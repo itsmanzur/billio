@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Billio — Scope & Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0f0f11; --soft: #3b3b42; --muted: #7a7a88;
+  --bg: #f8f8fa; --card: #fff; --line: #e4e4ec;
+  --blue: #3b6cf4; --green: #2cb87b; --amber: #f0a030; --red: #e05740;
+  --pro: #7c3aed;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Hind Siliguri', sans-serif; background: var(--bg); color: var(--ink); font-size: 15px; line-height: 1.6; }
+
+header { background: var(--ink); padding: 36px 32px 32px; max-width: 980px; margin: 0 auto; }
+.htag { font-family: 'Space Grotesk', sans-serif; font-size: 11px; letter-spacing: .1em; color: #444455; margin-bottom: 10px; }
+header h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(20px,3.5vw,30px); font-weight: 700; color: #fff; margin-bottom: 6px; }
+header p { font-size: 13px; color: #888899; }
+
+main { max-width: 980px; margin: 0 auto; padding: 0 32px 60px; }
+
+.tab-bar { display: flex; border-bottom: 2px solid var(--line); margin: 24px 0 0; overflow-x: auto; scrollbar-width: none; }
+.tab-bar::-webkit-scrollbar { display: none; }
+.tab-btn { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 500; color: var(--muted); background: none; border: none; padding: 11px 16px; cursor: pointer; white-space: nowrap; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color .15s, border-color .15s; }
+.tab-btn:hover { color: var(--ink); }
+.tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+.section { display: none; padding: 24px 0; }
+.section.active { display: block; }
+
+/* Feature scope */
+.scope-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 20px; }
+@media(max-width:640px){ .scope-grid { grid-template-columns: 1fr; } }
+
+.fc { background: var(--card); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.fc-head { padding: 16px 20px 12px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+.fc-head h3 { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; }
+.badge { font-family: 'Space Grotesk', sans-serif; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; letter-spacing: .05em; }
+.b-free { background: #dcf5ea; color: #1a7a54; }
+.b-pro { background: #ede9fe; color: #5b21b6; }
+.b-no { background: #fde8e4; color: #991b1b; }
+.fc-body { padding: 14px 20px 18px; }
+ul.fl { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+ul.fl li { font-size: 13.5px; padding-left: 22px; position: relative; color: var(--soft); }
+ul.fl li::before { position: absolute; left: 0; font-weight: 700; font-size: 13px; }
+ul.fl.free li::before { content: '✓'; color: var(--green); }
+ul.fl.pro li::before { content: '★'; color: var(--pro); }
+ul.fl.no li::before { content: '✗'; color: var(--red); }
+.fc-body small { display: block; margin-top: 10px; font-size: 12px; color: var(--muted); font-style: italic; }
+
+/* Architecture */
+.arch-card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 16px; overflow: hidden; }
+.arch-head { padding: 14px 20px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+.arch-head:hover { background: #fafafa; }
+.arch-icon { width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.arch-head h3 { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 700; flex: 1; }
+.arch-sub { font-size: 12px; color: var(--muted); }
+.chev { font-size: 11px; color: var(--muted); transition: transform .2s; }
+.arch-card.open .chev { transform: rotate(180deg); }
+.arch-body { display: none; padding: 16px 20px 20px; }
+.arch-card.open .arch-body { display: block; }
+
+/* File tree */
+.tree { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: #0f0f14; color: #c8c8d8; border-radius: 8px; padding: 18px 20px; line-height: 1.9; overflow-x: auto; position: relative; }
+.tree .d { color: #7dd3fc; } /* directory */
+.tree .f { color: #c8c8d8; } /* file */
+.tree .c { color: #4ade80; } /* core */
+.tree .p { color: #c084fc; } /* pro */
+.tree .e { color: #fbbf24; } /* entry */
+.tree .m { color: #94a3b8; } /* muted/comment */
+.copy-btn { position: absolute; top: 10px; right: 12px; background: #2a2a38; border: 1px solid #3a3a50; color: #9494a8; font-family: 'Space Grotesk', sans-serif; font-size: 11px; padding: 4px 10px; border-radius: 5px; cursor: pointer; transition: background .15s; }
+.copy-btn:hover { background: #3a3a50; color: #fff; }
+.copied { background: #1a3a28 !important; color: #4ade80 !important; border-color: #2a5a38 !important; }
+
+/* Class table */
+.class-table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 13px; }
+.class-table th { font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: .06em; text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); background: #f5f5f8; }
+.class-table td { padding: 10px 12px; border-bottom: 1px solid var(--line); color: var(--soft); vertical-align: top; }
+.class-table td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink); font-weight: 500; white-space: nowrap; }
+.class-table tr:last-child td { border-bottom: none; }
+.tag-p { background: #ede9fe; color: #5b21b6; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 10px; font-family: 'Space Grotesk', sans-serif; }
+.tag-c { background: #dcf5ea; color: #1a7a54; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 10px; font-family: 'Space Grotesk', sans-serif; }
+
+/* Info box */
+.info { background: #f0f5ff; border: 1px solid #c0d0f8; border-radius: 8px; padding: 14px 18px; font-size: 13.5px; color: var(--soft); margin-top: 14px; }
+.info strong { font-family: 'Space Grotesk', sans-serif; font-size: 12px; color: var(--blue); display: block; margin-bottom: 6px; }
+
+.dark-box { background: var(--ink); color: #c8c8d8; border-radius: 10px; padding: 22px 24px; margin-bottom: 16px; }
+.dark-box h3 { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; color: var(--blue); margin-bottom: 10px; }
+.dark-box p, .dark-box li { font-size: 13.5px; color: #9494a8; line-height: 1.7; }
+.dark-box ul { list-style: none; display: flex; flex-direction: column; gap: 5px; padding-left: 0; }
+.dark-box ul li::before { content: '→ '; color: var(--blue); }
+
+@media(max-width:640px){
+  header, main { padding-left: 16px; padding-right: 16px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="htag">BILLIO · PLUGIN PLANNING · OCT 2026</div>
+  <h1>Feature Scope & Architecture</h1>
+  <p>v1 Free vs Pro scope · PSR-4 folder structure · Class map</p>
+</header>
+
+<main>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('scope',this)">Feature Scope</button>
+    <button class="tab-btn" onclick="showTab('arch',this)">Folder Structure</button>
+    <button class="tab-btn" onclick="showTab('classes',this)">Class Map</button>
+    <button class="tab-btn" onclick="showTab('decisions',this)">Architecture Decisions</button>
+  </div>
+
+  <!-- ══ TAB 1: SCOPE ══ -->
+  <div id="tab-scope" class="section active">
+
+    <div class="scope-grid">
+      <!-- Free -->
+      <div class="fc">
+        <div class="fc-head">
+          <h3>Free (WordPress.org)</h3>
+          <span class="badge b-free">FREE</span>
+        </div>
+        <div class="fc-body">
+          <ul class="fl free">
+            <li>Order complete email এ auto PDF invoice attach</li>
+            <li>২টি built-in template — Default &amp; Modern</li>
+            <li>Company logo, name, address, VAT/tax number</li>
+            <li>Sequential invoice numbering (bug-free)</li>
+            <li>Customer → My Account থেকে download</li>
+            <li>Admin → Order list এ download + resend button</li>
+            <li>Order meta box এ invoice preview</li>
+            <li>Basic Settings page (logo, company info, number prefix)</li>
+            <li>Invoice এ order items, subtotal, tax, total, shipping</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Pro -->
+      <div class="fc">
+        <div class="fc-head">
+          <h3>Pro Features</h3>
+          <span class="badge b-pro">PRO</span>
+        </div>
+        <div class="fc-body">
+          <ul class="fl pro">
+            <li>Drag-and-drop template builder (visual)</li>
+            <li>৩+ premium templates (Minimal, Brand, Classic)</li>
+            <li>Packing slip generation</li>
+            <li>Bulk PDF download (zip) &amp; CSV export</li>
+            <li>WhatsApp এ invoice send (link/PDF)</li>
+            <li>Custom invoice number format + reset</li>
+            <li>White-label (Billio branding remove)</li>
+            <li>Pro email triggers (processing, on-hold, refund)</li>
+            <li>Multi-site / Agency license support</li>
+          </ul>
+          <small>★ Freemius SDK দিয়ে gate করা হবে</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- V1 NOT included -->
+    <div class="fc" style="margin-bottom:20px;">
+      <div class="fc-head">
+        <h3>v1 তে নেই (backlog)</h3>
+        <span class="badge b-no">LATER</span>
+      </div>
+      <div class="fc-body">
+        <ul class="fl no">
+          <li>Credit note / refund invoice</li>
+          <li>Proforma invoice / quote generation</li>
+          <li>Tax report / accounting export</li>
+          <li>Multi-vendor (Dokan, WCFM) support</li>
+          <li>bKash/Nagad payment link in invoice</li>
+          <li>Subscription invoice (WC Subscriptions)</li>
+        </ul>
+        <small>এগুলো v2 / Pro add-on হিসেবে রাখা হবে</small>
+      </div>
+    </div>
+
+    <div class="dark-box">
+      <h3>v1 Strategy</h3>
+      <p>Free তে core flow perfect করো — শুধু invoice generate + attach + download। Pro তে template builder ও WhatsApp। WordPress.org এ submit করার আগে free version এ ৫ স্টার রেটিং দরকার — তাই free experience flawless হতে হবে।</p>
+    </div>
+  </div>
+
+  <!-- ══ TAB 2: FOLDER STRUCTURE ══ -->
+  <div id="tab-arch" class="section">
+
+    <div class="tree" id="tree-main">
+      <button class="copy-btn" onclick="copyTree('tree-main')">Copy</button>
+<span class="e">billio/</span>
+├── <span class="e">billio.php</span>               <span class="m"># Entry point, Freemius init, bootstrap</span>
+├── <span class="f">composer.json</span>
+├── <span class="f">composer.lock</span>
+├── <span class="f">uninstall.php</span>             <span class="m"># Clean DB on uninstall</span>
+│
+├── <span class="d">vendor/</span>                    <span class="m"># Composer autoload (gitignore)</span>
+│
+├── <span class="d">freemius/</span>                  <span class="m"># Freemius SDK</span>
+│
+├── <span class="d">assets/</span>
+│   ├── <span class="d">css/</span>
+│   │   ├── <span class="f">admin.css</span>
+│   │   └── <span class="f">invoice-preview.css</span>
+│   ├── <span class="d">js/</span>
+│   │   ├── <span class="f">admin.js</span>              <span class="m"># Vanilla JS</span>
+│   │   └── <span class="f">settings.js</span>
+│   └── <span class="d">images/</span>
+│       └── <span class="f">billio-logo.svg</span>
+│
+├── <span class="d">templates/</span>                 <span class="m"># Invoice HTML templates</span>
+│   ├── <span class="f">default.php</span>
+│   ├── <span class="f">modern.php</span>
+│   └── <span class="d">pro/</span>                   <span class="m"># Pro-only templates</span>
+│       ├── <span class="p">minimal.php</span>
+│       └── <span class="p">classic.php</span>
+│
+├── <span class="d">inc/</span>                       <span class="m"># All PHP classes (PSR-4)</span>
+│   ├── <span class="c">Plugin.php</span>             <span class="m"># Core: hooks, DI container</span>
+│   ├── <span class="c">Installer.php</span>          <span class="m"># Activate/deactivate/upgrade</span>
+│   │
+│   ├── <span class="d">Invoice/</span>
+│   │   ├── <span class="c">Generator.php</span>      <span class="m"># PDF build (Dompdf)</span>
+│   │   ├── <span class="c">NumberManager.php</span>  <span class="m"># Sequential number logic</span>
+│   │   ├── <span class="c">TemplateEngine.php</span> <span class="m"># Template render + data pass</span>
+│   │   └── <span class="c">EmailAttacher.php</span>  <span class="m"># WC email hooks</span>
+│   │
+│   ├── <span class="d">Admin/</span>
+│   │   ├── <span class="c">OrderActions.php</span>   <span class="m"># Order list column + buttons</span>
+│   │   ├── <span class="c">MetaBox.php</span>        <span class="m"># Order edit page meta box</span>
+│   │   └── <span class="c">BulkActions.php</span>    <span class="m"># Bulk download action</span>
+│   │
+│   ├── <span class="d">Settings/</span>
+│   │   ├── <span class="c">SettingsPage.php</span>   <span class="m"># Admin menu + page render</span>
+│   │   └── <span class="c">Fields.php</span>         <span class="m"># Settings field definitions</span>
+│   │
+│   ├── <span class="d">Frontend/</span>
+│   │   └── <span class="c">MyAccount.php</span>      <span class="m"># Customer download endpoint</span>
+│   │
+│   └── <span class="d">Pro/</span>                   <span class="m"># Freemius gated</span>
+│       ├── <span class="p">TemplateBuilder.php</span>
+│       ├── <span class="p">WhatsApp.php</span>
+│       └── <span class="p">BulkExport.php</span>
+│
+└── <span class="d">languages/</span>
+    └── <span class="f">billio.pot</span>
+    </div>
+
+    <div class="info">
+      <strong>Namespace</strong>
+      সব class এ <code>namespace Billio\...</code> ব্যবহার হবে। composer.json এ PSR-4: <code>"Billio\\": "inc/"</code>
+    </div>
+
+    <div class="info" style="margin-top:12px;">
+      <strong>PDF Library</strong>
+      <strong>Dompdf</strong> → composer require dompdf/dompdf। TCPDF এর চেয়ে সহজ, UTF-8 support ভালো, Bangla font embed করা যাবে।
+    </div>
+  </div>
+
+  <!-- ══ TAB 3: CLASS MAP ══ -->
+  <div id="tab-classes" class="section">
+
+    <div class="arch-card open" id="ac1">
+      <div class="arch-head" onclick="togArch('ac1')">
+        <div class="arch-icon" style="background:#e4eeff">⚙️</div>
+        <h3>Core</h3>
+        <span class="arch-sub">Plugin bootstrap &amp; lifecycle</span>
+        <span class="chev">▼</span>
+      </div>
+      <div class="arch-body">
+        <table class="class-table">
+          <thead><tr><th>Class</th><th>দায়িত্ব</th><th>Type</th></tr></thead>
+          <tbody>
+            <tr><td>Billio\Plugin</td><td>Singleton। সব module init করে, hooks register করে। DI হিসেবে কাজ করে।</td><td><span class="tag-c">FREE</span></td></tr>
+            <tr><td>Billio\Installer</td><td>activate() → DB table তৈরি (invoice meta)। deactivate()। version upgrade migration।</td><td><span class="tag-c">FREE</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="arch-card" id="ac2">
+      <div class="arch-head" onclick="togArch('ac2')">
+        <div class="arch-icon" style="background:#dcf5ea">📄</div>
+        <h3>Invoice Module</h3>
+        <span class="arch-sub">PDF generation pipeline</span>
+        <span class="chev">▼</span>
+      </div>
+      <div class="arch-body">
+        <table class="class-table">
+          <thead><tr><th>Class</th><th>দায়িত্ব</th><th>Type</th></tr></thead>
+          <tbody>
+            <tr><td>Invoice\Generator</td><td>generate($order_id) → Dompdf দিয়ে PDF build করে। stream() বা save() করে।</td><td><span class="tag-c">FREE</span></td></tr>
+            <tr><td>Invoice\NumberManager</td><td>get_next_number() → sequential number তৈরি। DB তে lock করে race condition এড়ায়। prefix + year + padding support।</td><td><span class="tag-c">FREE</span></td></tr>
+            <tr><td>Invoice\TemplateEngine</td><td>render($template, $data) → template file load করে, order data pass করে। template override support।</td><td><span class="tag-c">FREE</span></td></tr>
+            <tr><td>Invoice\EmailAttacher</td><td>woocommerce_email_attachments hook। order status অনুযায়ী PDF attach করে।</td><td><span class="tag-c">FREE</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="arch-card" id="ac3">
+      <div class="arch-head" onclick="togArch('ac3')">
+        <div class="arch-icon" style="background:#fff3dc">🖥️</div>
+        <h3>Admin Module</h3>
+        <span class="arch-sub">Order list &amp; meta box</span>
+        <span class="chev">▼</span>
+      </div>
+      <div class="arch-body">
+        <table class="class-table">
+          <thead><tr><th>Class</th><th>দায়িত্ব</th><th>Type</th></tr></thead>
+          <tbody>
+            <tr><td>Admin\OrderActions</td><td>Order list এ "Invoice" column যোগ করে। Download + Resend button render করে। AJAX handler।</td><td><span class="tag-c">FREE</span></td></tr>
+            <tr><td>Admin\MetaBox</td><td>Order edit page এ invoice info box। Invoice number, date, download link।</td><td><span class="tag-c">FREE</span></td></tr>
+            <tr><td>Admin\BulkActions</td><td>Order list এ "Download Invoices (ZIP)" bulk action। ZipArchive দিয়ে।</td><td><span class="tag-p">PRO</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="arch-card" id="ac4">
+      <div class="arch-head" onclick="togArch('ac4')">
+        <div class="arch-icon" style="background:#ede9fe">★</div>
+        <h3>Pro Module</h3>
+        <span class="arch-sub">Freemius gated features</span>
+        <span class="chev">▼</span>
+      </div>
+      <div class="arch-body">
+        <table class="class-table">
+          <thead><tr><th>Class</th><th>দায়িত্ব</th><th>Type</th></tr></thead>
+          <tbody>
+            <tr><td>Pro\TemplateBuilder</td><td>Visual editor UI। drag-and-drop field reordering। custom CSS input।</td><td><span class="tag-p">PRO</span></td></tr>
+            <tr><td>Pro\WhatsApp</td><td>wa.me link generate করে invoice URL সহ। Admin থেকে one-click send।</td><td><span class="tag-p">PRO</span></td></tr>
+            <tr><td>Pro\BulkExport</td><td>Date range দিয়ে bulk PDF zip download এবং CSV (order data) export।</td><td><span class="tag-p">PRO</span></td></tr>
+          </tbody>
+        </table>
+        <div class="info" style="margin-top:14px;">
+          <strong>Pro Gate Pattern</strong>
+          billio.php এ Freemius init হওয়ার পর: <code>if ( billio_fs()->is_paying() ) { new Pro\WhatsApp(); }</code> — এই pattern সব Pro class এ follow করতে হবে।
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ TAB 4: DECISIONS ══ -->
+  <div id="tab-decisions" class="section">
+
+    <div class="arch-card open" id="ad1">
+      <div class="arch-head" onclick="togArch('ad1')">
+        <div class="arch-icon" style="background:#e4eeff">📚</div>
+        <h3>PDF Library: Dompdf</h3>
+        <span class="arch-sub">কেন Dompdf বেছে নিলাম</span>
+        <span class="chev">▼</span>
+      </div>
+      <div class="arch-body">
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;">
+          <li style="font-size:13.5px;color:var(--soft);padding-left:20px;position:relative;">✓ <strong>Composer install:</strong> <code>dompdf/dompdf</code> — clean dependency</li>
+          <li style="font-size:13.5px;color:var(--soft);padding-left:20px;position:relative;">✓ HTML/CSS থেকে PDF — template designer এর জন্য সহজ</li>
+          <li style="font-size:13.5px;color:var(--soft);padding-left:20px;position:relative;">✓ UTF-8 + custom font embed — বাংলা font support করবে</li>
+          <li style="font-size:13.5px;color:var(--soft);padding-left:20px;position:relative;">✓ TCPDF বা mPDF এর চেয়ে modern API</li>
+          <li style="font-size:13.5px;color:var(--soft);padding-left:20px;position:relative;">⚠ Complex table layout এ কিছু quirk আছে — template simple রাখতে হবে v1 এ</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="arch-card" id="ad2">
+      <div class="arch-head" onclick="togArch('ad2')">
+        <div class="arch-icon" style="background:#dcf5ea">🗄️</div>
+        <h3>DB Structure</h3>
+        <span class="arch-sub">Invoice meta কোথায় store হবে</span>
+        <span class="chev">▼</span>
+      </div>
+      <div class="arch-body">
+        <p style="font-size:13.5px;color:var(--soft);margin-bottom:12px;">Custom table <strong>না</strong> — WooCommerce order meta তে store করব:</p>
+        <div class="tree" style="margin:0;">
+_billio_invoice_number   → "INV-2026-0001"
+_billio_invoice_date     → timestamp
+_billio_invoice_pdf_path → relative path (uploads/billio/...)
+        </div>
+        <div class="info" style="margin-top:12px;">
+          <strong>কেন custom table নয়?</strong>
+          v1 এ scope ছোট রাখতে। Order meta সহজ, HPOS compatible। পরে query দরকার হলে custom table add করা যাবে।
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-card" id="ad3">
+      <div class="arch-head" onclick="togArch('ad3')">
+        <div class="arch-icon" style="background:#fff3dc">🔒</div>
+        <h3>Security Rules</h3>
+        <span class="arch-sub">প্রতিটি action এ enforce করতে হবে</span>
+        <span class="chev">▼</span>
+      </div>
+      <div class="arch-body">
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;">
+          <li style="font-size:13.5px;color:var(--soft);">✓ Admin download: <code>current_user_can('manage_woocommerce')</code> check</li>
+          <li style="font-size:13.5px;color:var(--soft);">✓ Customer download: order owner verify করতে হবে (<code>$order->get_customer_id() === get_current_user_id()</code>)</li>
+          <li style="font-size:13.5px;color:var(--soft);">✓ AJAX: nonce verify (<code>check_ajax_referer</code>)</li>
+          <li style="font-size:13.5px;color:var(--soft);">✓ Settings save: <code>sanitize_text_field()</code> + <code>wp_verify_nonce()</code></li>
+          <li style="font-size:13.5px;color:var(--soft);">✓ PDF file URL direct access block — uploads/billio/ তে .htaccess</li>
+          <li style="font-size:13.5px;color:var(--soft);">⚠ <code>is_pro()</code> check ছাড়া কোনো Pro class load করা যাবে না</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="arch-card" id="ad4">
+      <div class="arch-head" onclick="togArch('ad4')">
+        <div class="arch-icon" style="background:#fde8e4">🏗️</div>
+        <h3>HPOS Compatibility</h3>
+        <span class="arch-sub">WooCommerce High-Performance Order Storage</span>
+        <span class="chev">▼</span>
+      </div>
+      <div class="arch-body">
+        <p style="font-size:13.5px;color:var(--soft);margin-bottom:10px;">WooCommerce 7.1+ এ HPOS default। billio.php এ declare করতে হবে:</p>
+        <div class="tree" style="margin:0;font-size:12px;">
+add_action( 'before_woocommerce_init', function() {
+    if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+        \Automattic\WooCommerce\Utilities\FeaturesUtil
+            ::declare_compatibility( 'custom_order_tables', __FILE__, true );
+    }
+} );
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin-top:10px;">সব order query অবশ্যই <code>wc_get_order()</code> API দিয়ে করতে হবে — direct <code>$wpdb</code> query নয়।</p>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+function showTab(name, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+function togArch(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+function copyTree(id) {
+  const el = document.getElementById(id);
+  const text = el.innerText.replace('Copy','').replace('Copied!','').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = el.querySelector('.copy-btn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>

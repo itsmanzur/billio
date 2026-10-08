@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WordPress Plugin Market Analysis 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0f11;
+    --ink-soft: #3b3b42;
+    --ink-muted: #7a7a88;
+    --surface: #f8f8fa;
+    --card: #ffffff;
+    --line: #e4e4ec;
+    --blue: #3b6cf4;
+    --red: #e05740;
+    --green: #2cb87b;
+    --amber: #f0a030;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Hind Siliguri', sans-serif; background: var(--surface); color: var(--ink); line-height: 1.7; font-size: 15px; }
+
+  header { background: #0f0f11; color: #fff; padding: 48px 32px 40px; max-width: 980px; margin: 0 auto; }
+  .htag { font-family: 'Space Grotesk', sans-serif; font-size: 11px; letter-spacing: .12em; color: #555568; margin-bottom: 14px; }
+  header h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(22px,4vw,34px); font-weight: 700; line-height: 1.2; color: #fff; margin-bottom: 10px; }
+  header p { color: #9494a8; font-size: 14px; max-width: 560px; }
+  .stat-row { display: flex; gap: 16px; margin-top: 28px; flex-wrap: wrap; }
+  .stat-pill { background: #1a1a22; border: 1px solid #2e2e3a; border-radius: 6px; padding: 10px 18px; }
+  .stat-pill .num { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; color: var(--blue); }
+  .stat-pill .lbl { font-size: 11px; color: #555568; margin-top: 2px; }
+
+  main { max-width: 980px; margin: 0 auto; padding: 0 32px 60px; }
+
+  .tab-bar { display: flex; border-bottom: 2px solid var(--line); margin: 28px 0 0; overflow-x: auto; scrollbar-width: none; }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-btn { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 500; color: var(--ink-muted); background: none; border: none; padding: 12px 16px; cursor: pointer; white-space: nowrap; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color .15s, border-color .15s; }
+  .tab-btn:hover { color: var(--ink); }
+  .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+  .section { display: none; padding: 28px 0; }
+  .section.active { display: block; }
+
+  /* overview cards */
+  .ov-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 24px; }
+  .ov-card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px 16px; }
+  .ov-val { font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700; color: var(--blue); line-height: 1; margin-bottom: 4px; }
+  .ov-lbl { font-size: 12px; color: var(--ink-muted); }
+  .insight-dark { background: #0f0f11; color: #fff; border-radius: 10px; padding: 22px 24px; margin-bottom: 18px; }
+  .insight-dark h3 { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; color: var(--blue); margin-bottom: 10px; }
+  .insight-dark p { font-size: 13.5px; color: #9494a8; line-height: 1.7; }
+  .scrd { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 20px 22px; margin-bottom: 14px; }
+  .scrd h3 { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .scrd p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.7; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; font-family: 'Space Grotesk', sans-serif; }
+  .b-blue { background: #e4eeff; color: #1a4ab8; }
+  .b-green { background: #dcf5ea; color: #1a8754; }
+  .b-amber { background: #fff3dc; color: #a0640a; }
+  .b-red { background: #fde8e4; color: #c03020; }
+
+  /* plugin cards */
+  .pc { background: var(--card); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 18px; overflow: hidden; }
+  .pc-head { display: flex; align-items: flex-start; justify-content: space-between; padding: 20px 22px 16px; gap: 12px; cursor: pointer; user-select: none; }
+  .pc-head:hover { background: #fafafa; }
+  .pc-rank { font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 600; color: var(--blue); letter-spacing: .06em; margin-bottom: 4px; }
+  .pc-title { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .pc-sub { font-size: 13px; color: var(--ink-muted); }
+  .score-g { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; min-width: 88px; flex-shrink: 0; }
+  .sc-lbl { font-family: 'Space Grotesk', sans-serif; font-size: 10px; color: var(--ink-muted); letter-spacing: .06em; }
+  .sc-bar { width: 80px; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+  .sc-fill { height: 100%; border-radius: 3px; background: var(--blue); }
+  .sc-num { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; color: var(--blue); }
+  .chev { font-size: 11px; color: var(--ink-muted); transition: transform .2s; margin-left: 6px; margin-top: 4px; flex-shrink: 0; }
+  .pc.open .chev { transform: rotate(180deg); }
+  .pc-body { display: none; border-top: 1px solid var(--line); padding: 22px; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .pc.open .pc-body { display: grid; }
+  .blk-title { font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: .08em; margin-bottom: 10px; }
+  .t-red { color: var(--red); }
+  .t-green { color: var(--green); }
+  .t-blue { color: var(--blue); }
+  ul.cl { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  ul.cl li { font-size: 13.5px; padding-left: 20px; position: relative; color: var(--ink-soft); }
+  ul.cl li::before { content: '✓'; position: absolute; left: 0; color: var(--green); font-weight: 700; }
+  .comp-row { display: flex; flex-direction: column; gap: 8px; }
+  .ci { background: #f5f5f8; border-radius: 7px; padding: 10px 14px; }
+  .ci-name { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .ci-weak { font-size: 12.5px; color: #8a3020; }
+  .fw { grid-column: 1/-1; }
+  .why-box { background: #f0f5ff; border: 1px solid #c0d0f8; border-radius: 8px; padding: 16px 18px; font-size: 13.5px; color: var(--ink-soft); }
+  .why-box strong { display: block; font-family: 'Space Grotesk', sans-serif; font-size: 12px; color: var(--blue); margin-bottom: 8px; letter-spacing: .06em; }
+
+  /* table */
+  .tw { overflow-x: auto; margin: 18px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 600; color: var(--ink-muted); letter-spacing: .06em; text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); background: #f5f5f8; }
+  td { padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--ink-soft); }
+  td:first-child { font-weight: 600; color: var(--ink); font-family: 'Space Grotesk', sans-serif; }
+  tr:last-child td { border-bottom: none; }
+  .ck { color: var(--green); font-weight: 700; }
+  .cx { color: var(--red); font-weight: 700; }
+
+  @media (max-width:660px) {
+    header, main { padding-left: 16px; padding-right: 16px; }
+    .ov-grid { grid-template-columns: 1fr 1fr; }
+    .pc-body { grid-template-columns: 1fr; }
+    .score-g { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="htag">THEREADSCOPE · MARKET ANALYSIS · OCT 2026</div>
+  <h1>WordPress Plugin Market<br>Opportunity Report</h1>
+  <p>Evergreen plugin ক্যাটাগরি বিশ্লেষণ — মানুষের সবসময় দরকার, কম্পিটিটরদের দুর্বলতা, আমরা কীভাবে জিতব।</p>
+  <div class="stat-row">
+    <div class="stat-pill"><div class="num">595M</div><div class="lbl">WordPress সাইট (2026)</div></div>
+    <div class="stat-pill"><div class="num">61.4%</div><div class="lbl">CMS মার্কেট শেয়ার</div></div>
+    <div class="stat-pill"><div class="num">$55</div><div class="lbl">প্রিমিয়াম plugin গড় দাম</div></div>
+    <div class="stat-pill"><div class="num">35%</div><div class="lbl">Plugin যাদের install = শূন্য</div></div>
+  </div>
+</header>
+
+<main>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('overview',this)">বাজারের চিত্র</button>
+    <button class="tab-btn" onclick="showTab('plugins',this)">৫টি সেরা সুযোগ</button>
+    <button class="tab-btn" onclick="showTab('strategy',this)">জেতার কৌশল</button>
+    <button class="tab-btn" onclick="showTab('compare',this)">তুলনামূলক টেবিল</button>
+  </div>
+
+  <!-- TAB 1 -->
+  <div id="tab-overview" class="section active">
+    <div class="ov-grid">
+      <div class="ov-card"><div class="ov-val">~27K</div><div class="ov-lbl">Active WordPress.org plugin</div></div>
+      <div class="ov-card"><div class="ov-val">20</div><div class="ov-lbl">মিডিয়ান install / plugin</div></div>
+      <div class="ov-card"><div class="ov-val">7%</div><div class="ov-lbl">Plugin যা 10K+ install পায়</div></div>
+      <div class="ov-card"><div class="ov-val">90K</div><div class="ov-lbl">Schema category তে install/plugin (underserved!)</div></div>
+      <div class="ov-card"><div class="ov-val">4M+</div><div class="ov-lbl">WooCommerce স্টোর</div></div>
+      <div class="ov-card"><div class="ov-val">$1.7M</div><div class="ov-lbl">Form builder category মাসিক revenue</div></div>
+    </div>
+
+    <div class="insight-dark">
+      <h3>সবচেয়ে গুরুত্বপূর্ণ insight</h3>
+      <p>মার্কেট "Winner-Takes-All" — SEO, Page Builder, Security তে বড় খেলোয়াড় আছে, সরাসরি ঢোকা কঠিন। কিন্তু <strong style="color:#fff">Niche + Evergreen</strong> ক্যাটাগরিতে প্রতিটি plugin এ গড়ে ৯০,০০০ ইনস্টল, অথচ প্রতিযোগী কম। WooCommerce এ ৪,০০০+ plugin কিন্তু বেশিরভাগ সাপোর্টহীন বা পুরনো — এটাই আমাদের ঢোকার জায়গা।</p>
+    </div>
+
+    <div class="scrd">
+      <div class="badge b-red">এড়িয়ে চলো</div>
+      <h3>কোন ক্যাটাগরিতে যাওয়া উচিত না</h3>
+      <p>SEO (Yoast এর ৭৮৭M+ ডাউনলোড), Caching (WP Rocket দখলে), Page Builder (Elementor সর্বোচ্চ শেয়ার) — এই তিনটিতে নতুন plugin দিয়ে লাভজনক হওয়া প্রায় অসম্ভব। ফোকাস করতে হবে এমন ক্যাটাগরিতে যেখানে <strong>চাহিদা বেশি, সরবরাহ দুর্বল।</strong></p>
+    </div>
+
+    <div class="scrd">
+      <div class="badge b-green">আমাদের সুযোগ</div>
+      <h3>Evergreen = যা মানুষ কখনো বন্ধ করে না</h3>
+      <p>একটি plugin "evergreen" হয় যদি এটি কোনো Business Process এর অংশ হয়ে যায়। Invoice generate করা, appointment নেওয়া, schema manage করা — এগুলো feature না, এগুলো workflow। Workflow plugin এ churn rate কম, renewal rate বেশি। এই টাইপের plugin একবার কিনলে বছরের পর বছর renew করে।</p>
+    </div>
+  </div>
+
+  <!-- TAB 2 -->
+  <div id="tab-plugins" class="section">
+
+    <!-- Card 1 -->
+    <div class="pc" id="c1">
+      <div class="pc-head" onclick="tog('c1')">
+        <div>
+          <div class="pc-rank">সুযোগ #১ · সর্বোচ্চ অগ্রাধিকার</div>
+          <div class="pc-title">WooCommerce PDF Invoice & Billing</div>
+          <div class="pc-sub">প্রতিটি অনলাইন স্টোরের প্রতিদিনের দরকার</div>
+        </div>
+        <div class="score-g">
+          <div class="sc-lbl">OPPORTUNITY</div>
+          <div class="sc-bar"><div class="sc-fill" style="width:92%"></div></div>
+          <div class="sc-num">9.2</div>
+        </div>
+        <span class="chev">▼</span>
+      </div>
+      <div class="pc-body">
+        <div>
+          <div class="blk-title t-blue">কেন বানাতে হবে</div>
+          <ul class="cl">
+            <li>WooCommerce এ ৪M+ স্টোর — প্রত্যেকের invoice দরকার</li>
+            <li>WooCommerce নিজেই built-in PDF invoice দেয় না</li>
+            <li>VAT/tax compliance এর জন্য PDF invoice বাধ্যতামূলক</li>
+            <li>Business expense ট্র্যাকিংয়ের জন্য সব দেশেই দরকার</li>
+          </ul>
+        </div>
+        <div>
+          <div class="blk-title t-red">কম্পিটিটর ও দুর্বলতা</div>
+          <div class="comp-row">
+            <div class="ci"><div class="ci-name">WooCommerce PDF Invoices ($79/yr)</div><div class="ci-weak">২০২৪ থেকে আপডেট বন্ধ, গ্রাহকের ডেটা মিক্স-আপ bug, একই invoice নম্বর দুজনকে পাঠানোর অভিযোগ, সাপোর্ট নেই</div></div>
+            <div class="ci"><div class="ci-name">PDF Invoices & Packing Slips (free)</div><div class="ci-weak">Template কাস্টমাইজেশন দুর্বল, multi-currency নেই, bulk generation ধীর</div></div>
+            <div class="ci"><div class="ci-name">Challan Pro / WebToffee</div><div class="ci-weak">UI জটিল, onboarding খারাপ, BD/ভারত মার্কেটের জন্য কোনো optimization নেই</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="blk-title t-green">আমরা কীভাবে এগিয়ে যাব</div>
+          <ul class="cl">
+            <li>৫ মিনিটের onboarding wizard — কোনো কোডিং ছাড়াই ready</li>
+            <li>Drag-and-drop template builder (Canva-style)</li>
+            <li>Multi-currency + বাংলা language support</li>
+            <li>Bug-free sequential invoice numbering</li>
+            <li>WhatsApp এ invoice পাঠানোর সুবিধা (BD/emerging market USP)</li>
+          </ul>
+        </div>
+        <div class="fw">
+          <div class="why-box"><strong>ইউজার কেন কিনবে?</strong>"আমার স্টোরে প্রতিদিন ৫০+ অর্ডার। প্রতিটায় ম্যানুয়ালি invoice বানাই। এই plugin অটো করে দেয়, আমার ব্র্যান্ড লোগো থাকে, আর WhatsApp এ পাঠিয়ে দেয়।"</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="pc" id="c2">
+      <div class="pc-head" onclick="tog('c2')">
+        <div>
+          <div class="pc-rank">সুযোগ #২ · Underserved নিশ</div>
+          <div class="pc-title">Smart Popup & Lead Capture</div>
+          <div class="pc-sub">প্রতিটি মার্কেটার, ব্লগার, WooCommerce স্টোরের দৈনিক হাতিয়ার</div>
+        </div>
+        <div class="score-g">
+          <div class="sc-lbl">OPPORTUNITY</div>
+          <div class="sc-bar"><div class="sc-fill" style="width:85%"></div></div>
+          <div class="sc-num">8.5</div>
+        </div>
+        <span class="chev">▼</span>
+      </div>
+      <div class="pc-body">
+        <div>
+          <div class="blk-title t-blue">কেন বানাতে হবে</div>
+          <ul class="cl">
+            <li>Email list building = যেকোনো ব্যবসার মেরুদণ্ড</li>
+            <li>WooCommerce cart abandonment popup সরাসরি revenue বাড়ায়</li>
+            <li>Exit intent, scroll trigger — conversion এর core টুল</li>
+            <li>প্রতিটি নিশ সাইট এটা ছাড়া চলে না</li>
+          </ul>
+        </div>
+        <div>
+          <div class="blk-title t-red">কম্পিটিটর ও দুর্বলতা</div>
+          <div class="comp-row">
+            <div class="ci"><div class="ci-name">OptinMonster (SaaS, $9–$49/mo)</div><div class="ci-weak">অনেক ব্যয়বহুল, self-hosted ইউজারের জন্য overkill, BD/এশিয়ার payment ঝামেলা</div></div>
+            <div class="ci"><div class="ci-name">Popup Maker (free)</div><div class="ci-weak">Template নেই, design দুর্বল, WooCommerce integration poor, A/B testing নেই</div></div>
+            <div class="ci"><div class="ci-name">Convert Pro / Bloom</div><div class="ci-weak">দামি, bloated, performance heavy, small sites এর জন্য overkill</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="blk-title t-green">আমরা কীভাবে এগিয়ে যাব</div>
+          <ul class="cl">
+            <li>Ready-made templates — ১ ক্লিকে launch</li>
+            <li>Lightweight (&lt;30KB) — site speed নষ্ট করে না</li>
+            <li>Built-in A/B testing free তে</li>
+            <li>WooCommerce cart abandonment trigger</li>
+            <li>FluentCRM, Mailchimp direct connect</li>
+          </ul>
+        </div>
+        <div class="fw">
+          <div class="why-box"><strong>ইউজার কেন কিনবে?</strong>"OptinMonster মাসে ৫ হাজার টাকা। আমার ছোট সাইটে দরকার নেই। একটা one-time plugin যা দ্রুত কাজ করে, সুন্দর দেখায়, email list বাড়ায়।"</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="pc" id="c3">
+      <div class="pc-head" onclick="tog('c3')">
+        <div>
+          <div class="pc-rank">সুযোগ #৩ · Blue Ocean (Low Competition)</div>
+          <div class="pc-title">Schema & Structured Data Manager</div>
+          <div class="pc-sub">Google Rich Snippets — সার্চে স্টার রেটিং, FAQ, Product দেখায়</div>
+        </div>
+        <div class="score-g">
+          <div class="sc-lbl">OPPORTUNITY</div>
+          <div class="sc-bar"><div class="sc-fill" style="width:88%"></div></div>
+          <div class="sc-num">8.8</div>
+        </div>
+        <span class="chev">▼</span>
+      </div>
+      <div class="pc-body">
+        <div>
+          <div class="blk-title t-blue">কেন বানাতে হবে</div>
+          <ul class="cl">
+            <li>Data: Schema category তে প্রতি plugin এ ৯০,০০০ install — সবচেয়ে underserved!</li>
+            <li>Google AI Overview এ ঢুকতে Schema এখন mandatory</li>
+            <li>WooCommerce Product, Recipe, FAQ, Event — সব schema type লাগে</li>
+            <li>SEO agencies প্রতিটি সাইটে এটা ব্যবহার করে</li>
+          </ul>
+        </div>
+        <div>
+          <div class="blk-title t-red">কম্পিটিটর ও দুর্বলতা</div>
+          <div class="comp-row">
+            <div class="ci"><div class="ci-name">Rank Math (bundled)</div><div class="ci-weak">SEO plugin এর অংশ — standalone নয়। Yoast ব্যবহারকারীদের শুধু schema এর জন্য পুরো plugin install করতে হয়, bloat বাড়ে</div></div>
+            <div class="ci"><div class="ci-name">Schema Pro ($79/yr)</div><div class="ci-weak">Expensive, UI outdated, Google এর নতুন schema type এ slow update, support দুর্বল</div></div>
+            <div class="ci"><div class="ci-name">All In One Schema Rich Snippets</div><div class="ci-weak">২০২৩ থেকে আপডেট নেই, Gutenberg support নেই</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="blk-title t-green">আমরা কীভাবে এগিয়ে যাব</div>
+          <ul class="cl">
+            <li>SEO Plugin-independent — Yoast বা Rank Math যেটাই থাকুক</li>
+            <li>Visual schema builder — code দরকার নেই</li>
+            <li>AI দিয়ে content type auto-detect → schema suggest</li>
+            <li>Google Rich Result Test integration</li>
+            <li>২০+ schema type — Article, Product, Recipe, FAQ, LocalBusiness</li>
+          </ul>
+        </div>
+        <div class="fw">
+          <div class="why-box"><strong>ইউজার কেন কিনবে?</strong>"আমার রেসিপি সাইটে Google এ star rating দেখাতে চাই। Rank Math দিয়ে সব করা ঝামেলা। শুধু schema এর জন্য একটা ছোট plugin চাই যা ঠিকমতো কাজ করে।"</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="pc" id="c4">
+      <div class="pc-head" onclick="tog('c4')">
+        <div>
+          <div class="pc-rank">সুযোগ #৪ · Agency Market</div>
+          <div class="pc-title">WordPress Client Report & Maintenance</div>
+          <div class="pc-sub">ফ্রিল্যান্সার ও এজেন্সিরা প্রতি মাসে ক্লায়েন্টকে রিপোর্ট দেয়</div>
+        </div>
+        <div class="score-g">
+          <div class="sc-lbl">OPPORTUNITY</div>
+          <div class="sc-bar"><div class="sc-fill" style="width:80%"></div></div>
+          <div class="sc-num">8.0</div>
+        </div>
+        <span class="chev">▼</span>
+      </div>
+      <div class="pc-body">
+        <div>
+          <div class="blk-title t-blue">কেন বানাতে হবে</div>
+          <ul class="cl">
+            <li>বাংলাদেশ/এশিয়ায় হাজার হাজার WP agency ও freelancer</li>
+            <li>প্রতি মাসে uptime, speed, backup, security রিপোর্ট দিতে হয়</li>
+            <li>iThemes Sync ২০২৪ এ discontinued — মার্কেট এখন open</li>
+            <li>Retainer-based recurring revenue model</li>
+          </ul>
+        </div>
+        <div>
+          <div class="blk-title t-red">কম্পিটিটর ও দুর্বলতা</div>
+          <div class="comp-row">
+            <div class="ci"><div class="ci-name">ManageWP / MainWP</div><div class="ci-weak">SaaS — ডেটা third-party server এ যায়, per-site pricing, small agencies এর জন্য ব্যয়বহুল</div></div>
+            <div class="ci"><div class="ci-name">WP Activity Log</div><div class="ci-weak">শুধু activity log, client-facing branded report নেই, standalone reporting নেই</div></div>
+            <div class="ci"><div class="ci-name">iThemes Sync</div><div class="ci-weak">২০২৪ এ বন্ধ হয়ে গেছে — পুরো মার্কেট open</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="blk-title t-green">আমরা কীভাবে এগিয়ে যাব</div>
+          <ul class="cl">
+            <li>Self-hosted — ডেটা ক্লায়েন্টের নিজের সার্ভারে</li>
+            <li>White-label branded PDF report generation</li>
+            <li>WhatsApp/Email এ auto monthly report</li>
+            <li>Uptime, backup, plugin update, security — এক জায়গায়</li>
+            <li>Agency license — unlimited sites, flat fee</li>
+          </ul>
+        </div>
+        <div class="fw">
+          <div class="why-box"><strong>ইউজার কেন কিনবে?</strong>"আমি ১৫ জন ক্লায়েন্টের সাইট maintain করি। প্রতি মাসে manually রিপোর্ট বানাই। এই plugin আমার ব্র্যান্ডের রিপোর্ট auto পাঠাবে — ক্লায়েন্ট খুশি, সময় বাঁচে।"</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 5 -->
+    <div class="pc" id="c5">
+      <div class="pc-head" onclick="tog('c5')">
+        <div>
+          <div class="pc-rank">সুযোগ #৫ · BD-First Opportunity</div>
+          <div class="pc-title">WordPress Appointment & Booking</div>
+          <div class="pc-sub">ডাক্তার, কোচ, ক্লিনিক, salon — service business এর core টুল</div>
+        </div>
+        <div class="score-g">
+          <div class="sc-lbl">OPPORTUNITY</div>
+          <div class="sc-bar"><div class="sc-fill" style="width:82%"></div></div>
+          <div class="sc-num">8.2</div>
+        </div>
+        <span class="chev">▼</span>
+      </div>
+      <div class="pc-body">
+        <div>
+          <div class="blk-title t-blue">কেন বানাতে হবে</div>
+          <ul class="cl">
+            <li>Service-based business সংখ্যায় product business এর চেয়ে বেশি</li>
+            <li>Online appointment = revenue directly tied — high WTP</li>
+            <li>বাংলাদেশে clinic, tutor, salon, fitness দ্রুত digitize হচ্ছে</li>
+            <li>bKash/Nagad integration কেউ এখনো ঠিকমতো করেনি</li>
+          </ul>
+        </div>
+        <div>
+          <div class="blk-title t-red">কম্পিটিটর ও দুর্বলতা</div>
+          <div class="comp-row">
+            <div class="ci"><div class="ci-name">Amelia ($79–$299/yr)</div><div class="ci-weak">অনেক দামি, complex setup, bKash/Nagad নেই, BD market এর জন্য suitable না</div></div>
+            <div class="ci"><div class="ci-name">Bookly ($89 one-time)</div><div class="ci-weak">UI dated, add-on কিনতে হয়, SMS local gateway নেই</div></div>
+            <div class="ci"><div class="ci-name">Simply Schedule (free)</div><div class="ci-weak">Feature কম, WooCommerce payment নেই, reminder system দুর্বল</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="blk-title t-green">আমরা কীভাবে এগিয়ে যাব</div>
+          <ul class="cl">
+            <li>bKash, Nagad, SSLCommerz native integration — BD-first USP</li>
+            <li>WhatsApp + SMS reminder automation</li>
+            <li>Google Calendar + Zoom auto-link</li>
+            <li>Multi-staff, multi-location support</li>
+            <li>Simple pricing — no hidden add-ons</li>
+          </ul>
+        </div>
+        <div class="fw">
+          <div class="why-box"><strong>ইউজার কেন কিনবে?</strong>"আমার ক্লিনিকে রোজ ফোনে appointment নেই। একটা plugin দরকার যেখানে রোগী নিজে বুক করবে, bKash এ পেমেন্ট দেবে, আর WhatsApp reminder পাবে।"</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TAB 3 -->
+  <div id="tab-strategy" class="section">
+    <div class="scrd">
+      <div class="badge b-blue">আমাদের অবস্থান</div>
+      <h3>TheReadScope এর জন্য সঠিক পথ</h3>
+      <p>ইতিমধ্যে BookLens, Filtron, CPTify, AgentIQ আছে — এগুলো niche এবং vertical specific। পরবর্তী plugin হওয়া উচিত এমন কিছু যা WooCommerce ecosystem কে serve করে। কারণ ৪ মিলিয়ন WooCommerce সাইট = সবচেয়ে বড় paying audience। তারা revenue-critical tool এর জন্য pay করে।</p>
+    </div>
+    <div class="scrd">
+      <div class="badge b-green">পরামর্শ #১</div>
+      <h3>প্রথম লক্ষ্য: WooCommerce PDF Invoice Plugin</h3>
+      <p>কারণ: (a) সরাসরি revenue-critical — কেউ invoice বন্ধ করে না; (b) leader WooCommerce PDF Invoices এ গুরুতর bug ও সাপোর্ট নেই; (c) WordPress.org এ free version দিলে organic traction সহজ; (d) Freemius SDK দিয়ে licensing ready। Target: $29/yr single site, $79/yr unlimited। ৫০০ পেইড ইউজার = ~$20K ARR — প্রথম ৬ মাসে realistic।</p>
+    </div>
+    <div class="scrd">
+      <div class="badge b-amber">পরামর্শ #২</div>
+      <h3>Schema Plugin = Long-term SEO play</h3>
+      <p>Data অনুযায়ী schema category তে প্রতি plugin এ ৯০,০০০ install — সবচেয়ে underserved। Google AI Overview এর যুগে schema আরও গুরুত্বপূর্ণ হবে। SEO agencies এর মধ্যে distribution সহজ। AgentIQ এর সাথে cross-sell করা যাবে।</p>
+    </div>
+    <div class="scrd">
+      <div class="badge b-green">Monetization মডেল</div>
+      <h3>Freemium → Annual Subscription → Agency License</h3>
+      <p>WordPress.org এ free version → Pro: advanced templates, bulk export, white-label, multi-site। Annual subscription — invoice plugin এ yearly renewal rate ৬০%+ থাকে কারণ কেউ invoice system বদলাতে চায় না। Agency license tier ($149/yr unlimited sites) তোমার total ACV বাড়িয়ে দেবে।</p>
+    </div>
+    <div class="scrd">
+      <div class="badge b-red">ভুলগুলো যা বেশিরভাগ developer করে</div>
+      <h3>এগুলো এড়িয়ে চলো</h3>
+      <p>১. V1 তে সব feature বানানো — core flow perfect করো আগে। ২. Free-only রেখে দেওয়া — pricing page থেকেই শুরু করো। ৩. Support ignore করা — ৫ স্টার রেটিং WordPress.org organic growth এর engine। ৪. README ও screenshots অবহেলা — এটাই conversion rate ঠিক করে।</p>
+    </div>
+  </div>
+
+  <!-- TAB 4 -->
+  <div id="tab-compare" class="section">
+    <p style="font-size:13.5px;color:var(--ink-muted);margin-bottom:20px;">পাঁচটি সুযোগের পাশাপাশি তুলনা।</p>
+    <div class="tw">
+      <table>
+        <thead>
+          <tr>
+            <th>Plugin Idea</th>
+            <th>Market Size</th>
+            <th>Competition</th>
+            <th>Evergreen</th>
+            <th>BD Fit</th>
+            <th>Build Effort</th>
+            <th>Revenue Speed</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>WooCommerce Invoice</td><td>4M+ stores</td><td>Medium (buggy)</td><td><span class="ck">✓ হ্যাঁ</span></td><td><span class="ck">✓ High</span></td><td>Medium</td><td><span class="ck">Fast</span></td></tr>
+          <tr><td>Smart Popup</td><td>50M+ WP sites</td><td>High (expensive)</td><td><span class="ck">✓ হ্যাঁ</span></td><td>Medium</td><td>Medium</td><td>Medium</td></tr>
+          <tr><td>Schema Manager</td><td>All SEO sites</td><td><span class="ck">Low (underserved)</span></td><td><span class="ck">✓ হ্যাঁ</span></td><td>Medium</td><td>Medium</td><td><span class="ck">Fast</span></td></tr>
+          <tr><td>Client Report</td><td>Agencies/freelancer</td><td><span class="ck">Low (iThemes বন্ধ)</span></td><td><span class="ck">✓ হ্যাঁ</span></td><td><span class="ck">✓ High</span></td><td>High</td><td>Slow</td></tr>
+          <tr><td>Appointment Booking</td><td>Service businesses</td><td>Medium (expensive)</td><td><span class="ck">✓ হ্যাঁ</span></td><td><span class="ck">✓ Very High</span></td><td>High</td><td>Medium</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="insight-dark" style="margin-top:24px;">
+      <h3>চূড়ান্ত সুপারিশ</h3>
+      <p>
+        <strong style="color:#fff">এখনই শুরু করো:</strong> WooCommerce PDF Invoice — দ্রুত revenue, কম্পিটিটর দুর্বল, build effort মাঝারি।<br><br>
+        <strong style="color:#fff">পরবর্তী ৩ মাসে:</strong> Schema Manager — data-backed underserved niche, WordPress.org organic growth সহজ।<br><br>
+        <strong style="color:#fff">BD-specific বড় bet:</strong> Appointment Booking with bKash/Nagad — কেউ এই combination বানায়নি, first-mover advantage আছে।
+      </p>
+    </div>
+  </div>
+</main>
+
+<script>
+function showTab(name, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+function tog(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+</script>
+</body>
+</html>

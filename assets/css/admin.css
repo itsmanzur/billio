@@ -1,0 +1,15 @@
+.billio-actions {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	align-items: flex-start;
+}
+
+.billio-number {
+	font-family: Consolas, Menlo, monospace;
+	font-size: 12px;
+}
+
+.billio-actions .button {
+	line-height: 1.8;
+}

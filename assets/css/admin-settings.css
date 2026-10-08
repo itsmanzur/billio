@@ -1,0 +1,782 @@
+/* Billio Settings — scoped under .billio-settings (plus the shared
+ * .billio-ui tokens/components from admin-base.css). */
+
+.billio-settings {
+	padding-bottom: 110px;
+}
+
+.billio-settings h1 {
+	font-size: 22px;
+	margin: 0;
+	line-height: 1.1;
+}
+
+.billio-sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+	border: 0;
+	padding: 0;
+	margin: -1px;
+}
+
+/* layout */
+.billio-settings-layout {
+	display: grid;
+	grid-template-columns: 190px minmax(0, 1fr) 420px;
+	gap: 20px;
+	align-items: start;
+}
+
+@media (max-width: 1350px) {
+	.billio-settings-layout {
+		grid-template-columns: minmax(0, 1fr) 380px;
+	}
+	.billio-settings-nav {
+		display: none;
+	}
+}
+
+@media (max-width: 1000px) {
+	.billio-settings-layout {
+		grid-template-columns: 1fr;
+	}
+	.billio-settings-pv {
+		position: static !important;
+	}
+}
+
+/* section nav */
+.billio-settings-nav {
+	position: sticky;
+	top: 32px;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.billio-settings-nav a {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 9px 12px;
+	border-radius: 10px;
+	color: var(--billio-ink2);
+	text-decoration: none;
+	font-weight: 500;
+	transition: .15s;
+}
+
+.billio-settings-nav a:hover {
+	background: #fff;
+}
+
+.billio-settings-nav a.billio-nav-on {
+	background: #fff;
+	color: var(--billio-brand);
+	box-shadow: var(--billio-shadow);
+}
+
+.billio-nav-dot {
+	margin-inline-start: auto;
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: var(--billio-warn);
+}
+
+.billio-profile-card {
+	margin-top: 16px;
+	background: #fff;
+	border: 1px solid var(--billio-line);
+	border-radius: 12px;
+	padding: 12px;
+}
+
+.billio-profile-card small {
+	color: var(--billio-muted);
+	font-size: 12px;
+}
+
+.billio-profile-pct {
+	font-weight: 700;
+	margin-top: 2px;
+}
+
+.billio-profile-bar {
+	height: 6px;
+	background: var(--billio-bg);
+	border-radius: 99px;
+	overflow: hidden;
+	margin-top: 6px;
+}
+
+.billio-profile-bar i {
+	display: block;
+	height: 100%;
+	background: linear-gradient(90deg, var(--billio-brand), var(--billio-brand2));
+	border-radius: 99px;
+	transition: width .4s;
+}
+
+/* section cards */
+.billio-sec {
+	margin-bottom: 18px;
+	padding: 0;
+	scroll-margin-top: 32px;
+}
+
+.billio-sec > header {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--billio-line);
+}
+
+.billio-sec-ic {
+	width: 34px;
+	height: 34px;
+	border-radius: 9px;
+	display: grid;
+	place-items: center;
+	background: var(--billio-brand-soft);
+	color: var(--billio-brand);
+	flex-shrink: 0;
+	font-weight: 700;
+}
+
+.billio-sec h2 {
+	font-size: 15px;
+	margin: 0;
+}
+
+.billio-sec header p {
+	margin: 0;
+	color: var(--billio-muted);
+	font-size: 12.5px;
+}
+
+.billio-sec-body {
+	padding: 6px 20px 10px;
+}
+
+.billio-f {
+	display: grid;
+	grid-template-columns: 200px minmax(0, 1fr);
+	gap: 16px;
+	padding: 14px 0;
+	border-bottom: 1px dashed var(--billio-line);
+}
+
+.billio-f:last-child {
+	border: 0;
+}
+
+@media (max-width: 640px) {
+	.billio-f {
+		grid-template-columns: 1fr;
+		gap: 6px;
+	}
+}
+
+.billio-f > label,
+.billio-f > .billio-lab {
+	font-weight: 600;
+	font-size: 13.5px;
+	padding-top: 8px;
+}
+
+.billio-f .billio-lab small,
+.billio-f > label small {
+	display: block;
+	font-weight: 400;
+	color: var(--billio-muted);
+	font-size: 12px;
+}
+
+.billio-in {
+	width: 100%;
+	border: 1px solid var(--billio-line);
+	border-radius: 10px;
+	padding: 9px 12px;
+	background: #fff;
+	transition: .15s;
+}
+
+.billio-in:focus {
+	outline: 0;
+	border-color: var(--billio-brand);
+	box-shadow: 0 0 0 3px var(--billio-brand-soft);
+}
+
+textarea.billio-in {
+	resize: vertical;
+	min-height: 84px;
+}
+
+.billio-hint {
+	color: var(--billio-muted);
+	font-size: 12.5px;
+	margin-top: 6px;
+}
+
+.billio-hint-warn {
+	color: var(--billio-warn);
+}
+
+.billio-hint-bad {
+	color: var(--billio-bad);
+}
+
+.billio-tag {
+	font-size: 11px;
+	font-weight: 600;
+	padding: 1px 6px;
+	border-radius: 5px;
+	margin-inline-start: 6px;
+}
+
+.billio-tag-opt {
+	color: var(--billio-muted);
+	background: var(--billio-bg);
+}
+
+.billio-tag-req {
+	color: var(--billio-warn);
+	background: var(--billio-warn-soft);
+}
+
+/* logo dropzone */
+.billio-drop {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	border: 2px dashed #d5d9e8;
+	border-radius: 12px;
+	padding: 12px;
+	transition: .15s;
+}
+
+.billio-drop.billio-drop-over {
+	border-color: var(--billio-brand);
+	background: var(--billio-brand-soft);
+}
+
+.billio-drop-img {
+	width: 64px;
+	height: 64px;
+	border-radius: 12px;
+	background: linear-gradient(135deg, #a855f7, #7c3aed);
+	display: grid;
+	place-items: center;
+	color: #fff;
+	flex-shrink: 0;
+	overflow: hidden;
+}
+
+.billio-drop-img img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	background: #fff;
+}
+
+.billio-drop-t {
+	flex: 1;
+	min-width: 150px;
+	font-size: 13px;
+	color: var(--billio-ink2);
+}
+
+.billio-drop-t b {
+	color: var(--billio-ink);
+	display: block;
+}
+
+/* number builder */
+.billio-two {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 12px;
+}
+
+@media (max-width: 640px) {
+	.billio-two {
+		grid-template-columns: 1fr;
+	}
+}
+
+.billio-two small {
+	color: var(--billio-muted);
+	display: block;
+	margin-bottom: 4px;
+}
+
+.billio-mono {
+	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.billio-chips {
+	display: flex;
+	gap: 6px;
+	flex-wrap: wrap;
+	margin-top: 8px;
+	align-items: center;
+}
+
+.billio-chips-label {
+	color: var(--billio-muted);
+	font-size: 12px;
+}
+
+.billio-chip {
+	border: 1px dashed #c7cbe0;
+	background: var(--billio-bg);
+	border-radius: 7px;
+	padding: 3px 9px;
+	font-family: ui-monospace, Menlo, monospace;
+	font-size: 12px;
+	color: var(--billio-brand);
+}
+
+.billio-chip:hover {
+	border-style: solid;
+	border-color: var(--billio-brand);
+	background: var(--billio-brand-soft);
+}
+
+.billio-nprev {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin-top: 12px;
+}
+
+.billio-nprev div {
+	background: linear-gradient(135deg, #f5f3ff, #eef2ff);
+	border: 1px solid #e0e7ff;
+	border-radius: 10px;
+	padding: 8px 12px;
+	flex: 1;
+	min-width: 150px;
+}
+
+.billio-nprev small {
+	display: block;
+	color: var(--billio-muted);
+	font-size: 11.5px;
+}
+
+.billio-nprev b {
+	font-family: ui-monospace, Menlo, monospace;
+	font-size: 14px;
+	color: var(--billio-brand);
+}
+
+.billio-nprev-cn b {
+	color: var(--billio-bad);
+}
+
+.billio-step-wrap {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.billio-step {
+	display: inline-flex;
+	border: 1px solid var(--billio-line);
+	border-radius: 10px;
+	overflow: hidden;
+}
+
+.billio-step button {
+	border: 0;
+	background: var(--billio-bg);
+	width: 36px;
+	font-size: 16px;
+}
+
+.billio-step input {
+	width: 52px;
+	border: 0;
+	text-align: center;
+	font-weight: 600;
+}
+
+.billio-step input:focus {
+	outline: 0;
+}
+
+/* switch rows */
+.billio-sw {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	border: 1px solid var(--billio-line);
+	border-radius: 12px;
+	padding: 12px 14px;
+	margin-bottom: 10px;
+	transition: .15s;
+}
+
+.billio-sw:hover {
+	border-color: #c7cbe0;
+}
+
+.billio-sw.billio-sw-on {
+	border-color: #a7f3d0;
+	background: var(--billio-ok-soft);
+}
+
+.billio-sw-t {
+	flex: 1;
+}
+
+.billio-sw-t small {
+	display: block;
+	color: var(--billio-muted);
+	font-size: 12px;
+}
+
+/* segmented-control-as-radiogroup (paper size, preview doc type) */
+.billio-paper-fieldset .billio-seg label {
+	display: contents;
+}
+
+.billio-dim {
+	color: var(--billio-muted);
+	font-weight: 400;
+}
+
+/* template cards + swatches */
+.billio-settings-tpls {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 12px;
+	max-width: 420px;
+}
+
+.billio-settings-tpl {
+	display: block;
+	border: 2px solid var(--billio-line);
+	border-radius: 12px;
+	background: #fff;
+	padding: 10px;
+	text-align: center;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--billio-ink2);
+	transition: .15s;
+	position: relative;
+	cursor: pointer;
+}
+
+.billio-settings-tpl:hover {
+	border-color: #c7cbe0;
+}
+
+.billio-settings-tpl.billio-settings-tpl-on {
+	border-color: var(--billio-brand);
+	color: var(--billio-brand);
+	background: var(--billio-brand-soft);
+}
+
+.billio-settings-tpl.billio-settings-tpl-on::after {
+	content: "✓";
+	position: absolute;
+	top: 6px;
+	inset-inline-end: 8px;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background: var(--billio-brand);
+	color: #fff;
+	font-size: 11px;
+	display: grid;
+	place-items: center;
+}
+
+.billio-settings-mini {
+	height: 84px;
+	border-radius: 6px;
+	background: #fff;
+	border: 1px solid var(--billio-line);
+	margin-bottom: 8px;
+	padding: 7px;
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+}
+
+.billio-settings-mini i {
+	display: block;
+	height: 5px;
+	border-radius: 2px;
+	background: #e2e8f0;
+}
+
+.billio-settings-mini-hd {
+	height: 16px;
+	background: var(--billio-settings-accent, var(--billio-brand));
+	border-radius: 3px;
+}
+
+.billio-settings-tpl-desc {
+	font-weight: 400;
+	font-size: 11.5px;
+	color: var(--billio-muted);
+}
+
+.billio-dim-row {
+	opacity: .45;
+	pointer-events: none;
+}
+
+.billio-swatches {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+	align-items: center;
+	position: relative;
+}
+
+.billio-swc {
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	border: 3px solid #fff;
+	box-shadow: 0 0 0 1px var(--billio-line);
+	transition: .15s;
+}
+
+.billio-swc.billio-swc-on {
+	box-shadow: 0 0 0 2px var(--billio-brand);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.billio-swc:hover {
+		transform: scale(1.1);
+	}
+}
+
+.billio-cust {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	border: 1px solid var(--billio-line);
+	border-radius: 99px;
+	padding: 3px 10px 3px 3px;
+	font-size: 12.5px;
+	font-family: ui-monospace, Menlo, monospace;
+}
+
+.billio-cust input[type="color"] {
+	width: 24px;
+	height: 24px;
+	border: 0;
+	padding: 0;
+	border-radius: 50%;
+	overflow: hidden;
+	background: none;
+}
+
+/* advanced */
+.billio-sec details {
+	border-top: 1px solid var(--billio-line);
+}
+
+.billio-sec summary {
+	padding: 14px 20px;
+	cursor: pointer;
+	font-weight: 600;
+	list-style: none;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.billio-sec summary::-webkit-details-marker {
+	display: none;
+}
+
+.billio-sec summary::after {
+	content: "›";
+	margin-inline-start: auto;
+	transition: .2s;
+	font-size: 18px;
+	color: var(--billio-muted);
+}
+
+.billio-sec details[open] summary::after {
+	transform: rotate(90deg);
+}
+
+.billio-advanced-note {
+	margin: 0 20px 10px;
+	color: var(--billio-ink2);
+	font-size: 13px;
+}
+
+.billio-code {
+	background: #0f172a;
+	color: #e2e8f0;
+	border-radius: 10px;
+	padding: 12px 14px;
+	font-family: ui-monospace, Menlo, monospace;
+	font-size: 12.5px;
+	line-height: 1.8;
+	margin: 0 20px 16px;
+	overflow: auto;
+}
+
+.billio-code span {
+	color: #a5b4fc;
+}
+
+.billio-overridden-badge {
+	display: inline-block;
+	background: var(--billio-ok-soft);
+	color: var(--billio-ok);
+	font-size: 10.5px;
+	font-weight: 700;
+	padding: 1px 6px;
+	border-radius: 5px;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* live preview */
+.billio-settings-pv {
+	position: sticky;
+	top: 32px;
+}
+
+.billio-pvh {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 10px;
+	flex-wrap: wrap;
+}
+
+.billio-pvh-t {
+	font-size: 11.5px;
+	font-weight: 700;
+	letter-spacing: .06em;
+	color: var(--billio-muted);
+	text-transform: uppercase;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.billio-live-dot {
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: var(--billio-ok);
+	box-shadow: 0 0 0 0 rgba(5, 150, 105, .5);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.billio-live-dot {
+		animation: billio-pulse 2s infinite;
+	}
+
+	@keyframes billio-pulse {
+		70% {
+			box-shadow: 0 0 0 7px rgba(5, 150, 105, 0);
+		}
+		100% {
+			box-shadow: 0 0 0 0 rgba(5, 150, 105, 0);
+		}
+	}
+}
+
+.billio-paperwrap {
+	background: #e5e7ef;
+	border-radius: var(--billio-r);
+	padding: 16px;
+	max-height: calc(100vh - 140px);
+	overflow: auto;
+}
+
+#billio-preview-frame {
+	width: 100%;
+	aspect-ratio: 210 / 297;
+	border: 0;
+	background: #fff;
+	box-shadow: 0 10px 30px rgba(15, 23, 42, .12);
+	border-radius: 4px;
+	display: block;
+	transition: aspect-ratio .3s;
+}
+
+#billio-preview-frame.billio-letter {
+	aspect-ratio: 216 / 279;
+}
+
+/* save bar */
+.billio-savebar {
+	position: fixed;
+	left: 50%;
+	bottom: 20px;
+	transform: translate(-50%, 120%);
+	opacity: 0;
+	background: var(--billio-ink);
+	color: #fff;
+	border-radius: 14px;
+	padding: 10px 10px 10px 18px;
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	box-shadow: 0 14px 40px rgba(15, 23, 42, .35);
+	transition: .3s;
+	z-index: 100000;
+	width: min(620px, calc(100vw - 32px));
+}
+
+.billio-savebar.billio-show {
+	transform: translate(-50%, 0);
+	opacity: 1;
+}
+
+.billio-savebar-t {
+	flex: 1;
+	font-size: 13.5px;
+}
+
+.billio-savebar-t small {
+	display: block;
+	color: #94a3b8;
+	font-size: 12px;
+}
+
+.billio-savebar .billio-btn.billio-ghost {
+	color: #cbd5e1;
+}
+
+.billio-savebar .billio-btn.billio-ghost:hover {
+	background: rgba(255, 255, 255, .08);
+}
+
+.billio-kbd {
+	font-family: ui-monospace, Menlo, monospace;
+	font-size: 11px;
+	background: rgba(255, 255, 255, .12);
+	padding: 1px 5px;
+	border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.billio-settings * {
+		animation: none !important;
+		transition: none !important;
+	}
+}

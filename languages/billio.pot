@@ -1,0 +1,927 @@
+# Copyright (C) 2026 Billio
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Billio 1.2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: bin/make-pot.php\n"
+
+#: inc/Admin/Dashboard.php:228
+msgid "%1$d of %2$d · %3$s"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:262
+msgid "%1$d → %2$s"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:230
+msgid "%d invoices generated"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:269
+msgid "%d unsaved change"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:271
+msgid "%d unsaved changes"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:222
+msgid "%s regenerated"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:505
+msgid "210×297"
+msgstr ""
+
+#: inc/Settings/Fields.php:94
+msgid "A4"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:537
+msgid "Accent color"
+msgstr ""
+
+#: inc/Settings/Fields.php:120
+msgid "Accent color (Modern template)"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:274
+msgid "Add your company address"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:265
+#: inc/Settings/SettingsPage.php:468
+msgid "Add {YEAR} to the format, otherwise numbers will repeat each year."
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:357
+#: inc/Settings/SettingsPage.php:555
+msgid "Advanced"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:213
+msgid "All caught up"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:210
+msgid "All orders invoiced"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:138
+msgid "At least one \"Send invoice when order is\" option must stay checked — your previous choice was kept."
+msgstr ""
+
+#: inc/Admin/DashboardAjax.php:106
+msgid "At least one \"Send invoice when order is\" option must stay checked."
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:486
+msgid "Attach invoice when order is"
+msgstr ""
+
+#: templates/credit-note.php:90
+#: templates/default.php:83
+#: templates/modern.php:91
+msgid "Billed to"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:103
+#: inc/Admin/Dashboard.php:104
+msgid "Billio"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:258
+msgid "Billio Dashboard"
+msgstr ""
+
+#: inc/Admin/MetaBox.php:49
+msgid "Billio Invoice"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:51
+msgid "Billio Settings"
+msgstr ""
+
+#: inc/Admin/ReviewNotice.php:64
+msgid "Billio has generated %d invoices for you. If it's working well, a quick review helps other store owners find it."
+msgstr ""
+
+#: billio.php:109
+msgid "Billio requires WooCommerce to be installed and active."
+msgstr ""
+
+#: billio.php:57
+msgid "Billio: Composer dependencies are missing. Please reinstall the plugin."
+msgstr ""
+
+#: templates/credit-note.php:74
+msgid "CREDIT NOTE"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:219
+msgid "Cancel"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:336
+msgid "Changes show in the live preview instantly. Nothing is saved until you click Save."
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:250
+msgid "Choose a logo"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:516
+msgid "Choose a template and match it to your brand."
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:526
+msgid "Clean, black & white"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:532
+msgid "Color header band"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:351
+msgid "Company"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:281
+#: inc/Settings/Fields.php:42
+#: inc/Settings/SettingsPage.php:399
+msgid "Company address"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:372
+msgid "Company details"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:275
+#: inc/Settings/Fields.php:36
+#: inc/Settings/SettingsPage.php:380
+msgid "Company logo"
+msgstr ""
+
+#: inc/Settings/Fields.php:30
+#: inc/Settings/SettingsPage.php:376
+msgid "Company name"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:494
+#: inc/Settings/SettingsPage.php:496
+msgid "Completed"
+msgstr ""
+
+#: inc/Settings/Fields.php:105
+msgid "Completed (order fulfilled)"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:559
+msgid "Copy any file into your theme and Billio will use it instead of the bundled one:"
+msgstr ""
+
+#: inc/Admin/OrderActions.php:239
+msgid "Could not find the email to resend."
+msgstr ""
+
+#: inc/Admin/MetaBox.php:208
+msgid "Could not generate the credit note."
+msgstr ""
+
+#: inc/Admin/OrderActions.php:204
+#: inc/Admin/OrderActions.php:334
+msgid "Could not generate the invoice."
+msgstr ""
+
+#: inc/Frontend/MyAccount.php:119
+msgid "Could not generate the invoice. Please contact us for help."
+msgstr ""
+
+#: inc/Admin/MetaBox.php:151
+msgid "Could not generate the packing slip."
+msgstr ""
+
+#: inc/Admin/OrderActions.php:264
+msgid "Could not regenerate the invoice."
+msgstr ""
+
+#: inc/Admin/Dashboard.php:241
+msgid "Could not save — please try again."
+msgstr ""
+
+#: inc/Admin/MetaBox.php:107
+msgid "Credit Note"
+msgstr ""
+
+#: templates/credit-note.php:76
+msgid "Credit Note #:"
+msgstr ""
+
+#: inc/Admin/MetaBox.php:100
+msgid "Credit Notes"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:429
+#: inc/Settings/SettingsPage.php:582
+msgid "Credit note"
+msgstr ""
+
+#: inc/Admin/MetaBox.php:195
+#: inc/Admin/MetaBox.php:199
+msgid "Credit note not found."
+msgstr ""
+
+#: inc/Settings/Fields.php:60
+msgid "Credit note prefix"
+msgstr ""
+
+#: inc/Settings/Fields.php:63
+msgid "Credit notes have their own number sequence, separate from invoices."
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:429
+msgid "Credit notes have their own sequence"
+msgstr ""
+
+#: inc/Invoice/SampleOrder.php:63
+msgid "Customer changed their mind"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:114
+#: inc/Admin/Dashboard.php:115
+#: inc/Settings/SettingsPage.php:339
+msgid "Dashboard"
+msgstr ""
+
+#: templates/credit-note.php:78
+#: templates/default.php:74
+#: templates/packing-slip.php:60
+msgid "Date:"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:455
+msgid "Decrease"
+msgstr ""
+
+#: inc/Settings/Fields.php:114
+#: inc/Settings/SettingsPage.php:525
+msgid "Default"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:356
+#: inc/Settings/SettingsPage.php:516
+msgid "Design"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:452
+msgid "Digits in {NUMBER}"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:599
+msgid "Discard"
+msgstr ""
+
+#: templates/default.php:164
+#: templates/modern.php:171
+msgid "Discount"
+msgstr ""
+
+#: inc/Admin/OrderActions.php:121
+msgid "Download"
+msgstr ""
+
+#: inc/Frontend/MyAccount.php:42
+#: inc/Frontend/MyAccount.php:62
+msgid "Download invoice"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:215
+msgid "Downloading…"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:389
+msgid "Drop a new image here or"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:355
+#: inc/Settings/SettingsPage.php:482
+msgid "Email & paper"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:287
+msgid "Email attachment enabled"
+msgstr ""
+
+#: templates/default.php:152
+#: templates/modern.php:159
+msgid "Fees"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:293
+msgid "First invoice generated"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:273
+msgid "Fix the number format first"
+msgstr ""
+
+#: templates/credit-note.php:80
+msgid "For Invoice #:"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:555
+msgid "For developers and theme authors."
+msgstr ""
+
+#: templates/modern.php:77
+msgid "From"
+msgstr ""
+
+#: inc/Admin/OrderActions.php:134
+msgid "Generate"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:212
+msgid "Generate missing (%d)"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:223
+msgid "Generate missing invoices"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:214
+msgid "Generate them now →"
+msgstr ""
+
+#: inc/Settings/Fields.php:79
+msgid "How many digits the {NUMBER} placeholder is padded to, e.g. 4 → 0001."
+msgstr ""
+
+#: templates/default.php:71
+#: templates/modern.php:65
+msgid "INVOICE"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:457
+msgid "Increase"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:439
+msgid "Insert:"
+msgstr ""
+
+#: inc/Admin/OrderActions.php:68
+#: inc/Admin/OrderActions.php:74
+#: inc/Settings/SettingsPage.php:425
+#: inc/Settings/SettingsPage.php:581
+msgid "Invoice"
+msgstr ""
+
+#: templates/default.php:73
+msgid "Invoice #:"
+msgstr ""
+
+#: inc/Admin/OrderActions.php:273
+msgid "Invoice PDF regenerated by %s."
+msgstr ""
+
+#: inc/Admin/OrderActions.php:184
+#: inc/Admin/OrderActions.php:244
+msgid "Invoice email sent."
+msgstr ""
+
+#: inc/Admin/Dashboard.php:216
+msgid "Invoice emailed to customer"
+msgstr ""
+
+#: inc/Invoice/FileServer.php:27
+msgid "Invoice not found."
+msgstr ""
+
+#: inc/Settings/Fields.php:54
+msgid "Invoice number prefix"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:418
+msgid "Invoice numbering"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:360
+msgid "Invoice profile"
+msgstr ""
+
+#: inc/Settings/Fields.php:110
+#: inc/Settings/SettingsPage.php:521
+msgid "Invoice template"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:238
+msgid "Invoice template updated"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:239
+msgid "Invoice will be attached to this email"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:240
+msgid "Invoice will no longer be attached to this email"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:405
+msgid "Invoices without an address may not be accepted as valid tax documents."
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:502
+msgid "Invoices, packing slips, credit notes"
+msgstr ""
+
+#: templates/credit-note.php:99
+#: templates/default.php:100
+#: templates/modern.php:107
+#: templates/packing-slip.php:91
+msgid "Item"
+msgstr ""
+
+#: inc/Admin/ReviewNotice.php:68
+msgid "Leave a review"
+msgstr ""
+
+#: inc/Settings/Fields.php:95
+#: inc/Settings/SettingsPage.php:506
+msgid "Letter"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:587
+msgid "Live invoice preview"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:578
+msgid "Live preview"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:276
+msgid "Logo removed"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:275
+msgid "Logo uploaded"
+msgstr ""
+
+#: inc/Settings/Fields.php:115
+#: inc/Settings/SettingsPage.php:531
+msgid "Modern"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:537
+msgid "Modern template only"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:447
+msgid "Next credit note"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:446
+msgid "Next invoice"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:246
+msgid "No credit notes yet"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:233
+msgid "No documents match \"%s\""
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:267
+msgid "No email status selected — customers won't receive invoices automatically. Save anyway?"
+msgstr ""
+
+#: inc/Frontend/MyAccount.php:107
+msgid "No invoice is available for this order yet."
+msgstr ""
+
+#: inc/Admin/Dashboard.php:231
+msgid "No invoices generated yet — they appear here as soon as an order is invoiced."
+msgstr ""
+
+#: inc/Admin/Dashboard.php:245
+msgid "No invoices yet"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:388
+msgid "No logo uploaded"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:244
+msgid "No refunds this month"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:266
+#: inc/Settings/SettingsPage.php:498
+msgid "No status selected — customers won't receive invoices by email."
+msgstr ""
+
+#: inc/Settings/Fields.php:67
+#: inc/Settings/SettingsPage.php:435
+msgid "Number format"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:154
+msgid "Number format must include {NUMBER} — your previous format was kept."
+msgstr ""
+
+#: inc/Settings/Fields.php:74
+#: inc/Settings/SettingsPage.php:452
+msgid "Number padding"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:354
+msgid "Numbering"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:418
+msgid "Numbers are assigned atomically — no duplicates, no gaps."
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:401
+msgid "One line per row — shown exactly as typed"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:409
+msgid "Optional"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:494
+msgid "Order fulfilled — invoice arrives with the shipping email"
+msgstr ""
+
+#: inc/Admin/MetaBox.php:67
+#: inc/Admin/MetaBox.php:142
+#: inc/Admin/OrderActions.php:299
+#: inc/Admin/OrderActions.php:321
+msgid "Order not found."
+msgstr ""
+
+#: templates/packing-slip.php:118
+msgid "Order notes:"
+msgstr ""
+
+#: templates/credit-note.php:82
+#: templates/default.php:75
+#: templates/packing-slip.php:59
+msgid "Order:"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:224
+msgid "Orders will be processed oldest-first so numbering stays chronological."
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:567
+msgid "Overridden by theme"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:558
+msgid "Override templates from your theme"
+msgstr ""
+
+#: templates/packing-slip.php:57
+msgid "PACKING SLIP"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:380
+msgid "PNG or JPG, at least 300px wide"
+msgstr ""
+
+#: inc/Admin/MetaBox.php:78
+msgid "Packing Slip"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:583
+msgid "Packing slip"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:456
+msgid "Padding"
+msgstr ""
+
+#: inc/Settings/Fields.php:90
+#: inc/Settings/SettingsPage.php:502
+#: inc/Settings/SettingsPage.php:504
+msgid "Paper size"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:237
+msgid "Paper size updated"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:489
+msgid "Payment received — customer gets the invoice right away"
+msgstr ""
+
+#: inc/Admin/DashboardAjax.php:61
+#: inc/Admin/MetaBox.php:137
+#: inc/Admin/MetaBox.php:188
+#: inc/Admin/OrderActions.php:292
+#: inc/Admin/OrderActions.php:316
+#: inc/Settings/SettingsPage.php:619
+msgid "Permission denied."
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:486
+msgid "Pick at least one"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:277
+msgid "Please drop an image file (PNG or JPG)."
+msgstr ""
+
+#: inc/Frontend/MyAccount.php:90
+msgid "Please log in to download your invoice."
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:422
+msgid "Prefixes"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:597
+msgid "Press"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:580
+msgid "Preview document type"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:372
+msgid "Printed in the \"From\" block of every invoice, credit note and packing slip."
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:489
+#: inc/Settings/SettingsPage.php:491
+msgid "Processing"
+msgstr ""
+
+#: inc/Settings/Fields.php:104
+msgid "Processing (payment received)"
+msgstr ""
+
+#: templates/credit-note.php:100
+#: templates/default.php:101
+#: templates/modern.php:108
+#: templates/packing-slip.php:93
+msgid "Qty"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:226
+msgid "Ready"
+msgstr ""
+
+#: templates/credit-note.php:139
+msgid "Reason:"
+msgstr ""
+
+#: templates/credit-note.php:108
+msgid "Refund issued as a flat amount (no item breakdown)."
+msgstr ""
+
+#: inc/Admin/Dashboard.php:761
+#: templates/credit-note.php:101
+msgid "Refunded"
+msgstr ""
+
+#: templates/default.php:179
+#: templates/modern.php:186
+msgid "Refunded: %s (see your refund receipt for details)"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:220
+#: inc/Admin/OrderActions.php:129
+msgid "Regenerate"
+msgstr ""
+
+#: inc/Admin/OrderActions.php:185
+msgid "Regenerate this invoice's PDF? This replaces the existing file (same number) with freshly rendered content."
+msgstr ""
+
+#: inc/Admin/Dashboard.php:217
+msgid "Regenerate this invoice?"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:393
+msgid "Remove"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:392
+msgid "Replace"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:400
+msgid "Required"
+msgstr ""
+
+#: inc/Admin/OrderActions.php:125
+msgid "Resend"
+msgstr ""
+
+#: inc/Settings/Fields.php:83
+msgid "Reset numbering each year"
+msgstr ""
+
+#: templates/packing-slip.php:92
+msgid "SKU"
+msgstr ""
+
+#: inc/Invoice/SampleOrder.php:33
+#: inc/Invoice/SampleOrder.php:66
+msgid "Sample Product A"
+msgstr ""
+
+#: inc/Invoice/SampleOrder.php:39
+msgid "Sample Product B"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:340
+#: inc/Settings/SettingsPage.php:600
+msgid "Save changes"
+msgstr ""
+
+#: inc/Settings/Fields.php:100
+msgid "Send invoice when order is"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:52
+#: inc/Settings/SettingsPage.php:69
+#: inc/Settings/SettingsPage.php:335
+msgid "Settings"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:209
+msgid "Settings saved."
+msgstr ""
+
+#: templates/packing-slip.php:68
+msgid "Ship to"
+msgstr ""
+
+#: templates/default.php:140
+#: templates/modern.php:147
+msgid "Shipping"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:235
+msgid "Showing %1$d of %2$d"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:409
+msgid "Shown under your company name"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:209
+#: inc/Admin/OrderActions.php:183
+msgid "Something went wrong. Please try again."
+msgstr ""
+
+#: inc/Admin/Dashboard.php:225
+msgid "Start"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:467
+#: inc/Settings/SettingsPage.php:471
+msgid "Start a fresh sequence every January"
+msgstr ""
+
+#: inc/Settings/Fields.php:86
+msgid "Starts a fresh sequence (1, 2, 3…) every January instead of counting up forever. Changing this mid-year starts a new sequence immediately."
+msgstr ""
+
+#: templates/default.php:135
+#: templates/modern.php:142
+msgid "Subtotal"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:520
+msgid "Template"
+msgstr ""
+
+#: templates/default.php:187
+#: templates/modern.php:194
+#: templates/packing-slip.php:124
+msgid "Thank you for your business."
+msgstr ""
+
+#: inc/Admin/DashboardAjax.php:99
+msgid "That setting cannot be changed from here."
+msgstr ""
+
+#: inc/Admin/Dashboard.php:218
+msgid "The PDF will be rebuilt with your current settings and template. The invoice number stays the same."
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:263
+#: inc/Settings/SettingsPage.php:444
+msgid "The format must include {NUMBER}, otherwise every invoice gets the same number."
+msgstr ""
+
+#: inc/Admin/OrderActions.php:224
+msgid "There's no invoice email for this order's current status."
+msgstr ""
+
+#: templates/credit-note.php:145
+msgid "This credit note documents a refund against the order above."
+msgstr ""
+
+#: inc/Admin/OrderActions.php:231
+msgid "This order's status isn't enabled for invoice emails in Billio → Settings."
+msgstr ""
+
+#: inc/Admin/Dashboard.php:243
+msgid "Today"
+msgstr ""
+
+#: templates/default.php:103
+#: templates/default.php:169
+#: templates/modern.php:110
+#: templates/modern.php:176
+msgid "Total"
+msgstr ""
+
+#: templates/credit-note.php:132
+msgid "Total Refunded"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:473
+msgid "Turning this on mid-year starts a new sequence immediately. Existing numbers are never reissued."
+msgstr ""
+
+#: templates/default.php:102
+#: templates/modern.php:109
+msgid "Unit Price"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:251
+msgid "Use this logo"
+msgstr ""
+
+#: inc/Settings/Fields.php:70
+msgid "Used for both invoices and credit notes. Placeholders: {PREFIX}, {YEAR}, {NUMBER}."
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:435
+msgid "Used for invoices and credit notes"
+msgstr ""
+
+#: inc/Settings/Fields.php:48
+#: inc/Settings/SettingsPage.php:409
+msgid "VAT / Tax number"
+msgstr ""
+
+#: templates/credit-note.php:69
+#: templates/default.php:66
+#: templates/modern.php:87
+msgid "VAT/Tax No:"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:236
+msgid "View all in Orders →"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:482
+msgid "When the PDF is attached, and what size it prints on."
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:463
+msgid "Yearly reset"
+msgstr ""
+
+#: inc/Frontend/MyAccount.php:98
+msgid "You do not have permission to access this invoice."
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:264
+#: inc/Settings/SettingsPage.php:468
+msgid "Your format includes {YEAR}, so numbers stay unique."
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:203
+msgid "Your number format has no {YEAR} placeholder, so numbers from different years will look identical with \"Reset numbering each year\" on. Consider adding {YEAR} to the format."
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:410
+msgid "e.g. BIN 000123456-0101"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:597
+msgid "to save"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:272
+msgid "✓ Settings saved"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:242
+msgid "🎉 You're all set — every invoice is fully branded"
+msgstr ""
+

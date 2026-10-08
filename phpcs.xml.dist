@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<ruleset name="Billio">
+	<description>Coding standards for the Billio plugin.</description>
+
+	<file>.</file>
+	<exclude-pattern>/vendor/*</exclude-pattern>
+	<exclude-pattern>/languages/*</exclude-pattern>
+	<exclude-pattern>/bin/*</exclude-pattern>
+	<exclude-pattern>*.min.js</exclude-pattern>
+
+	<arg value="sp"/>
+	<arg name="basepath" value="./"/>
+	<arg name="colors"/>
+	<arg name="extensions" value="php"/>
+
+	<rule ref="WordPress-Extra">
+		<!-- Templates intentionally extract() a data array for readability. -->
+		<exclude name="WordPress.PHP.DontExtract"/>
+		<!-- inc/ is PSR-4 autoloaded (composer.json): filenames must match
+		     class names exactly, not WP's legacy class-foo.php convention. -->
+		<exclude name="WordPress.Files.FileName"/>
+	</rule>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="billio"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="WordPress.WP.Capabilities">
+		<properties>
+			<!-- A real WooCommerce capability; this sniff only knows core's list. -->
+			<property name="custom_capabilities" type="array">
+				<element value="manage_woocommerce"/>
+			</property>
+		</properties>
+	</rule>
+
+	<config name="minimum_supported_wp_version" value="6.0"/>
+	<config name="testVersion" value="7.4-"/>
+</ruleset>

@@ -1,0 +1,710 @@
+/* Billio Dashboard — dashboard-only rules. Shared tokens, base resets,
+ * header, buttons, generic card/segmented-control/toggle/toast are in
+ * admin-base.css (enqueued as this file's dependency, loaded first) and
+ * scoped under .billio-ui, which the page wrapper also carries alongside
+ * .billio-dash. Ported from the approved mockup. */
+
+.billio-dash {
+	max-width: 1320px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.billio-kpi:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 24px rgba(15, 23, 42, .08);
+	}
+}
+
+/* setup banner */
+.billio-setup {
+	display: flex;
+	gap: 22px;
+	align-items: center;
+	background: linear-gradient(120deg, #312e81, #4f46e5 55%, #7c3aed);
+	color: #fff;
+	border-radius: var(--billio-r);
+	padding: 20px 22px;
+	margin-bottom: 20px;
+	position: relative;
+	overflow: hidden;
+	flex-wrap: wrap;
+}
+
+.billio-ring {
+	width: 72px;
+	height: 72px;
+	flex-shrink: 0;
+	position: relative;
+}
+
+.billio-ring b {
+	position: absolute;
+	inset: 0;
+	display: grid;
+	place-items: center;
+	font-size: 17px;
+}
+
+.billio-setup h3 {
+	margin: 0 0 4px;
+	font-size: 16px;
+}
+
+.billio-setup p {
+	margin: 0;
+	opacity: .8;
+	font-size: 13px;
+}
+
+.billio-steps {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+	margin-top: 12px;
+}
+
+.billio-step {
+	background: rgba(255, 255, 255, .12);
+	border: 1px solid rgba(255, 255, 255, .18);
+	border-radius: 99px;
+	padding: 5px 12px;
+	font-size: 12.5px;
+	display: flex;
+	gap: 6px;
+	align-items: center;
+}
+
+.billio-step.billio-done {
+	opacity: .65;
+	text-decoration: line-through;
+}
+
+/* Rendered as an <a>, so without enough specificity here it can pick up
+ * wp-admin's own link colors (including a different :visited color) —
+ * .billio-dash prefix + explicit link/visited/hover states keep it the
+ * intended white-pill-with-brand-purple-text look in every state. */
+.billio-dash a.billio-step.billio-todo,
+.billio-dash a.billio-step.billio-todo:link,
+.billio-dash a.billio-step.billio-todo:visited {
+	background: #fff;
+	color: var(--billio-brand);
+	font-weight: 600;
+	text-decoration: none;
+	border: 0;
+}
+
+.billio-dash a.billio-step.billio-todo:hover,
+.billio-dash a.billio-step.billio-todo:focus-visible {
+	background: #fff;
+	color: var(--billio-brand2);
+	text-decoration: none;
+}
+
+.billio-setup .billio-x {
+	position: absolute;
+	top: 10px;
+	inset-inline-end: 12px;
+	background: none;
+	border: 0;
+	color: #fff;
+	opacity: .6;
+	font-size: 18px;
+	z-index: 1;
+}
+
+/* kpis */
+.billio-kpis {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 16px;
+	margin-bottom: 20px;
+}
+
+@media (max-width: 1100px) {
+	.billio-kpis {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (max-width: 560px) {
+	.billio-kpis {
+		grid-template-columns: 1fr;
+	}
+}
+
+.billio-kpi {
+	background: var(--billio-card);
+	border-radius: var(--billio-r);
+	box-shadow: var(--billio-shadow);
+	padding: 16px 18px;
+	position: relative;
+	overflow: hidden;
+	border: 1px solid var(--billio-line);
+	transition: .2s;
+}
+
+.billio-kpi .billio-top {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	color: var(--billio-ink2);
+	font-size: 13px;
+}
+
+.billio-kpi .billio-ic {
+	width: 32px;
+	height: 32px;
+	border-radius: 9px;
+	display: grid;
+	place-items: center;
+}
+
+.billio-kpi .billio-v {
+	font-size: 28px;
+	font-weight: 700;
+	margin: 10px 0 2px;
+	letter-spacing: -.02em;
+	font-variant-numeric: tabular-nums;
+}
+
+.billio-kpi .billio-d {
+	font-size: 12.5px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	color: var(--billio-muted);
+}
+
+.billio-up {
+	color: var(--billio-ok);
+	font-weight: 600;
+}
+
+.billio-dn {
+	color: var(--billio-bad);
+	font-weight: 600;
+}
+
+.billio-kpi svg.billio-spark {
+	position: absolute;
+	inset-inline-end: 14px;
+	bottom: 14px;
+	width: 90px;
+	height: 34px;
+}
+
+.billio-kpi.billio-alert {
+	border-color: #fde68a;
+	background: linear-gradient(180deg, #fffbeb, #fff);
+}
+
+.billio-kpi.billio-alert .billio-v {
+	color: var(--billio-warn);
+}
+
+/* review bar */
+.billio-review {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-size: 13px;
+	color: var(--billio-ink2);
+	background: #fff;
+	border: 1px solid var(--billio-line);
+	border-radius: 10px;
+	padding: 9px 14px;
+	margin-bottom: 16px;
+	flex-wrap: wrap;
+}
+
+.billio-review .billio-sp {
+	flex: 1;
+}
+
+.billio-stars {
+	color: #f59e0b;
+	letter-spacing: 1px;
+}
+
+.billio-lnk {
+	color: var(--billio-brand);
+	font-size: 12.5px;
+	font-weight: 600;
+	background: none;
+	border: 0;
+	padding: 0;
+}
+
+/* grid */
+.billio-grid {
+	display: grid;
+	grid-template-columns: 2fr 1fr;
+	gap: 16px;
+	margin-bottom: 20px;
+}
+
+@media (max-width: 1000px) {
+	.billio-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* Flex column so .billio-chartbox can stretch to fill whatever height
+ * the grid row ends up being (matched to the taller right-column card),
+ * instead of leaving empty space below a fixed-height chart. */
+.billio-chart-card {
+	display: flex;
+	flex-direction: column;
+}
+
+.billio-chartbox {
+	position: relative;
+	flex: 1;
+	min-height: 240px;
+}
+
+.billio-chartbox svg {
+	/* Height is set inline (px, from the measured box height at draw
+	 * time), not 100% — a percentage height on a child of a flex:1 item
+	 * is exactly the kind of ambiguous-resolution case that caused the
+	 * chart card to grow without bound. display:block avoids the small
+	 * inline-baseline gap SVGs get by default, which was also
+	 * contributing a few px of drift per redraw. */
+	display: block;
+	width: 100%;
+	overflow: visible;
+}
+
+.billio-bar {
+	transition: opacity .15s;
+	cursor: pointer;
+	transform-box: fill-box;
+	transform-origin: bottom;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.billio-bar {
+		animation: billio-grow .5s cubic-bezier(.2, .8, .2, 1) both;
+	}
+
+	@keyframes billio-grow {
+		from {
+			transform: scaleY(0);
+		}
+	}
+
+	.billio-v[data-count] {
+		transition: none;
+	}
+}
+
+.billio-tip {
+	position: absolute;
+	pointer-events: none;
+	background: var(--billio-ink);
+	color: #fff;
+	border-radius: 8px;
+	padding: 7px 10px;
+	font-size: 12px;
+	white-space: nowrap;
+	transform: translate(-50%, -110%);
+	opacity: 0;
+	transition: opacity .12s;
+}
+
+.billio-tip b {
+	display: block;
+	font-size: 13px;
+}
+
+.billio-legend {
+	display: flex;
+	gap: 18px;
+	color: var(--billio-ink2);
+	font-size: 12.5px;
+	margin-top: 8px;
+}
+
+.billio-legend i {
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	border-radius: 3px;
+	margin-inline-end: 6px;
+	vertical-align: -1px;
+}
+
+.billio-chart-summary {
+	display: flex;
+	gap: 28px;
+	margin-bottom: 6px;
+	flex-wrap: wrap;
+}
+
+.billio-chart-summary .billio-label {
+	color: var(--billio-muted);
+	font-size: 12px;
+}
+
+.billio-chart-summary .billio-value {
+	font-size: 20px;
+	font-weight: 700;
+}
+
+.billio-sr-table {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+
+/* side config card */
+.billio-cfg {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.billio-row {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 11px 0;
+	border-bottom: 1px dashed var(--billio-line);
+}
+
+.billio-row:last-child {
+	border: 0;
+}
+
+.billio-row .billio-ic {
+	width: 34px;
+	height: 34px;
+	border-radius: 9px;
+	background: var(--billio-brand-soft);
+	color: var(--billio-brand);
+	display: grid;
+	place-items: center;
+	flex-shrink: 0;
+}
+
+.billio-row .billio-t {
+	flex: 1;
+	min-width: 0;
+}
+
+.billio-row .billio-t small {
+	display: block;
+	color: var(--billio-muted);
+	font-size: 12px;
+}
+
+.billio-row .billio-t span {
+	font-weight: 600;
+}
+
+.billio-mono {
+	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+	background: var(--billio-bg);
+	padding: 2px 7px;
+	border-radius: 6px;
+	font-size: 13px;
+}
+
+.billio-tpl {
+	display: flex;
+	gap: 10px;
+	margin-top: 4px;
+}
+
+.billio-tpl button {
+	flex: 1;
+	border: 2px solid var(--billio-line);
+	border-radius: 10px;
+	background: #fff;
+	padding: 8px;
+	font-size: 12px;
+	color: var(--billio-ink2);
+}
+
+.billio-tpl button[aria-pressed="true"] {
+	border-color: var(--billio-brand);
+	color: var(--billio-brand);
+	font-weight: 600;
+	background: var(--billio-brand-soft);
+}
+
+.billio-mini {
+	height: 46px;
+	border-radius: 5px;
+	background: #fff;
+	border: 1px solid var(--billio-line);
+	margin-bottom: 6px;
+	padding: 5px;
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+
+.billio-mini i {
+	display: block;
+	height: 4px;
+	border-radius: 2px;
+	background: #e2e8f0;
+}
+
+.billio-mini.billio-modern i:first-child {
+	background: var(--billio-brand);
+	height: 8px;
+}
+
+/* table */
+.billio-tools {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+	align-items: center;
+	margin-bottom: 12px;
+}
+
+.billio-search {
+	flex: 1;
+	min-width: 200px;
+	position: relative;
+}
+
+.billio-search input {
+	width: 100%;
+	border: 1px solid var(--billio-line);
+	border-radius: 10px;
+	padding: 8px 12px 8px 34px;
+	font: inherit;
+	background: var(--billio-bg);
+}
+
+.billio-search input:focus {
+	outline: 2px solid var(--billio-brand-soft);
+	border-color: var(--billio-brand);
+	background: #fff;
+}
+
+.billio-search svg {
+	position: absolute;
+	inset-inline-start: 11px;
+	top: 50%;
+	transform: translateY(-50%);
+	color: var(--billio-muted);
+}
+
+.billio-table-wrap {
+	overflow-x: auto;
+}
+
+.billio-tbl {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.billio-tbl th {
+	text-align: start;
+	font-size: 11.5px;
+	text-transform: uppercase;
+	letter-spacing: .05em;
+	color: var(--billio-muted);
+	font-weight: 600;
+	padding: 8px 10px;
+	border-bottom: 1px solid var(--billio-line);
+}
+
+.billio-tbl td {
+	padding: 11px 10px;
+	border-bottom: 1px solid #f1f2f6;
+	vertical-align: middle;
+}
+
+.billio-tbl tr:hover td {
+	background: #fafbff;
+}
+
+.billio-tbl tr:last-child td {
+	border: 0;
+}
+
+.billio-num {
+	font-weight: 600;
+}
+
+.billio-cust {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+}
+
+.billio-av {
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	display: grid;
+	place-items: center;
+	font-size: 11px;
+	font-weight: 700;
+	color: #fff;
+	flex-shrink: 0;
+}
+
+.billio-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 12px;
+	font-weight: 600;
+	padding: 3px 9px;
+	border-radius: 99px;
+}
+
+.billio-pill::before {
+	content: "";
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: currentColor;
+}
+
+.billio-p-ok {
+	background: var(--billio-ok-soft);
+	color: var(--billio-ok);
+}
+
+.billio-p-pr {
+	background: #eff6ff;
+	color: #2563eb;
+}
+
+.billio-p-cn {
+	background: var(--billio-bad-soft);
+	color: var(--billio-bad);
+}
+
+.billio-p-default {
+	background: #f0f0f1;
+	color: #50575e;
+}
+
+.billio-type {
+	font-size: 11px;
+	font-weight: 700;
+	padding: 2px 6px;
+	border-radius: 5px;
+	background: var(--billio-brand-soft);
+	color: var(--billio-brand);
+}
+
+.billio-type.billio-cn {
+	background: var(--billio-bad-soft);
+	color: var(--billio-bad);
+}
+
+.billio-acts {
+	display: flex;
+	gap: 4px;
+	justify-content: flex-end;
+}
+
+.billio-ib {
+	width: 30px;
+	height: 30px;
+	border-radius: 8px;
+	border: 1px solid transparent;
+	background: none;
+	display: grid;
+	place-items: center;
+	color: var(--billio-ink2);
+	position: relative;
+}
+
+.billio-ib:hover {
+	background: var(--billio-bg);
+	border-color: var(--billio-line);
+	color: var(--billio-brand);
+}
+
+.billio-r {
+	text-align: end;
+	font-variant-numeric: tabular-nums;
+}
+
+.billio-empty {
+	text-align: center;
+	padding: 30px;
+	color: var(--billio-muted);
+}
+
+.billio-tfoot {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 12px;
+	color: var(--billio-muted);
+	font-size: 12.5px;
+}
+
+@media (max-width: 760px) {
+	.billio-tbl .billio-hm {
+		display: none;
+	}
+}
+
+/* modal (generate-missing) — toast itself is shared, see admin-base.css */
+.billio-ov {
+	position: fixed;
+	inset: 0;
+	background: rgba(15, 23, 42, .45);
+	display: none;
+	place-items: center;
+	z-index: 100001;
+}
+
+.billio-ov.billio-show {
+	display: grid;
+}
+
+.billio-modal {
+	background: #fff;
+	border-radius: 16px;
+	padding: 22px;
+	width: min(420px, 92vw);
+	box-shadow: 0 20px 60px rgba(0, 0, 0, .3);
+}
+
+.billio-modal h3 {
+	margin: 0 0 6px;
+}
+
+.billio-modal p {
+	color: var(--billio-ink2);
+	margin: 0 0 18px;
+}
+
+.billio-modal .billio-f {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+.billio-prog {
+	height: 8px;
+	background: var(--billio-bg);
+	border-radius: 99px;
+	overflow: hidden;
+	margin: 6px 0 14px;
+}
+
+.billio-prog i {
+	display: block;
+	height: 100%;
+	width: 0;
+	background: linear-gradient(90deg, var(--billio-brand), var(--billio-brand2));
+	transition: width .2s;
+}
