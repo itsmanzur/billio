@@ -53,6 +53,7 @@ class Plugin {
 		// depend on the Dashboard object actually existing in that request.
 		add_action( 'billio_invoice_generated', array( Dashboard::class, 'bust_stats_cache' ) );
 		add_action( 'billio_credit_note_generated', array( Dashboard::class, 'bust_stats_cache' ) );
+		add_action( Dashboard::DEFERRED_BUST_HOOK, array( Dashboard::class, 'deferred_bust_stats_cache' ) );
 
 		if ( is_admin() ) {
 			$order_actions = new OrderActions();

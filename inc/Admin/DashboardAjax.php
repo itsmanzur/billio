@@ -46,6 +46,7 @@ class DashboardAjax {
 		add_action( 'wp_ajax_billio_dashboard_generate_batch', array( $this, 'ajax_generate_batch' ) );
 		add_action( 'wp_ajax_billio_dashboard_chart_data', array( $this, 'ajax_chart_data' ) );
 		add_action( 'wp_ajax_billio_dashboard_dismiss_setup', array( $this, 'ajax_dismiss_setup' ) );
+		add_action( 'wp_ajax_billio_dashboard_search_documents', array( $this, 'ajax_search_documents' ) );
 	}
 
 	/**
@@ -198,5 +199,29 @@ class DashboardAjax {
 		update_user_meta( get_current_user_id(), Dashboard::OPTION_SETUP_DISMISSED, 1 );
 
 		wp_send_json_success();
+	}
+
+	/**
+	 * AJAX: search invoices/credit notes beyond the 10 rows localized on
+	 * page load (number, order number, customer name) — paginated.
+	 *
+	 * @return void
+	 */
+	public function ajax_search_documents() {
+		$this->authorize();
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- already verified in authorize() above.
+		$q = isset( $_POST['q'] ) ? sanitize_text_field( wp_unslash( $_POST['q'] ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- already verified in authorize() above.
+		$type = isset( $_POST['type'] ) ? sanitize_key( wp_unslash( $_POST['type'] ) ) : 'all';
+		if ( ! in_array( $type, array( 'all', 'inv', 'cn' ), true ) ) {
+			$type = 'all';
+		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- already verified in authorize() above.
+		$page = isset( $_POST['page'] ) ? absint( $_POST['page'] ) : 1;
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- already verified in authorize() above.
+		$per_page = isset( $_POST['per_page'] ) ? absint( $_POST['per_page'] ) : 10;
+
+		wp_send_json_success( $this->dashboard->search_documents( $q, $type, $page, $per_page ) );
 	}
 }

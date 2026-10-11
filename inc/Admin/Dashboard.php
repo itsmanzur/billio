@@ -53,17 +53,37 @@ class Dashboard {
 	const OPTION_SETUP_DISMISSED = 'billio_dashboard_setup_dismissed';
 
 	/**
+	 * Max candidates fetched per search sub-query (find_invoice_candidates(),
+	 * find_credit_note_candidates()) — bounds the worst case for a very
+	 * broad search term, since results are still paginated/sorted in PHP
+	 * after the two sub-queries are merged.
+	 */
+	const SEARCH_CANDIDATE_CAP = 200;
+
+	/**
+	 * Short-lived lock debouncing bust_stats_cache() — see that method.
+	 */
+	const BUST_LOCK_TRANSIENT   = 'billio_dash_bust_lock';
+	const BUST_DEBOUNCE_SECONDS = 30;
+
+	/**
+	 * Cron hook for the deferred bust bust_stats_cache() schedules when it's
+	 * debounced — see that method.
+	 */
+	const DEFERRED_BUST_HOOK = 'billio_dashboard_deferred_bust';
+
+	/**
 	 * @var string Hook suffix for this page, as returned by add_menu_page().
 	 */
 	private $hook_suffix = '';
 
 	/**
-	 * @var \WC_Order[]|null Per-request memoization — see get_all_invoiced_orders().
+	 * @var \WC_Order[]|null Per-request memoization — see get_legacy_invoiced_orders().
 	 */
 	private $invoiced_orders_cache = null;
 
 	/**
-	 * @var \WC_Order_Refund[]|null Per-request memoization — see get_all_credit_noted_refunds().
+	 * @var \WC_Order_Refund[]|null Per-request memoization — see get_legacy_credit_noted_refunds().
 	 */
 	private $credit_noted_refunds_cache = null;
 
@@ -73,7 +93,13 @@ class Dashboard {
 	}
 
 	/**
-	 * Delete every cached stat/chart transient this class maintains.
+	 * Request (not necessarily perform) a cache bust, debounced: if another
+	 * bust already happened within the last BUST_DEBOUNCE_SECONDS, this call
+	 * is skipped, but a single deferred bust is scheduled for exactly when
+	 * that debounce window ends — so a burst of invoices generated in quick
+	 * succession (e.g. a batch "Generate missing" run) doesn't re-run the
+	 * stats queries on every single one, while the cache is still
+	 * guaranteed to be no more than BUST_DEBOUNCE_SECONDS stale.
 	 *
 	 * Static, and hooked unconditionally in Plugin.php (not gated behind
 	 * is_admin()) — invoices are very often generated from a non-admin
@@ -82,11 +108,49 @@ class Dashboard {
 	 * instantiated. A hook registered only inside this constructor would
 	 * silently never fire for that — the most common real-world path.
 	 *
+	 * Note: the deferred bust runs via WP-Cron, which only fires on an
+	 * incoming request after its scheduled time (not a true timer) — on a
+	 * very low-traffic site it may land at the next visit after the 30s
+	 * mark rather than exactly at it. That's a standard WP-Cron
+	 * characteristic, not something this debounce can avoid.
+	 *
 	 * @return void
 	 */
 	public static function bust_stats_cache() {
+		if ( false !== get_transient( self::BUST_LOCK_TRANSIENT ) ) {
+			if ( ! wp_next_scheduled( self::DEFERRED_BUST_HOOK ) ) {
+				wp_schedule_single_event( time() + self::BUST_DEBOUNCE_SECONDS, self::DEFERRED_BUST_HOOK );
+			}
+			return;
+		}
+
+		self::do_bust_stats_cache();
+		set_transient( self::BUST_LOCK_TRANSIENT, 1, self::BUST_DEBOUNCE_SECONDS );
+	}
+
+	/**
+	 * The deferred half of bust_stats_cache()'s debounce — runs the actual
+	 * bust once the debounce window from a skipped request ends. Hooked to
+	 * DEFERRED_BUST_HOOK unconditionally in Plugin.php, same reasoning as
+	 * bust_stats_cache() itself.
+	 *
+	 * @return void
+	 */
+	public static function deferred_bust_stats_cache() {
+		self::do_bust_stats_cache();
+		set_transient( self::BUST_LOCK_TRANSIENT, 1, self::BUST_DEBOUNCE_SECONDS );
+	}
+
+	/**
+	 * Delete every cached stat/chart/recent-documents transient this class
+	 * maintains. The actual work behind bust_stats_cache()'s debounce.
+	 *
+	 * @return void
+	 */
+	private static function do_bust_stats_cache() {
 		delete_transient( 'billio_dash_month_stats' );
 		delete_transient( 'billio_dash_last_month_stats' );
+		delete_transient( 'billio_dash_recent_documents' );
 		foreach ( array( 7, 30, 90 ) as $days ) {
 			delete_transient( 'billio_dash_chart_' . $days );
 		}
@@ -425,75 +489,112 @@ class Dashboard {
 	}
 
 	/**
-	 * Every invoiced order whose *resolved issue date* (see
-	 * invoice_issue_timestamp()) falls within a timestamp window.
+	 * Every invoiced order whose *resolved issue date* falls within a
+	 * timestamp window — split into two bounded queries instead of loading
+	 * every invoiced order ever and filtering in PHP:
 	 *
-	 * Filtered in PHP rather than via a meta_query BETWEEN on
-	 * _billio_invoice_date directly: that meta is only set at the moment a
-	 * number is first assigned, so an order invoiced for the first time
-	 * long after it was placed needs the same fallback chain applied here
-	 * as everywhere else, and an order that (on a pre-existing install)
-	 * never got the meta at all must still be found, not silently excluded.
+	 * 1. The common path: a direct meta_query BETWEEN on _billio_invoice_date
+	 *    (set at number-assignment time for every order invoiced since the
+	 *    meta existed) — this is virtually every real invoice, fetched as a
+	 *    single bounded, indexed-by-meta query.
+	 * 2. A legacy-fallback path, only for orders that somehow never got that
+	 *    meta at all (pre-existing installs from before it existed) — a
+	 *    small, memoized, EXISTS/NOT-EXISTS-scoped query, with
+	 *    invoice_issue_timestamp()'s paid/completed/created fallback chain
+	 *    still applied, but only to this normally-empty-or-tiny subset
+	 *    rather than on every request.
 	 *
 	 * @param int $from Window start (unix timestamp).
 	 * @param int $to   Window end (unix timestamp).
 	 * @return \WC_Order[]
 	 */
 	private function orders_issued_between( $from, $to ) {
-		return array_values(
-			array_filter(
-				$this->get_all_invoiced_orders(),
-				function ( $order ) use ( $from, $to ) {
-					$ts = $this->invoice_issue_timestamp( $order );
-					return $ts >= $from && $ts <= $to;
-				}
+		$common = wc_get_orders(
+			array(
+				'limit'      => -1,
+				'return'     => 'objects',
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					array(
+						'key'     => '_billio_invoice_date',
+						'value'   => array( $from, $to ),
+						'compare' => 'BETWEEN',
+						'type'    => 'NUMERIC',
+					),
+				),
 			)
 		);
+
+		$legacy_in_window = array_filter(
+			$this->get_legacy_invoiced_orders(),
+			function ( $order ) use ( $from, $to ) {
+				$ts = $this->invoice_issue_timestamp( $order );
+				return $ts >= $from && $ts <= $to;
+			}
+		);
+
+		return array_merge( $common, array_values( $legacy_in_window ) );
 	}
 
 	/**
-	 * Every credit-noted refund whose *resolved issue date* (see
-	 * credit_note_issue_timestamp()) falls within a timestamp window — same
-	 * PHP-side filtering reasoning as orders_issued_between().
+	 * Every credit-noted refund whose *resolved issue date* falls within a
+	 * timestamp window — same common-path/legacy-fallback split as
+	 * orders_issued_between().
 	 *
 	 * @param int $from Window start (unix timestamp).
 	 * @param int $to   Window end (unix timestamp).
 	 * @return \WC_Order_Refund[]
 	 */
 	private function credit_notes_issued_between( $from, $to ) {
-		return array_values(
-			array_filter(
-				$this->get_all_credit_noted_refunds(),
-				function ( $refund ) use ( $from, $to ) {
-					$ts = $this->credit_note_issue_timestamp( $refund );
-					return $ts >= $from && $ts <= $to;
-				}
+		$common = wc_get_orders(
+			array(
+				'type'       => 'shop_order_refund',
+				'limit'      => -1,
+				'return'     => 'objects',
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					array(
+						'key'     => '_billio_credit_note_date',
+						'value'   => array( $from, $to ),
+						'compare' => 'BETWEEN',
+						'type'    => 'NUMERIC',
+					),
+				),
 			)
 		);
+
+		$legacy_in_window = array_filter(
+			$this->get_legacy_credit_noted_refunds(),
+			function ( $refund ) use ( $from, $to ) {
+				$ts = $this->credit_note_issue_timestamp( $refund );
+				return $ts >= $from && $ts <= $to;
+			}
+		);
+
+		return array_merge( $common, array_values( $legacy_in_window ) );
 	}
 
 	/**
-	 * Every order that has an invoice number — the HPOS-safe way to query
-	 * via wc_get_orders() rather than raw wp_posts/wp_postmeta SQL (HPOS
-	 * stores order meta in its own table, which a hand-written query
-	 * against wp_postmeta would silently miss entirely).
-	 *
-	 * Memoized per request: localized_data() alone calls this indirectly
-	 * from four different methods (month stats, last-month stats, chart
-	 * data, recent documents) in the same page load.
+	 * Invoiced orders that never got _billio_invoice_date at all (e.g.
+	 * invoiced by a pre-1.1.0 version of this plugin, before the meta
+	 * existed) — normally empty on a real install. Memoized per request:
+	 * called from up to three stats methods in the same page load.
 	 *
 	 * @return \WC_Order[]
 	 */
-	private function get_all_invoiced_orders() {
+	private function get_legacy_invoiced_orders() {
 		if ( null === $this->invoiced_orders_cache ) {
 			$this->invoiced_orders_cache = wc_get_orders(
 				array(
 					'limit'      => -1,
 					'return'     => 'objects',
 					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						'relation' => 'AND',
 						array(
 							'key'     => '_billio_invoice_number',
 							'compare' => 'EXISTS',
+						),
+						array(
+							'key'     => '_billio_invoice_date',
+							'compare' => 'NOT EXISTS',
 						),
 					),
 				)
@@ -504,12 +605,12 @@ class Dashboard {
 	}
 
 	/**
-	 * Every refund that has a credit note number. Memoized per request —
-	 * see get_all_invoiced_orders().
+	 * Credit-noted refunds that never got _billio_credit_note_date at all —
+	 * same reasoning and memoization as get_legacy_invoiced_orders().
 	 *
 	 * @return \WC_Order_Refund[]
 	 */
-	private function get_all_credit_noted_refunds() {
+	private function get_legacy_credit_noted_refunds() {
 		if ( null === $this->credit_noted_refunds_cache ) {
 			$this->credit_noted_refunds_cache = wc_get_orders(
 				array(
@@ -517,9 +618,14 @@ class Dashboard {
 					'limit'      => -1,
 					'return'     => 'objects',
 					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						'relation' => 'AND',
 						array(
 							'key'     => '_billio_credit_note_number',
 							'compare' => 'EXISTS',
+						),
+						array(
+							'key'     => '_billio_credit_note_date',
+							'compare' => 'NOT EXISTS',
 						),
 					),
 				)
@@ -678,26 +784,67 @@ class Dashboard {
 
 	/**
 	 * Merge the most recent invoices and credit notes into one list, sorted
-	 * by issue date (newest first).
+	 * by issue date (newest first). Cached — see STATS_CACHE_TTL.
+	 *
+	 * Fetches only `$limit` of each type directly ordered by their own date
+	 * meta in SQL (not "every invoiced order ever, sorted in PHP") — orders
+	 * invoiced so long ago they predate the _billio_invoice_date meta won't
+	 * surface here (an accepted tradeoff for this specific "recent activity"
+	 * list; the stats/chart methods still find them via their own legacy
+	 * fallback). Parent-order lookups only happen for the credit notes that
+	 * actually make the final cut, not every refund in history.
 	 *
 	 * @return array[]
 	 */
 	private function get_recent_documents() {
+		$cache_key = 'billio_dash_recent_documents';
+		$cached    = get_transient( $cache_key );
+		if ( false !== $cached ) {
+			return $cached;
+		}
+
 		$limit = (int) apply_filters( 'billio_dashboard_recent_documents_limit', 10 );
 
-		// Fetched via get_all_invoiced_orders()/get_all_credit_noted_refunds()
-		// (every invoiced order/refund, not a DB-level "last N by creation
-		// date") because sorting must happen by *resolved issue date*
-		// (invoice_issue_timestamp()), which can differ from an order's own
-		// creation date — an order placed months ago but invoiced today
-		// would be missed by a DB-level ORDER BY post_date LIMIT N.
+		$invoice_candidates = wc_get_orders(
+			array(
+				'limit'      => $limit,
+				'return'     => 'objects',
+				'orderby'    => 'meta_value_num',
+				'meta_key'   => '_billio_invoice_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'order'      => 'DESC',
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					array(
+						'key'     => '_billio_invoice_date',
+						'compare' => 'EXISTS',
+					),
+				),
+			)
+		);
+
+		$refund_candidates = wc_get_orders(
+			array(
+				'type'       => 'shop_order_refund',
+				'limit'      => $limit,
+				'return'     => 'objects',
+				'orderby'    => 'meta_value_num',
+				'meta_key'   => '_billio_credit_note_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'order'      => 'DESC',
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					array(
+						'key'     => '_billio_credit_note_date',
+						'compare' => 'EXISTS',
+					),
+				),
+			)
+		);
+
 		$documents = array();
 
-		foreach ( $this->get_all_invoiced_orders() as $order ) {
+		foreach ( $invoice_candidates as $order ) {
 			$documents[] = $this->format_invoice_document( $order );
 		}
 
-		foreach ( $this->get_all_credit_noted_refunds() as $refund ) {
+		foreach ( $refund_candidates as $refund ) {
 			$parent_order = wc_get_order( $refund->get_parent_id() );
 			if ( ! $parent_order ) {
 				continue;
@@ -712,7 +859,218 @@ class Dashboard {
 			}
 		);
 
-		return array_slice( $documents, 0, $limit );
+		$result = array_slice( $documents, 0, $limit );
+
+		set_transient( $cache_key, $result, self::STATS_CACHE_TTL );
+
+		return $result;
+	}
+
+	/**
+	 * Search invoices/credit notes server-side (not just the localized
+	 * top-10), paginated. Backs the Dashboard table's search box.
+	 *
+	 * @param string $q        Search text (invoice/CN number, order number, or customer name).
+	 * @param string $type     'all', 'inv', or 'cn'.
+	 * @param int    $page     1-indexed page number.
+	 * @param int    $per_page Results per page (already capped by the caller).
+	 * @return array{items: array[], total: int, page: int, perPage: int}
+	 */
+	public function search_documents( $q, $type, $page, $per_page ) {
+		$page     = max( 1, (int) $page );
+		$per_page = min( 20, max( 1, (int) $per_page ) );
+
+		$documents = array();
+
+		if ( 'cn' !== $type ) {
+			foreach ( $this->find_invoice_candidates( $q ) as $order ) {
+				$documents[] = $this->format_invoice_document( $order );
+			}
+		}
+
+		if ( 'inv' !== $type ) {
+			foreach ( $this->find_credit_note_candidates( $q ) as $refund ) {
+				$parent_order = wc_get_order( $refund->get_parent_id() );
+				if ( ! $parent_order ) {
+					continue;
+				}
+				$documents[] = $this->format_credit_note_document( $refund, $parent_order );
+			}
+		}
+
+		usort(
+			$documents,
+			static function ( $a, $b ) {
+				return $b['dateTimestamp'] - $a['dateTimestamp'];
+			}
+		);
+
+		$total = count( $documents );
+		$items = array_slice( $documents, ( $page - 1 ) * $per_page, $per_page );
+
+		return array(
+			'items'   => $items,
+			'total'   => $total,
+			'page'    => $page,
+			'perPage' => $per_page,
+		);
+	}
+
+	/**
+	 * Candidate invoiced orders for a search term — two bounded queries
+	 * (number match, general WooCommerce order search for customer
+	 * name/email/numeric order id) merged and de-duplicated, rather than one
+	 * "OR across a meta LIKE and the general search" query (WooCommerce's
+	 * query API doesn't expose that combination in a single call). Both
+	 * queries are always scoped to _billio_invoice_number EXISTS — never a
+	 * full orders-table scan — and each internally capped so a broad search
+	 * term can't balloon into an unbounded fetch.
+	 *
+	 * @param string $q Search text; empty string browses the most recent instead.
+	 * @return \WC_Order[]
+	 */
+	private function find_invoice_candidates( $q ) {
+		$base_args = array(
+			'limit'    => self::SEARCH_CANDIDATE_CAP,
+			'return'   => 'objects',
+			'orderby'  => 'meta_value_num',
+			'meta_key' => '_billio_invoice_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'order'    => 'DESC',
+		);
+
+		if ( '' === $q ) {
+			return wc_get_orders(
+				$base_args + array(
+					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						array(
+							'key'     => '_billio_invoice_number',
+							'compare' => 'EXISTS',
+						),
+					),
+				)
+			);
+		}
+
+		$by_number = wc_get_orders(
+			$base_args + array(
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					'relation' => 'AND',
+					array(
+						'key'     => '_billio_invoice_number',
+						'compare' => 'EXISTS',
+					),
+					array(
+						'key'     => '_billio_invoice_number',
+						'value'   => $q,
+						'compare' => 'LIKE',
+					),
+				),
+			)
+		);
+
+		$by_customer = wc_get_orders(
+			array(
+				'limit'      => self::SEARCH_CANDIDATE_CAP,
+				'return'     => 'objects',
+				's'          => $q,
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					array(
+						'key'     => '_billio_invoice_number',
+						'compare' => 'EXISTS',
+					),
+				),
+			)
+		);
+
+		return $this->dedupe_orders( array_merge( $by_number, $by_customer ) );
+	}
+
+	/**
+	 * Candidate credit-noted refunds for a search term — same two-query
+	 * merge-and-dedupe reasoning as find_invoice_candidates().
+	 *
+	 * @param string $q Search text; empty string browses the most recent instead.
+	 * @return \WC_Order_Refund[]
+	 */
+	private function find_credit_note_candidates( $q ) {
+		$base_args = array(
+			'type'     => 'shop_order_refund',
+			'limit'    => self::SEARCH_CANDIDATE_CAP,
+			'return'   => 'objects',
+			'orderby'  => 'meta_value_num',
+			'meta_key' => '_billio_credit_note_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'order'    => 'DESC',
+		);
+
+		if ( '' === $q ) {
+			return wc_get_orders(
+				$base_args + array(
+					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						array(
+							'key'     => '_billio_credit_note_number',
+							'compare' => 'EXISTS',
+						),
+					),
+				)
+			);
+		}
+
+		$by_number = wc_get_orders(
+			$base_args + array(
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					'relation' => 'AND',
+					array(
+						'key'     => '_billio_credit_note_number',
+						'compare' => 'EXISTS',
+					),
+					array(
+						'key'     => '_billio_credit_note_number',
+						'value'   => $q,
+						'compare' => 'LIKE',
+					),
+				),
+			)
+		);
+
+		$by_customer = wc_get_orders(
+			array(
+				'type'       => 'shop_order_refund',
+				'limit'      => self::SEARCH_CANDIDATE_CAP,
+				'return'     => 'objects',
+				's'          => $q,
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					array(
+						'key'     => '_billio_credit_note_number',
+						'compare' => 'EXISTS',
+					),
+				),
+			)
+		);
+
+		return $this->dedupe_orders( array_merge( $by_number, $by_customer ) );
+	}
+
+	/**
+	 * De-duplicate a list of orders/refunds by ID, keeping the first
+	 * occurrence (used after merging two overlapping queries).
+	 *
+	 * @param \WC_Abstract_Order[] $orders Orders/refunds, possibly with duplicates.
+	 * @return array
+	 */
+	private function dedupe_orders( array $orders ) {
+		$seen   = array();
+		$result = array();
+
+		foreach ( $orders as $order ) {
+			$id = $order->get_id();
+			if ( isset( $seen[ $id ] ) ) {
+				continue;
+			}
+			$seen[ $id ] = true;
+			$result[]    = $order;
+		}
+
+		return $result;
 	}
 
 	/**
@@ -736,7 +1094,7 @@ class Dashboard {
 			'dateDisplay'      => wp_date( get_option( 'date_format' ), $timestamp ),
 			'dateTimestamp'    => $timestamp,
 			'total'            => (float) $order->get_total(),
-			'downloadUrl'      => OrderActions::build_download_url( $order ),
+			'downloadUrl'      => $this->raw_download_url( OrderActions::build_download_url( $order ) ),
 		);
 	}
 
@@ -762,7 +1120,7 @@ class Dashboard {
 			'dateDisplay'      => wp_date( get_option( 'date_format' ), $timestamp ),
 			'dateTimestamp'    => $timestamp,
 			'total'            => -abs( (float) $refund->get_amount() ),
-			'downloadUrl'      => MetaBox::credit_note_url( $parent_order, $refund ),
+			'downloadUrl'      => $this->raw_download_url( MetaBox::credit_note_url( $parent_order, $refund ) ),
 		);
 	}
 
@@ -779,5 +1137,31 @@ class Dashboard {
 		}
 
 		return admin_url( 'post.php?post=' . $order->get_id() . '&action=edit' );
+	}
+
+	/**
+	 * Undo wp_nonce_url()'s internal esc_html() so the URL is safe to put
+	 * into JSON (via wp_localize_script) and later into an HTML attribute
+	 * via JS — not into raw HTML output directly.
+	 *
+	 * wp_nonce_url() (used by OrderActions::build_download_url() and
+	 * MetaBox::credit_note_url()) is designed to be echoed straight into an
+	 * href="" in server-rendered HTML, where the browser's HTML parser
+	 * decodes the "&amp;" back into "&" while parsing. That never happens
+	 * here: the URL instead goes into a JSON blob and then into
+	 * admin-dashboard.js's own attribute-building, so the pre-escaped
+	 * "&amp;" survives as literal text, gets escaped a *second* time by the
+	 * JS escaping helper, and the resulting query string parameter names
+	 * come out as "amp;order_id"/"amp;_wpnonce" instead of the real names —
+	 * breaking the download with a "link expired" error. Decoding here
+	 * once, to the real (unescaped) URL, is the correct fix: the JS side
+	 * then escapes it exactly once, for the one HTML context it's actually
+	 * used in.
+	 *
+	 * @param string $url A URL built via wp_nonce_url() (HTML-entity-escaped).
+	 * @return string The same URL with entities decoded back to raw characters.
+	 */
+	private function raw_download_url( $url ) {
+		return wp_specialchars_decode( $url, ENT_QUOTES );
 	}
 }

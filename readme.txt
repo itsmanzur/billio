@@ -4,7 +4,7 @@ Tags: woocommerce, invoice, pdf invoice, billing, packing slip
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -46,6 +46,12 @@ No. Invoice numbers are assigned with an atomic, lock-guarded database operation
 Vowel signs (ি ে ৈ ো ৌ) are repositioned so names and addresses display correctly. Complex consonant conjuncts (e.g. ক্ষ, ম্ম) currently render with a visible connecting mark rather than a fully stacked ligature glyph, which is a limitation of the underlying PDF renderer rather than something Billio's text processing can fully correct. This does not affect the accuracy of any amounts or data on the invoice.
 
 == Changelog ==
+
+= 1.2.1 =
+* Fix: a download/resend/regenerate link on the Dashboard's recent-documents table could show "link expired" — the nonce'd download URL was being HTML-entity-escaped twice (once by WordPress, once by the Dashboard's JS) before being read back, corrupting its parameters.
+* Fix: the Dashboard no longer loads every invoiced order and refund your store has ever had on every page load; the stats cards, chart, and recent-documents list now query only the data they actually need, and recent-documents is now cached like the other stats. Cache invalidation is also debounced so a burst of invoice generation doesn't re-run these queries on every single one, while never staying stale more than ~30 seconds.
+* New: the Dashboard's recent-documents search now searches your entire invoice/credit note history (by number, order, or customer), not just the 10 most recent rows — with pagination for larger result sets.
+* Hardening: the path check guarding PDF downloads now specifically confirms the resolved file stays inside the plugin's own uploads/billio directory, closing a theoretical sibling-directory bypass (e.g. an uploads-backup folder) that a looser prefix check would have allowed.
 
 = 1.2.0 =
 * New: redesigned, interactive Dashboard — setup-progress ring, KPI cards with trend/sparklines, an invoice-activity chart (Invoices/Revenue, 7D/30D/90D) with instant quick-settings (email triggers, paper size, template), and a searchable, filterable recent-documents table (invoices + credit notes) with inline Download/Resend/Regenerate actions.

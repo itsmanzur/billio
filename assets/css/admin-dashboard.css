@@ -650,6 +650,21 @@
 	font-size: 12.5px;
 }
 
+.billio-pager {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.billio-pager .billio-ib:disabled {
+	opacity: .4;
+	cursor: default;
+}
+
+.billio-page-info {
+	white-space: nowrap;
+}
+
 @media (max-width: 760px) {
 	.billio-tbl .billio-hm {
 		display: none;

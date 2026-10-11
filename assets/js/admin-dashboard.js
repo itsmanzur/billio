@@ -23,6 +23,26 @@
 		return div.innerHTML;
 	}
 
+	// For values placed inside a quoted HTML attribute (href=, data-*=,
+	// aria-label=, title=, placeholder=), never escapeHtml(): that's a
+	// textContent->innerHTML round-trip, which only escapes the five
+	// characters HTML TEXT NODES need (and only turns " into &quot; as a
+	// side effect of innerHTML serialization, not reliably across all
+	// values). A value that already contains an HTML entity — such as a
+	// PHP-built download URL, which must NOT be pre-entity-decoded a
+	// second time here, see Dashboard::raw_download_url() on the PHP side —
+	// must not be escaped again by that path. This is an explicit
+	// character-replace instead, covering exactly the characters that are
+	// unsafe inside a double-quoted attribute value: & < > " '.
+	function escapeAttr( str ) {
+		return String( str === undefined || str === null ? '' : str )
+			.replace( /&/g, '&amp;' )
+			.replace( /</g, '&lt;' )
+			.replace( />/g, '&gt;' )
+			.replace( /"/g, '&quot;' )
+			.replace( /'/g, '&#039;' );
+	}
+
 	function fmtMoney( n ) {
 		var decimals = data.currency.decimals;
 		var fixed = Math.abs( n ).toFixed( decimals );
@@ -246,8 +266,8 @@
 				'<div><h2>Billio <span class="billio-ver">v' + escapeHtml( root.dataset.version || '' ) + '</span></h2>' +
 				'<div class="billio-sub">' + escapeHtml( 'Invoices, credit notes & packing slips for your WooCommerce store' ) + '</div></div>' +
 				'<div class="billio-sp"></div>' +
-				'<a class="billio-btn" href="' + escapeHtml( data.urls.preview ) + '">' + escapeHtml( 'Preview template' ) + '</a>' +
-				'<a class="billio-btn" href="' + escapeHtml( data.urls.settings ) + '">' + escapeHtml( 'Settings' ) + '</a>' +
+				'<a class="billio-btn" href="' + escapeAttr( data.urls.preview ) + '">' + escapeHtml( 'Preview template' ) + '</a>' +
+				'<a class="billio-btn" href="' + escapeAttr( data.urls.settings ) + '">' + escapeHtml( 'Settings' ) + '</a>' +
 				headerBtn +
 			'</div>' +
 			'<div id="billio-setup-slot"></div>' +
@@ -271,7 +291,7 @@
 						'<div><div class="billio-label">' + escapeHtml( 'Daily average' ) + '</div><div class="billio-value" id="billio-chart-avg">—</div></div>' +
 						'<div><div class="billio-label">' + escapeHtml( 'Best day' ) + '</div><div class="billio-value" id="billio-chart-best">—</div></div>' +
 					'</div>' +
-					'<div class="billio-chartbox" id="billio-chart" aria-label="' + escapeHtml( 'Invoice activity chart' ) + '">' +
+					'<div class="billio-chartbox" id="billio-chart" aria-label="' + escapeAttr( 'Invoice activity chart' ) + '">' +
 						'<div class="billio-tip" id="billio-tip"></div>' +
 					'</div>' +
 					'<table class="billio-sr-table" id="billio-chart-table"><caption>' + escapeHtml( 'Invoice activity, by day' ) + '</caption></table>' +
@@ -295,7 +315,7 @@
 				'</div>' +
 				'<div class="billio-tools"><div class="billio-search">' +
 					'<svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>' +
-					'<input type="search" id="billio-q" placeholder="' + escapeHtml( 'Search by number, order or customer…' ) + '">' +
+					'<input type="search" id="billio-q" placeholder="' + escapeAttr( 'Search by number, order or customer…' ) + '">' +
 				'</div></div>' +
 				'<div class="billio-table-wrap"><table class="billio-tbl">' +
 					'<thead><tr>' +
@@ -309,7 +329,7 @@
 					'</tr></thead>' +
 					'<tbody id="billio-rows"></tbody>' +
 				'</table></div>' +
-				'<div class="billio-tfoot"><span id="billio-cnt"></span><a class="billio-lnk" href="' + escapeHtml( data.urls.ordersList ) + '">' + escapeHtml( t( 'viewAllInOrders' ) ) + '</a></div>' +
+				'<div class="billio-tfoot"><span id="billio-cnt"></span><div class="billio-sp"></div><div class="billio-pager" id="billio-pager"></div><a class="billio-lnk" href="' + escapeAttr( data.urls.ordersList ) + '">' + escapeHtml( t( 'viewAllInOrders' ) ) + '</a></div>' +
 			'</div>';
 	}
 
@@ -411,7 +431,7 @@
 				return '<span class="billio-step billio-done">✓ ' + escapeHtml( step.label ) + '</span>';
 			}
 			if ( i === firstTodoIndex && step.anchor ) {
-				return '<a class="billio-step billio-todo" href="' + escapeHtml( data.urls.settings + step.anchor ) + '">＋ ' + escapeHtml( step.label ) + ' →</a>';
+				return '<a class="billio-step billio-todo" href="' + escapeAttr( data.urls.settings + step.anchor ) + '">＋ ' + escapeHtml( step.label ) + ' →</a>';
 			}
 			return '<span class="billio-step">○ ' + escapeHtml( step.label ) + '</span>';
 		} ).join( '' );
@@ -420,7 +440,7 @@
 
 		slot.innerHTML =
 			'<div class="billio-setup" id="billio-setup">' +
-				'<button type="button" class="billio-x" id="billio-setup-dismiss" aria-label="' + escapeHtml( 'Hide' ) + '">×</button>' +
+				'<button type="button" class="billio-x" id="billio-setup-dismiss" aria-label="' + escapeAttr( 'Hide' ) + '">×</button>' +
 				'<div class="billio-ring"><svg viewBox="0 0 36 36" width="72" height="72">' +
 					'<circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="3"/>' +
 					'<circle cx="18" cy="18" r="15.9" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="' + pct + ' 100" transform="rotate(-90 18 18)"/>' +
@@ -456,7 +476,7 @@
 				'<span class="billio-stars">★★★★★</span>' +
 				escapeHtml( 'Billio has created ' + r.total + ' invoices for you. Enjoying it?' ) +
 				'<span class="billio-sp"></span>' +
-				'<a class="billio-lnk" href="' + escapeHtml( r.url ) + '" target="_blank" rel="noopener">' + escapeHtml( 'Leave a review' ) + '</a>' +
+				'<a class="billio-lnk" href="' + escapeAttr( r.url ) + '" target="_blank" rel="noopener">' + escapeHtml( 'Leave a review' ) + '</a>' +
 				'<button type="button" class="billio-lnk" id="billio-review-dismiss" style="color:var(--billio-muted)">' + escapeHtml( 'Not now' ) + '</button>' +
 			'</div>';
 
@@ -729,7 +749,7 @@
 
 		var cfg = document.getElementById( 'billio-cfg' );
 		cfg.innerHTML =
-			'<div class="billio-row"><span class="billio-ic">#</span><div class="billio-t"><small>' + escapeHtml( 'Next invoice number' ) + '</small><span class="billio-mono">' + escapeHtml( data.nextInvoiceNumber ) + '</span></div><a class="billio-lnk" href="' + escapeHtml( data.urls.editFormatField ) + '">' + escapeHtml( 'Edit format' ) + '</a></div>' +
+			'<div class="billio-row"><span class="billio-ic">#</span><div class="billio-t"><small>' + escapeHtml( 'Next invoice number' ) + '</small><span class="billio-mono">' + escapeHtml( data.nextInvoiceNumber ) + '</span></div><a class="billio-lnk" href="' + escapeAttr( data.urls.editFormatField ) + '">' + escapeHtml( 'Edit format' ) + '</a></div>' +
 			'<div class="billio-row"><span class="billio-ic">✉</span><div class="billio-t"><small>' + escapeHtml( 'Attach to email' ) + '</small><span>' + escapeHtml( 'Processing order' ) + '</span></div><button type="button" class="billio-tg" id="billio-tg-processing" role="switch" aria-checked="' + ( processingOn ? 'true' : 'false' ) + '"></button></div>' +
 			'<div class="billio-row"><span class="billio-ic">✉</span><div class="billio-t"><small>' + escapeHtml( 'Attach to email' ) + '</small><span>' + escapeHtml( 'Completed order' ) + '</span></div><button type="button" class="billio-tg" id="billio-tg-completed" role="switch" aria-checked="' + ( completedOn ? 'true' : 'false' ) + '"></button></div>' +
 			'<div class="billio-row"><span class="billio-ic"><svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/></svg></span><div class="billio-t"><small>' + escapeHtml( 'Paper size' ) + '</small><span id="billio-paper-value">' + escapeHtml( qs.paperSize ) + '</span></div><div class="billio-seg" id="billio-paper-seg">' +
@@ -799,7 +819,14 @@
 	 * Recent documents table
 	 * ------------------------------------------------------------- */
 
-	var tableState = { type: 'all', q: '' };
+	var tableState = { type: 'all', q: '', page: 1 };
+	var SEARCH_PER_PAGE = 10;
+	var searchDebounceTimer = null;
+	// Incremented on every search request; a response is only rendered if
+	// its sequence number is still current — guards against an older,
+	// slower request resolving after a newer one and overwriting its
+	// (more current) results.
+	var searchRequestSeq = 0;
 
 	function statusPillClass( status ) {
 		if ( 'completed' === status ) {
@@ -842,50 +869,124 @@
 		return t( 'noDocumentsYet' );
 	}
 
-	function renderTable() {
-		var docs = data.recentDocuments;
-		var q = tableState.q.toLowerCase();
-		var filtered = docs.filter( function ( doc ) {
-			var matchesType = tableState.type === 'all' || doc.type === tableState.type;
-			var haystack = ( doc.number + ' #' + doc.orderNumber + ' ' + doc.customerName ).toLowerCase();
-			return matchesType && haystack.indexOf( q ) !== -1;
-		} );
+	function buildRowHtml( doc ) {
+		var actions = '<button type="button" class="billio-ib billio-act-download" data-url="' + escapeAttr( doc.downloadUrl ) + '" data-number="' + escapeAttr( doc.number ) + '" aria-label="' + escapeAttr( 'Download PDF' ) + '" title="' + escapeAttr( 'Download PDF' ) + '">' +
+			'<svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></button>';
+		if ( 'inv' === doc.type ) {
+			actions += '<button type="button" class="billio-ib billio-act-resend" data-order-id="' + doc.orderId + '" aria-label="' + escapeAttr( 'Resend email' ) + '" title="' + escapeAttr( 'Resend email' ) + '">' +
+				'<svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg></button>' +
+				'<button type="button" class="billio-ib billio-act-regen" data-order-id="' + doc.orderId + '" data-number="' + escapeAttr( doc.number ) + '" aria-label="' + escapeAttr( 'Regenerate' ) + '" title="' + escapeAttr( 'Regenerate' ) + '">' +
+				'<svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.5 9a9 9 0 0 1 14.8-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15"/></svg></button>';
+		}
 
-		var rowsEl = document.getElementById( 'billio-rows' );
+		return '<tr>' +
+			'<td><span class="billio-type ' + ( doc.type === 'cn' ? 'billio-cn' : '' ) + '">' + ( doc.type === 'cn' ? 'CN' : 'INV' ) + '</span> <span class="billio-num">' + escapeHtml( doc.number ) + '</span></td>' +
+			'<td class="billio-hm"><a href="' + escapeAttr( doc.orderEditUrl ) + '" style="color:var(--billio-brand)">#' + escapeHtml( doc.orderNumber ) + '</a></td>' +
+			'<td><div class="billio-cust"><span class="billio-av" style="background:' + avatarColor( doc.customerName || '?' ) + '">' + escapeHtml( initials( doc.customerName || '?' ) ) + '</span>' + escapeHtml( doc.customerName ) + '</div></td>' +
+			'<td class="billio-hm"><span class="billio-pill ' + statusPillClass( doc.orderStatus ) + '">' + escapeHtml( doc.orderStatusLabel ) + '</span></td>' +
+			'<td class="billio-hm" style="color:var(--billio-ink2)">' + escapeHtml( doc.dateDisplay ) + '</td>' +
+			'<td class="billio-r billio-num" style="' + ( doc.total < 0 ? 'color:var(--billio-bad)' : '' ) + '">' + fmtMoney( doc.total ) + '</td>' +
+			'<td><div class="billio-acts">' + actions + '</div></td>' +
+		'</tr>';
+	}
 
-		if ( ! docs.length ) {
-			renderEmptyRow( t( 'noDocumentsYet' ) );
-			document.getElementById( 'billio-cnt' ).textContent = '';
+	function renderRows( docs ) {
+		document.getElementById( 'billio-rows' ).innerHTML = docs.map( buildRowHtml ).join( '' );
+		wireRowActions();
+	}
+
+	function renderPager( total, page, perPage ) {
+		var pagerEl = document.getElementById( 'billio-pager' );
+		var totalPages = Math.max( 1, Math.ceil( total / perPage ) );
+
+		if ( totalPages <= 1 ) {
+			pagerEl.innerHTML = '';
 			return;
 		}
 
-		if ( ! filtered.length ) {
-			renderEmptyRow( emptyStateMessage() );
-		} else {
-			rowsEl.innerHTML = filtered.map( function ( doc ) {
-				var actions = '<button type="button" class="billio-ib billio-act-download" data-url="' + escapeHtml( doc.downloadUrl ) + '" data-number="' + escapeHtml( doc.number ) + '" aria-label="' + escapeHtml( 'Download PDF' ) + '" title="' + escapeHtml( 'Download PDF' ) + '">' +
-					'<svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></button>';
-				if ( 'inv' === doc.type ) {
-					actions += '<button type="button" class="billio-ib billio-act-resend" data-order-id="' + doc.orderId + '" aria-label="' + escapeHtml( 'Resend email' ) + '" title="' + escapeHtml( 'Resend email' ) + '">' +
-						'<svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg></button>' +
-						'<button type="button" class="billio-ib billio-act-regen" data-order-id="' + doc.orderId + '" data-number="' + escapeHtml( doc.number ) + '" aria-label="' + escapeHtml( 'Regenerate' ) + '" title="' + escapeHtml( 'Regenerate' ) + '">' +
-						'<svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.5 9a9 9 0 0 1 14.8-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15"/></svg></button>';
-				}
+		pagerEl.innerHTML =
+			'<button type="button" class="billio-ib" id="billio-page-prev" aria-label="' + escapeAttr( 'Previous page' ) + '"' + ( page <= 1 ? ' disabled' : '' ) + '>‹</button>' +
+			'<span class="billio-page-info">' + page + ' / ' + totalPages + '</span>' +
+			'<button type="button" class="billio-ib" id="billio-page-next" aria-label="' + escapeAttr( 'Next page' ) + '"' + ( page >= totalPages ? ' disabled' : '' ) + '>›</button>';
 
-				return '<tr>' +
-					'<td><span class="billio-type ' + ( doc.type === 'cn' ? 'billio-cn' : '' ) + '">' + ( doc.type === 'cn' ? 'CN' : 'INV' ) + '</span> <span class="billio-num">' + escapeHtml( doc.number ) + '</span></td>' +
-					'<td class="billio-hm"><a href="' + escapeHtml( doc.orderEditUrl ) + '" style="color:var(--billio-brand)">#' + escapeHtml( doc.orderNumber ) + '</a></td>' +
-					'<td><div class="billio-cust"><span class="billio-av" style="background:' + avatarColor( doc.customerName || '?' ) + '">' + escapeHtml( initials( doc.customerName || '?' ) ) + '</span>' + escapeHtml( doc.customerName ) + '</div></td>' +
-					'<td class="billio-hm"><span class="billio-pill ' + statusPillClass( doc.orderStatus ) + '">' + escapeHtml( doc.orderStatusLabel ) + '</span></td>' +
-					'<td class="billio-hm" style="color:var(--billio-ink2)">' + escapeHtml( doc.dateDisplay ) + '</td>' +
-					'<td class="billio-r billio-num" style="' + ( doc.total < 0 ? 'color:var(--billio-bad)' : '' ) + '">' + fmtMoney( doc.total ) + '</td>' +
-					'<td><div class="billio-acts">' + actions + '</div></td>' +
-				'</tr>';
-			} ).join( '' );
+		var prevBtn = document.getElementById( 'billio-page-prev' );
+		var nextBtn = document.getElementById( 'billio-page-next' );
+		if ( prevBtn ) {
+			prevBtn.addEventListener( 'click', function () {
+				if ( tableState.page > 1 ) {
+					tableState.page--;
+					renderTable();
+				}
+			} );
+		}
+		if ( nextBtn ) {
+			nextBtn.addEventListener( 'click', function () {
+				if ( tableState.page < totalPages ) {
+					tableState.page++;
+					renderTable();
+				}
+			} );
+		}
+	}
+
+	// With no active search term, the table renders from the ≤10 documents
+	// already localized on page load — identical to pre-Bug-C behavior,
+	// no server round trip, no pagination. A non-empty search term instead
+	// queries billio_dashboard_search_documents, which searches every
+	// invoice/credit note (not just these 10) and returns one paginated
+	// page of results.
+	function renderTable() {
+		var pagerEl = document.getElementById( 'billio-pager' );
+
+		if ( ! tableState.q ) {
+			pagerEl.innerHTML = '';
+
+			var docs = data.recentDocuments;
+			var filtered = docs.filter( function ( doc ) {
+				return tableState.type === 'all' || doc.type === tableState.type;
+			} );
+
+			if ( ! docs.length ) {
+				renderEmptyRow( t( 'noDocumentsYet' ) );
+				document.getElementById( 'billio-cnt' ).textContent = '';
+				return;
+			}
+
+			if ( ! filtered.length ) {
+				renderEmptyRow( emptyStateMessage() );
+			} else {
+				renderRows( filtered );
+			}
+			document.getElementById( 'billio-cnt' ).textContent = tf( 'showingOf', filtered.length, docs.length );
+			return;
 		}
 
-		document.getElementById( 'billio-cnt' ).textContent = tf( 'showingOf', filtered.length, docs.length );
-		wireRowActions();
+		var requestSeq = ++searchRequestSeq;
+		post( 'billio_dashboard_search_documents', {
+			q: tableState.q,
+			type: tableState.type,
+			page: tableState.page,
+			per_page: SEARCH_PER_PAGE,
+		} ).then( function ( res ) {
+			if ( requestSeq !== searchRequestSeq ) {
+				return;
+			}
+			if ( ! res || ! res.success ) {
+				renderEmptyRow( t( 'error' ) );
+				document.getElementById( 'billio-cnt' ).textContent = '';
+				pagerEl.innerHTML = '';
+				return;
+			}
+
+			var items = res.data.items;
+			if ( ! items.length ) {
+				renderEmptyRow( emptyStateMessage() );
+			} else {
+				renderRows( items );
+			}
+			document.getElementById( 'billio-cnt' ).textContent = tf( 'showingOf', items.length, res.data.total );
+			renderPager( res.data.total, res.data.page, res.data.perPage );
+		} );
 	}
 
 	function wireRowActions() {
@@ -938,12 +1039,21 @@
 				} );
 				btn.setAttribute( 'aria-pressed', 'true' );
 				tableState.type = btn.dataset.t;
+				tableState.page = 1;
 				renderTable();
 			} );
 		} );
 		document.getElementById( 'billio-q' ).addEventListener( 'input', function ( e ) {
 			tableState.q = e.target.value;
-			renderTable();
+			tableState.page = 1;
+			clearTimeout( searchDebounceTimer );
+			if ( ! tableState.q ) {
+				// Clearing the box drops straight back to the fast local
+				// path — no need to wait out the debounce for that.
+				renderTable();
+				return;
+			}
+			searchDebounceTimer = setTimeout( renderTable, 300 );
 		} );
 	}
 

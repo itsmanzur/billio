@@ -320,23 +320,66 @@ class Generator {
 	 * @return string
 	 */
 	public static function get_absolute_path( $relative_path ) {
-		$base_dir       = trailingslashit( wp_get_upload_dir()['basedir'] );
-		$candidate      = $base_dir . $relative_path;
-		$real_base_dir  = realpath( $base_dir );
-		$real_candidate = realpath( $candidate );
+		$base_dir   = trailingslashit( wp_get_upload_dir()['basedir'] );
+		$billio_dir = trailingslashit( wp_normalize_path( $base_dir . 'billio' ) );
+		$candidate  = wp_normalize_path( $base_dir . $relative_path );
 
-		// Defense in depth: confirm the resolved path actually stays inside
-		// the uploads directory before handing it to FileServer's readfile().
-		// Meta is only ever written by this plugin's own code today, but a
-		// future bug/migration/corrupted row shouldn't be able to turn into
-		// a path-traversal read. On any resolution failure (e.g. the file is
-		// simply missing), fall through to the raw concatenation — it will
-		// harmlessly fail FileServer's existing is_readable() check.
-		if ( $real_base_dir && $real_candidate && 0 !== strpos( $real_candidate, $real_base_dir ) ) {
-			return $base_dir; // Deliberately not readable as a file — fails is_readable() safely.
+		// Containment is checked against uploads/billio specifically, not
+		// the whole uploads directory, and resolved with a plain string
+		// walk — not realpath() — so the check still applies even when
+		// uploads/billio doesn't exist on disk yet (realpath() would just
+		// return false for a path that isn't there, which would otherwise
+		// skip the check entirely and let a path through unexamined). The
+		// prefix comparison itself requires a trailing separator (or an
+		// exact match), not a bare strpos() === 0 — a bare prefix check
+		// against the broader uploads dir would let a *sibling* directory
+		// like "uploads-backup/..." through, since "uploads-backup" also
+		// starts with the string "uploads".
+		$resolved = self::resolve_path_segments( $candidate );
+
+		$contained = rtrim( $billio_dir, '/' ) === $resolved
+			|| 0 === strpos( $resolved, $billio_dir );
+
+		if ( ! $contained ) {
+			// Not $base_dir itself: is_readable() returns true for a
+			// directory, so FileServer::stream()'s is_readable() guard
+			// would pass and fall through to filesize()/readfile() on a
+			// directory instead of 404ing cleanly. This sentinel name
+			// cannot exist as a real invoice path (those are always
+			// "billio/<year>/<id>-<random>.pdf"), so is_readable() on it
+			// correctly returns false.
+			return $base_dir . '__billio_blocked__';
 		}
 
-		return $candidate;
+		return $resolved;
+	}
+
+	/**
+	 * Resolve "." and ".." segments in a slash-normalized path purely by
+	 * string manipulation (no filesystem access) — unlike realpath(), this
+	 * still works for a path that doesn't exist on disk, which matters
+	 * here since get_absolute_path() must contain a path *before* knowing
+	 * whether the target file exists.
+	 *
+	 * @param string $path A wp_normalize_path()'d path (forward slashes).
+	 * @return string
+	 */
+	private static function resolve_path_segments( $path ) {
+		$is_absolute = isset( $path[0] ) && '/' === $path[0];
+		$segments    = array();
+
+		foreach ( explode( '/', $path ) as $part ) {
+			if ( '' === $part || '.' === $part ) {
+				continue;
+			}
+			if ( '..' === $part ) {
+				array_pop( $segments );
+				continue;
+			}
+			$segments[] = $part;
+		}
+
+		return ( $is_absolute ? '/' : '' ) . implode( '/', $segments );
 	}
 
 	/**

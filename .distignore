@@ -1,0 +1,14 @@
+.git
+.gitignore
+.distignore
+.DS_Store
+node_modules
+composer.json
+composer.lock
+composer.phar
+phpcs.xml.dist
+bin
+assets/images
+*.zip
+Billio — Feature Scope & Architecture.html
+WordPress Plugin Market Analysis 2026.html
