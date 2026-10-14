@@ -9,6 +9,7 @@
 namespace Billio\Settings;
 
 use Billio\Admin\Dashboard;
+use Billio\Admin\DocsPage;
 use Billio\Invoice\NumberManager;
 use Billio\Invoice\SampleOrder;
 use Billio\Invoice\TemplateEngine;
@@ -125,7 +126,8 @@ class SettingsPage {
 		$submitted        = array();
 
 		foreach ( Fields::get() as $field ) {
-			$raw   = isset( $_POST[ $field['option'] ] ) ? $_POST[ $field['option'] ] : '';
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized via Fields::sanitize() below.
+			$raw   = isset( $_POST[ $field['option'] ] ) ? wp_unslash( $_POST[ $field['option'] ] ) : '';
 			$value = Fields::sanitize( $field, $raw );
 
 			// An empty trigger list silently means "invoices are never
@@ -204,6 +206,9 @@ class SettingsPage {
 				'warning'
 			);
 		}
+
+		// Invalidate cached logo data URI so any updated logo reflects immediately.
+		TemplateEngine::clear_logo_cache();
 
 		if ( ! $has_errors ) {
 			add_settings_error( 'billio', 'billio_saved', esc_html__( 'Settings saved.', 'billio' ), 'success' );
@@ -303,24 +308,29 @@ class SettingsPage {
 	public function render() {
 		settings_errors( 'billio' );
 
-		$company_name    = get_option( 'billio_company_name', get_bloginfo( 'name' ) );
-		$logo_id         = (int) get_option( 'billio_company_logo_id', 0 );
-		$logo_url        = $logo_id ? wp_get_attachment_image_url( $logo_id, 'medium' ) : '';
-		$logo_filename   = $logo_id ? wp_basename( get_attached_file( $logo_id ) ) : '';
-		$address         = get_option( 'billio_company_address', '' );
-		$vat             = get_option( 'billio_company_vat', '' );
-		$inv_prefix      = get_option( 'billio_number_prefix', 'INV' );
-		$cn_prefix       = get_option( 'billio_credit_note_prefix', 'CN' );
-		$number_format   = get_option( 'billio_number_format', '{PREFIX}-{YEAR}-{NUMBER}' );
-		$padding         = (int) get_option( 'billio_number_padding', 4 );
-		$reset_yearly    = (bool) get_option( 'billio_number_reset_yearly', false );
-		$paper_size      = get_option( 'billio_paper_size', 'A4' );
-		$email_triggers  = (array) get_option( 'billio_email_triggers', array( 'customer_completed_order' ) );
-		$template        = get_option( 'billio_template', 'default' );
-		$accent_color    = get_option( 'billio_accent_color', '#3b6cf4' );
-		$processing_on   = in_array( 'customer_processing_order', $email_triggers, true );
-		$completed_on    = in_array( 'customer_completed_order', $email_triggers, true );
-		$format_has_year = false !== strpos( $number_format, '{YEAR}' );
+		$company_name     = get_option( 'billio_company_name', get_bloginfo( 'name' ) );
+		$logo_id          = (int) get_option( 'billio_company_logo_id', 0 );
+		$logo_url         = $logo_id ? wp_get_attachment_image_url( $logo_id, 'medium' ) : '';
+		$logo_filename    = $logo_id ? wp_basename( get_attached_file( $logo_id ) ) : '';
+		$address          = get_option( 'billio_company_address', '' );
+		$vat              = get_option( 'billio_company_vat', '' );
+		$inv_prefix       = get_option( 'billio_number_prefix', 'INV' );
+		$cn_prefix        = get_option( 'billio_credit_note_prefix', 'CN' );
+		$number_format    = get_option( 'billio_number_format', '{PREFIX}-{YEAR}-{NUMBER}' );
+		$padding          = (int) get_option( 'billio_number_padding', 4 );
+		$reset_yearly     = (bool) get_option( 'billio_number_reset_yearly', false );
+		$paper_size       = get_option( 'billio_paper_size', 'A4' );
+		$email_triggers   = (array) get_option( 'billio_email_triggers', array( 'customer_completed_order' ) );
+		$template         = get_option( 'billio_template', 'default' );
+		$accent_color     = get_option( 'billio_accent_color', '#3b6cf4' );
+		$watermark_paid   = (bool) get_option( 'billio_watermark_paid', false );
+		$thankyou_down_on = (bool) get_option( 'billio_show_thankyou_download', true );
+		$enable_tax_id    = (bool) get_option( 'billio_enable_tax_id', false );
+		$tax_id_label     = get_option( 'billio_tax_id_label', __( 'VAT / Tax / BIN Number', 'billio' ) );
+		$tax_id_required  = (bool) get_option( 'billio_tax_id_required', false );
+		$processing_on    = in_array( 'customer_processing_order', $email_triggers, true );
+		$completed_on     = in_array( 'customer_completed_order', $email_triggers, true );
+		$format_has_year  = false !== strpos( $number_format, '{YEAR}' );
 
 		$next_invoice     = NumberManager::peek_next_number( 'invoice' );
 		$next_credit_note = NumberManager::peek_next_number( 'credit_note' );
@@ -336,6 +346,7 @@ class SettingsPage {
 					<div class="billio-sub"><?php esc_html_e( 'Changes show in the live preview instantly. Nothing is saved until you click Save.', 'billio' ); ?></div>
 				</div>
 				<div class="billio-sp"></div>
+				<a class="billio-btn" href="<?php echo esc_url( admin_url( 'admin.php?page=' . DocsPage::MENU_SLUG ) ); ?>"><?php esc_html_e( 'Docs & Features', 'billio' ); ?></a>
 				<a class="billio-btn" href="<?php echo esc_url( admin_url( 'admin.php?page=' . Dashboard::MENU_SLUG ) ); ?>">&larr; <?php esc_html_e( 'Dashboard', 'billio' ); ?></a>
 				<button type="button" class="billio-btn billio-pri" id="billio-top-save" disabled><?php esc_html_e( 'Save changes', 'billio' ); ?></button>
 			</div>
@@ -351,6 +362,7 @@ class SettingsPage {
 							<?php esc_html_e( 'Company', 'billio' ); ?>
 							<span class="billio-nav-dot" id="billio-nav-dot" <?php echo $address ? 'hidden' : ''; ?>></span>
 						</a>
+						<a href="#billio-sec-tax-id"><svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><?php esc_html_e( 'B2B / Tax ID', 'billio' ); ?></a>
 						<a href="#billio-sec-numbering"><svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9h16M4 15h16M10 3L8 21M16 3l-2 18"/></svg><?php esc_html_e( 'Numbering', 'billio' ); ?></a>
 						<a href="#billio-sec-delivery"><svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M22 6l-10 7L2 6"/></svg><?php esc_html_e( 'Email & paper', 'billio' ); ?></a>
 						<a href="#billio-sec-design"><svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 0 0 0 20c1 0 2-1 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1 1-2 2-2h2.3A5.7 5.7 0 0 0 22 10c0-4.4-4.5-8-10-8z"/></svg><?php esc_html_e( 'Design', 'billio' ); ?></a>
@@ -408,6 +420,41 @@ class SettingsPage {
 								<div class="billio-f">
 									<label for="billio_company_vat"><?php esc_html_e( 'VAT / Tax number', 'billio' ); ?> <span class="billio-tag billio-tag-opt"><?php esc_html_e( 'Optional', 'billio' ); ?></span><small><?php esc_html_e( 'Shown under your company name', 'billio' ); ?></small></label>
 									<div><input class="billio-in" type="text" name="billio_company_vat" id="billio_company_vat" value="<?php echo esc_attr( $vat ); ?>" data-bind="vat" placeholder="<?php esc_attr_e( 'e.g. BIN 000123456-0101', 'billio' ); ?>"></div>
+								</div>
+							</div>
+						</section>
+
+						<section class="billio-card billio-sec" id="billio-sec-tax-id">
+							<header>
+								<span class="billio-sec-ic"><svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+								<div><h2><?php esc_html_e( 'B2B Customer Tax ID', 'billio' ); ?></h2><p><?php esc_html_e( 'Collect customer VAT, Tax, BIN, TRN, or GSTIN numbers at checkout and print on invoices.', 'billio' ); ?></p></div>
+							</header>
+							<div class="billio-sec-body">
+								<div class="billio-f">
+									<div class="billio-lab"><?php esc_html_e( 'Checkout field', 'billio' ); ?><small><?php esc_html_e( 'Adds a Tax ID input field to WooCommerce checkout', 'billio' ); ?></small></div>
+									<div>
+										<div class="billio-sw <?php echo $enable_tax_id ? 'billio-sw-on' : ''; ?>" id="billio-sw-tax-id">
+											<div class="billio-sw-t"><?php esc_html_e( 'Enable Tax ID at checkout', 'billio' ); ?><small><?php esc_html_e( 'Works seamlessly with Classic shortcode checkout and Block checkout', 'billio' ); ?></small></div>
+											<input type="checkbox" name="billio_enable_tax_id" id="billio_enable_tax_id" value="1" tabindex="-1" aria-hidden="true" class="billio-sr-only" <?php checked( $enable_tax_id ); ?>>
+											<button type="button" class="billio-tg" role="switch" aria-checked="<?php echo $enable_tax_id ? 'true' : 'false'; ?>" aria-label="<?php esc_attr_e( 'Enable Tax ID at checkout', 'billio' ); ?>" data-checkbox="billio_enable_tax_id"></button>
+										</div>
+									</div>
+								</div>
+								<div class="billio-f <?php echo $enable_tax_id ? '' : 'billio-dim-row'; ?>" id="billio-tax-id-options">
+									<label for="billio_tax_id_label"><?php esc_html_e( 'Field label', 'billio' ); ?><small><?php esc_html_e( 'Shown on checkout, order details, and PDF invoices', 'billio' ); ?></small></label>
+									<div>
+										<input class="billio-in" type="text" name="billio_tax_id_label" id="billio_tax_id_label" value="<?php echo esc_attr( $tax_id_label ); ?>" placeholder="<?php esc_attr_e( 'e.g. VAT / Tax / BIN Number', 'billio' ); ?>">
+									</div>
+								</div>
+								<div class="billio-f <?php echo $enable_tax_id ? '' : 'billio-dim-row'; ?>" id="billio-tax-id-req-row">
+									<div class="billio-lab"><?php esc_html_e( 'Field requirement', 'billio' ); ?><small><?php esc_html_e( 'Control whether buyers are required to fill this field', 'billio' ); ?></small></div>
+									<div>
+										<div class="billio-sw <?php echo $tax_id_required ? 'billio-sw-on' : ''; ?>" id="billio-sw-tax-req">
+											<div class="billio-sw-t"><?php esc_html_e( 'Require Tax ID at checkout', 'billio' ); ?><small><?php esc_html_e( 'Orders cannot be placed without entering a Tax ID', 'billio' ); ?></small></div>
+											<input type="checkbox" name="billio_tax_id_required" id="billio_tax_id_required" value="1" tabindex="-1" aria-hidden="true" class="billio-sr-only" <?php checked( $tax_id_required ); ?>>
+											<button type="button" class="billio-tg" role="switch" aria-checked="<?php echo $tax_id_required ? 'true' : 'false'; ?>" aria-label="<?php esc_attr_e( 'Require Tax ID at checkout', 'billio' ); ?>" data-checkbox="billio_tax_id_required"></button>
+										</div>
+									</div>
 								</div>
 							</div>
 						</section>
@@ -507,6 +554,16 @@ class SettingsPage {
 										</div>
 									</div>
 								</div>
+								<div class="billio-f">
+									<div class="billio-lab"><?php esc_html_e( 'Thank You page', 'billio' ); ?><small><?php esc_html_e( 'Checkout confirmation', 'billio' ); ?></small></div>
+									<div>
+										<div class="billio-sw <?php echo $thankyou_down_on ? 'billio-sw-on' : ''; ?>" id="billio-sw-thankyou">
+											<div class="billio-sw-t"><?php esc_html_e( 'Show download button', 'billio' ); ?><small><?php esc_html_e( 'Allows buyers to immediately download their invoice on the order received page', 'billio' ); ?></small></div>
+											<input type="checkbox" name="billio_show_thankyou_download" id="billio_show_thankyou_download" value="1" tabindex="-1" aria-hidden="true" class="billio-sr-only" <?php checked( $thankyou_down_on ); ?>>
+											<button type="button" class="billio-tg" role="switch" aria-checked="<?php echo $thankyou_down_on ? 'true' : 'false'; ?>" aria-label="<?php esc_attr_e( 'Show download button', 'billio' ); ?>" data-checkbox="billio_show_thankyou_download"></button>
+										</div>
+									</div>
+								</div>
 							</div>
 						</section>
 
@@ -544,6 +601,16 @@ class SettingsPage {
 											<span id="billio-accent-hex"><?php echo esc_html( strtoupper( $accent_color ) ); ?></span>
 										</label>
 										<input type="text" class="billio-color-field" name="billio_accent_color" id="billio_accent_color" value="<?php echo esc_attr( $accent_color ); ?>" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;">
+									</div>
+								</div>
+								<div class="billio-f">
+									<div class="billio-lab"><?php esc_html_e( 'Watermark', 'billio' ); ?><small><?php esc_html_e( 'Paid orders only', 'billio' ); ?></small></div>
+									<div>
+										<div class="billio-sw <?php echo $watermark_paid ? 'billio-sw-on' : ''; ?>" id="billio-sw-watermark">
+											<div class="billio-sw-t"><?php esc_html_e( 'PAID stamp', 'billio' ); ?><small><?php esc_html_e( 'Display an angled, semi-transparent PAID watermark across the invoice', 'billio' ); ?></small></div>
+											<input type="checkbox" name="billio_watermark_paid" id="billio_watermark_paid" value="1" tabindex="-1" aria-hidden="true" class="billio-sr-only" <?php checked( $watermark_paid ); ?>>
+											<button type="button" class="billio-tg" role="switch" aria-checked="<?php echo $watermark_paid ? 'true' : 'false'; ?>" aria-label="<?php esc_attr_e( 'PAID stamp', 'billio' ); ?>" data-checkbox="billio_watermark_paid"></button>
+										</div>
 									</div>
 								</div>
 							</div>
@@ -631,10 +698,8 @@ class SettingsPage {
 			if ( 'media' === $field['type'] || ! isset( $_GET[ $option ] ) ) {
 				continue;
 			}
-			// No wp_unslash() here — Fields::sanitize() already unslashes
-			// internally; doing it twice would corrupt any real backslash
-			// characters in the submitted text.
-			$value                = Fields::sanitize( $field, $_GET[ $option ] );
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized via Fields::sanitize() below.
+			$value                = Fields::sanitize( $field, wp_unslash( $_GET[ $option ] ) );
 			$callback             = static function () use ( $value ) {
 				return $value;
 			};

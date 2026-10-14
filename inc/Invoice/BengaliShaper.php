@@ -56,6 +56,13 @@ class BengaliShaper {
 	 * @return string
 	 */
 	public static function reorder( $html ) {
+		// Fast-path: if the document contains no Bengali Unicode bytes
+		// (U+0980 to U+09FF: \xE0\xA6 or \xE0\xA7 in UTF-8), bail out immediately
+		// without running string replacements or regex over the entire document.
+		if ( false === strpos( $html, "\xe0\xa6" ) && false === strpos( $html, "\xe0\xa7" ) ) {
+			return $html;
+		}
+
 		$html = self::decompose_two_part_vowels( $html );
 
 		$pattern = '/((?:' . self::CONSONANT . self::VIRAMA . ')*' . self::CONSONANT . ')(' . self::PRE_BASE . ')/u';

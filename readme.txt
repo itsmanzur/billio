@@ -1,10 +1,10 @@
-=== Billio — WooCommerce PDF Invoice & Billing ===
+=== Billio — PDF Invoices & Billing for WooCommerce ===
 Contributors: getwpkit
 Tags: woocommerce, invoice, pdf invoice, billing, packing slip
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.1
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -17,13 +17,27 @@ Billio generates a professional PDF invoice for every WooCommerce order and atta
 **Free features**
 
 * Automatic PDF invoice attached to the order email (choose Processing and/or Completed)
-* Two invoice templates (Default, Modern)
+* Automatic PDF credit note attached to customer refund emails
+* Interactive Slide-over Quick Preview Drawer on the Dashboard with instant inline PDF view, 1-click print, WhatsApp sharing, link copy, and email resending
+* B2B Customer Tax ID: Collect customer VAT / BIN / TRN / GSTIN at checkout (compatible with both Classic and Block Checkout) and display on PDF invoices
+* Instant PDF download button on the checkout Thank You (Order Received) page
+* Customers can download invoices and credit notes from My Account and Thank You screens (with guest order verification)
+* Optional PAID watermark stamp on paid order invoices
+* Two professional invoice templates (Default, Modern) with customizable accent color
+* Interactive Dashboard with revenue KPIs, invoice chart, and live-preview settings
 * Company logo, name, address, and VAT/tax number
 * Race-condition-safe sequential invoice numbering, with no gaps even if a render fails mid-way
 * Packing slip generation from the order edit screen (no prices, ships-to address, never saved to disk)
-* Customers can download their invoice from My Account
 * Admins can download, resend, or regenerate the invoice from the order list and order edit screen
 * Bangla-script support: vowel-sign positioning is corrected so names and addresses render properly (complex consonant conjuncts have known font-rendering limitations — see FAQ)
+
+**Coming Soon in Billio Pro**
+
+* Bulk Actions: Download invoices as ZIP and Bulk Print from the WooCommerce orders list
+* Dynamic QR Codes: Instant payment links and e-invoicing verification (ZATCA, UPI, etc.)
+* Custom Fiscal Year: Configure financial year start month (e.g. April or July) for numbering resets
+* WhatsApp & SMS dispatch: Automated invoice dispatch directly to customer messaging apps
+* Drag-and-Drop Visual Template Customizer & Cloud Backup (Google Drive, Dropbox)
 
 == Installation ==
 
@@ -46,6 +60,35 @@ No. Invoice numbers are assigned with an atomic, lock-guarded database operation
 Vowel signs (ি ে ৈ ো ৌ) are repositioned so names and addresses display correctly. Complex consonant conjuncts (e.g. ক্ষ, ম্ম) currently render with a visible connecting mark rather than a fully stacked ligature glyph, which is a limitation of the underlying PDF renderer rather than something Billio's text processing can fully correct. This does not affect the accuracy of any amounts or data on the invoice.
 
 == Changelog ==
+
+= 1.3.0 =
+* New: Interactive Slide-over Quick Preview Drawer on the Dashboard with instant inline PDF viewer, 1-click print, WhatsApp sharing, invoice link copy, and customer contact details.
+* New: B2B Customer Tax ID (VAT, BIN, TRN, GSTIN) integration — seamlessly collect customer tax numbers at checkout with support for both Classic shortcode and WooCommerce Block Checkout.
+* New: Customer Tax ID admin order editing — store managers can view and edit the customer Tax ID on WooCommerce Admin order edit screens.
+* New: Automatic display of Customer Tax ID in PDF invoices, credit notes, and customer account/thank you order details.
+* New: Live preview support for B2B Tax ID in Billio Settings with real-time toggle and custom field label binding.
+* Fix: Removed false unsaved-changes dialog on Settings save.
+
+= 1.2.3 =
+* Performance: Enabled Dompdf font subsetting reducing generated PDF file size by up to 90% (~75KB to ~8KB) and dramatically decreasing rendering memory overhead.
+* Performance: Enabled Dompdf HTML5 parser option for improved CSS layout conformance and streamlined DOM rendering.
+* Performance: Added fast-path ASCII bypass to Bengali shaper when no Bengali unicode bytes are present.
+* Performance: Replaced transient base64 logo caching with in-memory memoization, cleaning up transient bloat on upgrade.
+* Performance: Added query result caching and proactive cache-busting for legacy orders and refunds lookups on the Dashboard.
+* Optimization: Added temporary memory limit increase during PDF generation to prevent out-of-memory errors on constrained hosts.
+* New: Added dedicated, interactive "Docs & Features" admin page featuring an organized overview of free & upcoming features, live search, and a non-technical beginner guide.
+* Extensibility: Added `billio_invoice_template_data` filter to allow custom template variable filtering and `billio_dompdf_options` filter for fine-grained Dompdf configuration.
+* i18n: Complete internationalization audit of documentation strings and included bundled Bengali (bn_BD) translation files.
+
+= 1.2.2 =
+* Fix: Removed search cap limitation on Dashboard candidate lookups and resolved OOM memory exhaustion via chunked record queries.
+* Hardening: Strengthened upload file path checking and atomic write error handling for PDF invoice generation.
+* New: Added guest invoice and credit note download support with secure order key validation.
+* New: Added prominent Thank You / Order Received page invoice download button with dedicated frontend styling for paid, processing, and completed orders.
+* New: Added optional angled "PAID" watermark stamp setting for paid orders across invoice templates.
+* New: Automatically generate and attach PDF credit notes to customer refund emails.
+* Fix: Automatically seed missing settings defaults on install and upgrade so unchecking default-true options persists properly.
+* Maintenance: Cleaned up Dashboard transients and scheduled hooks on uninstall.
 
 = 1.2.1 =
 * Fix: a download/resend/regenerate link on the Dashboard's recent-documents table could show "link expired" — the nonce'd download URL was being HTML-entity-escaped twice (once by WordPress, once by the Dashboard's JS) before being read back, corrupting its parameters.

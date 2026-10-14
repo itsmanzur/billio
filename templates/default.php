@@ -17,6 +17,8 @@ use Billio\Invoice\TemplateEngine;
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template variables are scoped inside TemplateEngine render methods.
 ?>
 <!DOCTYPE html>
 <html>
@@ -46,10 +48,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	table.totals td.val { text-align: right; }
 	table.totals tr.grand td { border-top: 2px solid #1a1a1a; font-size: 14px; font-weight: bold; padding-top: 10px; }
 	.footer { margin-top: 40px; color: #999; font-size: 10px; text-align: center; }
+	.watermark-paid { position: absolute; top: 360px; left: 160px; transform: rotate(-24deg); font-size: 72px; font-weight: bold; color: #16a34a; border: 5px solid #16a34a; padding: 6px 32px; opacity: 0.16; text-transform: uppercase; letter-spacing: 6px; border-radius: 8px; z-index: 999; }
 </style>
 </head>
 <body>
 <div class="wrap">
+
+	<?php if ( ! empty( $show_paid_watermark ) && ( $order->is_paid() || in_array( $order->get_status(), array( 'completed', 'processing' ), true ) ) ) : ?>
+		<div class="watermark-paid"><?php esc_html_e( 'PAID', 'billio' ); ?></div>
+	<?php endif; ?>
 
 	<table class="header">
 		<tr>
@@ -92,6 +99,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 		if ( $order->get_billing_phone() ) :
 			?>
 			<br><?php echo esc_html( $order->get_billing_phone() ); ?><?php endif; ?>
+		<?php if ( ! empty( $customer_tax_id ) ) : ?>
+			<br><strong><?php echo esc_html( $customer_tax_id_label ); ?>:</strong> <?php echo esc_html( $customer_tax_id ); ?>
+		<?php endif; ?>
 	</div>
 
 	<table class="items">

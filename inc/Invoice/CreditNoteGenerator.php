@@ -32,7 +32,7 @@ class CreditNoteGenerator {
 		}
 
 		$relative_path = $refund->get_meta( '_billio_credit_note_pdf_path' );
-		if ( $relative_path && file_exists( Generator::get_absolute_path( $relative_path ) ) ) {
+		if ( $relative_path && Generator::pdf_exists( Generator::get_absolute_path( $relative_path ) ) ) {
 			return $relative_path;
 		}
 
@@ -164,7 +164,10 @@ class CreditNoteGenerator {
 		$filename = $parent_order->get_id() . '-' . $refund->get_id() . '-' . wp_generate_password( 24, false, false ) . '.pdf';
 		$path     = trailingslashit( $dir ) . $filename;
 
-		file_put_contents( $path, $pdf_content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		$written = file_put_contents( $path, $pdf_content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		if ( false === $written ) {
+			throw new \RuntimeException( 'Could not write credit note PDF to disk.' );
+		}
 
 		return 'billio/credit-notes/' . $year . '/' . $filename;
 	}

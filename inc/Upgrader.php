@@ -45,6 +45,18 @@ class Upgrader {
 			self::migrate_to_1_1_0();
 		}
 
+		if ( version_compare( $installed, '1.2.2', '<' ) ) {
+			self::migrate_to_1_2_2();
+		}
+
+		if ( version_compare( $installed, '1.2.3', '<' ) ) {
+			self::migrate_to_1_2_3();
+		}
+
+		if ( version_compare( $installed, '1.3.0', '<' ) ) {
+			self::migrate_to_1_3_0();
+		}
+
 		update_option( self::OPTION_VERSION, BILLIO_VERSION );
 	}
 
@@ -73,5 +85,39 @@ class Upgrader {
 			$current_sequence = (int) get_option( NumberManager::OPTION_SEQUENCE, 0 );
 			add_option( NumberManager::OPTION_TOTAL_COUNT, $current_sequence, '', false );
 		}
+	}
+
+	/**
+	 * 1.2.2: Seed any missing settings defaults (e.g. billio_show_thankyou_download
+	 * and billio_watermark_paid) into wp_options with autoload yes, so saving an
+	 * unchecked state persists properly instead of no-opping.
+	 *
+	 * @return void
+	 */
+	private static function migrate_to_1_2_2() {
+		Installer::seed_default_options();
+	}
+
+	/**
+	 * 1.2.3: Clean up any old logo data URI transients from wp_options.
+	 *
+	 * @return void
+	 */
+	private static function migrate_to_1_2_3() {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query(
+			"DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_billio_logo_uri_%' OR option_name LIKE '_transient_timeout_billio_logo_uri_%'"
+		);
+	}
+
+	/**
+	 * 1.3.0: Seed B2B customer tax ID setting defaults into wp_options.
+	 *
+	 * @return void
+	 */
+	private static function migrate_to_1_3_0() {
+		Installer::seed_default_options();
 	}
 }

@@ -24,6 +24,18 @@ class TemplateEngine {
 		$template_file = self::locate_template( get_option( 'billio_template', 'default' ), 'default' );
 		$data          = self::prepare_data( $order, $invoice_number );
 
+		/**
+		 * Filter the data passed into the invoice template.
+		 *
+		 * Allows third-party plugins and themes to inject custom metadata,
+		 * barcodes, tax breakdowns, or company fields without template overrides.
+		 *
+		 * @param array     $data           Template variables.
+		 * @param \WC_Order $order          The invoiced order.
+		 * @param string    $invoice_number The assigned invoice number.
+		 */
+		$data = apply_filters( 'billio_invoice_template_data', $data, $order, $invoice_number );
+
 		extract( $data, EXTR_SKIP ); // phpcs:ignore WordPress.PHP.DontExtract
 
 		ob_start();
@@ -71,14 +83,19 @@ class TemplateEngine {
 	 * @return string Full HTML document, ready for Dompdf::loadHtml().
 	 */
 	public static function render_credit_note( \WC_Order $order, \WC_Order_Refund $refund, $credit_note_number ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter -- $refund and $credit_note_number are used by templates/credit-note.php via include() scope sharing, not referenced directly in this method.
-		$company        = array(
+		$company               = array(
 			'name'    => get_option( 'billio_company_name', get_bloginfo( 'name' ) ),
 			'address' => get_option( 'billio_company_address', '' ),
 			'vat'     => get_option( 'billio_company_vat', '' ),
 			'logo'    => self::get_logo_data_uri(),
 		);
-		$invoice_number = $order->get_meta( '_billio_invoice_number' );
-		$currency       = $order->get_currency();
+		$invoice_number        = $order->get_meta( '_billio_invoice_number' );
+		$currency              = $order->get_currency();
+		$customer_tax_id       = self::get_customer_tax_id( $order );
+		$customer_tax_id_label = get_option( 'billio_tax_id_label', __( 'VAT / Tax / BIN Number', 'billio' ) );
+		if ( empty( $customer_tax_id_label ) ) {
+			$customer_tax_id_label = __( 'VAT / Tax ID', 'billio' );
+		}
 
 		ob_start();
 		try {
@@ -171,6 +188,29 @@ class TemplateEngine {
 	}
 
 	/**
+	 * Retrieve the customer's tax ID from the order.
+	 *
+	 * Checks _billio_tax_id first, falling back to _billing_billio_tax_id,
+	 * _vat_number, and vat_number for maximum ecosystem compatibility.
+	 *
+	 * @param \WC_Order $order Order instance.
+	 * @return string
+	 */
+	public static function get_customer_tax_id( \WC_Order $order ) {
+		$tax_id = (string) $order->get_meta( '_billio_tax_id' );
+		if ( '' === $tax_id ) {
+			$tax_id = (string) $order->get_meta( '_billing_billio_tax_id' );
+		}
+		if ( '' === $tax_id ) {
+			$tax_id = (string) $order->get_meta( '_vat_number' );
+			if ( '' === $tax_id ) {
+				$tax_id = (string) $order->get_meta( 'vat_number' );
+			}
+		}
+		return $tax_id;
+	}
+
+	/**
 	 * Gather everything a template needs, pre-escaped data is left to the
 	 * template itself (same convention as core WP template parts).
 	 *
@@ -180,13 +220,20 @@ class TemplateEngine {
 	 */
 	private static function prepare_data( \WC_Order $order, $invoice_number ) {
 		$invoice_timestamp = (int) $order->get_meta( '_billio_invoice_date' );
+		$tax_id_label      = (string) get_option( 'billio_tax_id_label', __( 'VAT / Tax / BIN Number', 'billio' ) );
+		if ( empty( $tax_id_label ) ) {
+			$tax_id_label = __( 'VAT / Tax ID', 'billio' );
+		}
 
 		return array(
-			'order'          => $order,
-			'invoice_number' => $invoice_number,
-			'invoice_date'   => wp_date( get_option( 'date_format' ), $invoice_timestamp ? $invoice_timestamp : time() ),
-			'currency'       => $order->get_currency(),
-			'company'        => array(
+			'order'                 => $order,
+			'invoice_number'        => $invoice_number,
+			'invoice_date'          => wp_date( get_option( 'date_format' ), $invoice_timestamp ? $invoice_timestamp : time() ),
+			'currency'              => $order->get_currency(),
+			'show_paid_watermark'   => (bool) get_option( 'billio_watermark_paid', false ),
+			'customer_tax_id'       => self::get_customer_tax_id( $order ),
+			'customer_tax_id_label' => $tax_id_label,
+			'company'               => array(
 				'name'    => get_option( 'billio_company_name', get_bloginfo( 'name' ) ),
 				'address' => get_option( 'billio_company_address', '' ),
 				'vat'     => get_option( 'billio_company_vat', '' ),
@@ -196,21 +243,35 @@ class TemplateEngine {
 	}
 
 	/**
+	 * @var string|null Cached logo data URI in memory for the current request.
+	 */
+	private static $logo_data_uri_cache = null;
+
+	/**
 	 * Inline the company logo as a base64 data URI so Dompdf never needs
 	 * isRemoteEnabled (and the PDF still renders correctly offline).
+	 *
+	 * Memoized in-memory per request to avoid repeated file reads and base64
+	 * encoding across multiple renders in the same PHP lifecycle.
 	 *
 	 * @return string Data URI, or '' if no logo is set.
 	 */
 	private static function get_logo_data_uri() {
+		if ( null !== self::$logo_data_uri_cache ) {
+			return self::$logo_data_uri_cache;
+		}
+
 		$attachment_id = (int) get_option( 'billio_company_logo_id', 0 );
 
 		if ( ! $attachment_id ) {
+			self::$logo_data_uri_cache = '';
 			return '';
 		}
 
 		$path = get_attached_file( $attachment_id );
 
 		if ( ! $path || ! is_readable( $path ) ) {
+			self::$logo_data_uri_cache = '';
 			return '';
 		}
 
@@ -220,9 +281,21 @@ class TemplateEngine {
 		$contents = file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
 		if ( false === $contents ) {
+			self::$logo_data_uri_cache = '';
 			return '';
 		}
 
-		return 'data:' . $mime . ';base64,' . base64_encode( $contents ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
+		self::$logo_data_uri_cache = 'data:' . $mime . ';base64,' . base64_encode( $contents ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
+
+		return self::$logo_data_uri_cache;
+	}
+
+	/**
+	 * Clear the in-memory logo data URI cache.
+	 *
+	 * @return void
+	 */
+	public static function clear_logo_cache() {
+		self::$logo_data_uri_cache = null;
 	}
 }

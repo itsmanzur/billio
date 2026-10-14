@@ -15,6 +15,8 @@ use Billio\Invoice\TemplateEngine;
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template variables are scoped inside TemplateEngine render methods.
 ?>
 <!DOCTYPE html>
 <html>

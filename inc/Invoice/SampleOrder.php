@@ -28,6 +28,7 @@ class SampleOrder {
 		$order->set_billing_city( 'Dhaka' );
 		$order->set_billing_country( 'BD' );
 		$order->set_billing_email( 'rahim@example.com' );
+		$order->set_billing_phone( '+880 1711 000000' );
 
 		$item_one = new \WC_Order_Item_Product();
 		$item_one->set_name( esc_html__( 'Sample Product A', 'billio' ) );
@@ -44,6 +45,12 @@ class SampleOrder {
 		$order->set_shipping_total( 5 );
 		$order->set_discount_total( 0 );
 		$order->set_total( 70 );
+		$order->set_status( 'completed' );
+		$order->set_date_paid( time() );
+
+		if ( get_option( 'billio_enable_tax_id', false ) ) {
+			$order->update_meta_data( '_billio_tax_id', 'BIN-001234567-0101' );
+		}
 
 		// Never persisted: no $order->save() call, and id stays 0.
 		return $order;

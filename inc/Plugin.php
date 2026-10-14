@@ -9,9 +9,11 @@ namespace Billio;
 
 use Billio\Admin\Dashboard;
 use Billio\Admin\DashboardAjax;
+use Billio\Admin\DocsPage;
 use Billio\Admin\MetaBox;
 use Billio\Admin\OrderActions;
 use Billio\Admin\ReviewNotice;
+use Billio\Frontend\CheckoutTaxId;
 use Billio\Frontend\MyAccount;
 use Billio\Invoice\EmailAttacher;
 use Billio\Settings\SettingsPage;
@@ -39,12 +41,9 @@ class Plugin {
 	}
 
 	private function __construct() {
-		add_action( 'init', array( $this, 'load_textdomain' ) );
-
-		Upgrader::maybe_upgrade();
-
 		new EmailAttacher();
 		new MyAccount();
+		new CheckoutTaxId();
 
 		// Unconditional (not inside the is_admin() block below): an invoice
 		// is very often generated from a non-admin request — a payment
@@ -56,21 +55,15 @@ class Plugin {
 		add_action( Dashboard::DEFERRED_BUST_HOOK, array( Dashboard::class, 'deferred_bust_stats_cache' ) );
 
 		if ( is_admin() ) {
+			Upgrader::maybe_upgrade();
+
 			$order_actions = new OrderActions();
 			$dashboard     = new Dashboard();
 			new MetaBox( $order_actions );
 			new DashboardAjax( $dashboard );
 			new SettingsPage();
+			new DocsPage();
 			new ReviewNotice();
 		}
-	}
-
-	/**
-	 * Load the .mo translation file for the current locale.
-	 *
-	 * @return void
-	 */
-	public function load_textdomain() {
-		load_plugin_textdomain( 'billio', false, dirname( BILLIO_BASENAME ) . '/languages' );
 	}
 }

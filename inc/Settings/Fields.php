@@ -121,6 +121,41 @@ class Fields {
 				'type'    => 'color',
 				'default' => '#3b6cf4',
 			),
+			array(
+				'option'      => 'billio_watermark_paid',
+				'label'       => __( 'PAID watermark', 'billio' ),
+				'type'        => 'checkbox',
+				'default'     => false,
+				'description' => __( 'Display a subtle, angled PAID stamp on paid and completed order invoices.', 'billio' ),
+			),
+			array(
+				'option'      => 'billio_show_thankyou_download',
+				'label'       => __( 'Thank You page download', 'billio' ),
+				'type'        => 'checkbox',
+				'default'     => true,
+				'description' => __( 'Show a prominent PDF download button on the checkout order received screen.', 'billio' ),
+			),
+			array(
+				'option'      => 'billio_enable_tax_id',
+				'label'       => __( 'Customer Tax ID at checkout', 'billio' ),
+				'type'        => 'checkbox',
+				'default'     => false,
+				'description' => __( 'Allow B2B customers to enter their VAT / Tax / BIN number during checkout.', 'billio' ),
+			),
+			array(
+				'option'      => 'billio_tax_id_label',
+				'label'       => __( 'Customer Tax ID label', 'billio' ),
+				'type'        => 'text',
+				'default'     => __( 'VAT / Tax / BIN Number', 'billio' ),
+				'description' => __( 'Label displayed on the checkout page, order details, and PDF invoice.', 'billio' ),
+			),
+			array(
+				'option'      => 'billio_tax_id_required',
+				'label'       => __( 'Require Tax ID at checkout', 'billio' ),
+				'type'        => 'checkbox',
+				'default'     => false,
+				'description' => __( 'Make entering a Tax ID mandatory for customers during checkout.', 'billio' ),
+			),
 		);
 	}
 

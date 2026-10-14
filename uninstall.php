@@ -31,6 +31,11 @@ $billio_options = array(
 	'billio_email_triggers',
 	'billio_template',
 	'billio_accent_color',
+	'billio_watermark_paid',
+	'billio_show_thankyou_download',
+	'billio_enable_tax_id',
+	'billio_tax_id_label',
+	'billio_tax_id_required',
 	'billio_version',
 	'billio_review_notice_dismissed',
 );
@@ -38,3 +43,24 @@ $billio_options = array(
 foreach ( $billio_options as $billio_option ) {
 	delete_option( $billio_option );
 }
+
+// Keep transient names in sync with Dashboard.php cache keys, BUST_LOCK_TRANSIENT, and Installer.
+$billio_transients = array(
+	'billio_dash_month_stats',
+	'billio_dash_last_month_stats',
+	'billio_dash_chart_7',
+	'billio_dash_chart_30',
+	'billio_dash_chart_90',
+	'billio_dash_recent_documents',
+	'billio_dash_legacy_orders',
+	'billio_dash_legacy_refunds',
+	'billio_dash_bust_lock',
+	'billio_activation_redirect',
+);
+
+foreach ( $billio_transients as $billio_transient ) {
+	delete_transient( $billio_transient );
+}
+
+// Clear any remaining deferred cron hook (Dashboard::DEFERRED_BUST_HOOK).
+wp_clear_scheduled_hook( 'billio_dashboard_deferred_bust' );

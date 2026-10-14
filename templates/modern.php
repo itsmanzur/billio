@@ -18,6 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template variables are scoped inside TemplateEngine render methods.
 $accent = get_option( 'billio_accent_color', '#3b6cf4' );
 ?>
 <!DOCTYPE html>
@@ -47,9 +48,14 @@ $accent = get_option( 'billio_accent_color', '#3b6cf4' );
 	table.totals td.val { text-align: right; }
 	table.totals tr.grand td { border-top: 2px solid <?php echo esc_html( $accent ); ?>; font-size: 15px; font-weight: bold; padding-top: 10px; color: <?php echo esc_html( $accent ); ?>; }
 	.footer { margin-top: 36px; color: #aaa; font-size: 10px; text-align: center; }
+	.watermark-paid { position: absolute; top: 360px; left: 160px; transform: rotate(-24deg); font-size: 72px; font-weight: bold; color: #16a34a; border: 5px solid #16a34a; padding: 6px 32px; opacity: 0.16; text-transform: uppercase; letter-spacing: 6px; border-radius: 8px; z-index: 999; }
 </style>
 </head>
 <body>
+
+<?php if ( ! empty( $show_paid_watermark ) && ( $order->is_paid() || in_array( $order->get_status(), array( 'completed', 'processing' ), true ) ) ) : ?>
+	<div class="watermark-paid"><?php esc_html_e( 'PAID', 'billio' ); ?></div>
+<?php endif; ?>
 
 <div class="band">
 	<table>
@@ -96,6 +102,13 @@ $accent = get_option( 'billio_accent_color', '#3b6cf4' );
 					if ( $order->get_billing_email() ) :
 						?>
 						<br><?php echo esc_html( $order->get_billing_email() ); ?><?php endif; ?>
+					<?php
+					if ( $order->get_billing_phone() ) :
+						?>
+						<br><?php echo esc_html( $order->get_billing_phone() ); ?><?php endif; ?>
+					<?php if ( ! empty( $customer_tax_id ) ) : ?>
+						<br><strong><?php echo esc_html( $customer_tax_id_label ); ?>:</strong> <?php echo esc_html( $customer_tax_id ); ?>
+					<?php endif; ?>
 				</div>
 			</td>
 		</tr>

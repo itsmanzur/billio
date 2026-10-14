@@ -7,7 +7,9 @@
 
 namespace Billio;
 
+use Billio\Admin\Dashboard;
 use Billio\Invoice\NumberManager;
+use Billio\Settings\Fields;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -23,6 +25,7 @@ class Installer {
 	public static function activate() {
 		self::create_upload_dir();
 		self::seed_invoice_sequence();
+		self::seed_default_options();
 		// A fresh install is already on the current version — if this were
 		// left unset, Upgrader::maybe_upgrade() would see "0" on first boot
 		// and think it has every past migration to run.
@@ -35,10 +38,15 @@ class Installer {
 	 *
 	 * Deliberately does not delete invoice files, numbering sequence, or
 	 * settings — only uninstall.php removes data, matching core WP convention.
+	 * Only clears the one thing that would otherwise keep firing with the
+	 * plugin's classes unloaded: the deferred cache-bust cron event
+	 * bust_stats_cache() can leave scheduled (see Dashboard.php).
 	 *
 	 * @return void
 	 */
-	public static function deactivate() {}
+	public static function deactivate() {
+		wp_clear_scheduled_hook( Dashboard::DEFERRED_BUST_HOOK );
+	}
 
 	/**
 	 * Create the private uploads/billio directory and lock it down from
@@ -105,6 +113,23 @@ class Installer {
 
 		if ( false === get_option( NumberManager::OPTION_TOTAL_COUNT ) ) {
 			add_option( NumberManager::OPTION_TOTAL_COUNT, 0, '', false );
+		}
+	}
+
+	/**
+	 * Seed default values for all settings fields if they don't exist yet.
+	 *
+	 * Loops through Fields::get() defaults with autoload 'yes', ensuring
+	 * settings exist in wp_options so unchecking default-true checkboxes
+	 * (e.g. billio_show_thankyou_download) persists correctly instead of no-opping.
+	 *
+	 * @return void
+	 */
+	public static function seed_default_options() {
+		foreach ( Fields::get() as $field ) {
+			if ( ! empty( $field['option'] ) && array_key_exists( 'default', $field ) ) {
+				add_option( $field['option'], $field['default'], '', 'yes' );
+			}
 		}
 	}
 }

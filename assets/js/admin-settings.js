@@ -53,6 +53,7 @@
 	 * ------------------------------------------------------------- */
 
 	var dirty = new Set();
+	var isSubmitting = false;
 	var savebar = document.getElementById( 'billio-savebar' );
 	var savebarCount = document.getElementById( 'billio-savebar-count' );
 	var topSave = document.getElementById( 'billio-top-save' );
@@ -95,12 +96,15 @@
 		if ( ! validateBeforeSave() ) {
 			return;
 		}
+		isSubmitting = true;
+		clearDirty();
 		form.submit();
 	}
 
 	topSave.addEventListener( 'click', doSave );
 	document.getElementById( 'billio-savebar-save' ).addEventListener( 'click', doSave );
 	document.getElementById( 'billio-discard' ).addEventListener( 'click', function () {
+		clearDirty();
 		window.location.reload();
 	} );
 
@@ -114,7 +118,7 @@
 	} );
 
 	window.addEventListener( 'beforeunload', function ( e ) {
-		if ( dirty.size ) {
+		if ( ! isSubmitting && dirty.size ) {
 			e.preventDefault();
 			e.returnValue = '';
 		}
@@ -125,7 +129,9 @@
 	form.addEventListener( 'submit', function ( e ) {
 		if ( ! validateBeforeSave() ) {
 			e.preventDefault();
+			isSubmitting = false;
 		} else {
+			isSubmitting = true;
 			clearDirty();
 		}
 	} );
@@ -404,6 +410,59 @@
 		schedulePreview();
 	} );
 
+	var thankyouRow = document.getElementById( 'billio-sw-thankyou' );
+	if ( thankyouRow ) {
+		wireSwitch( thankyouRow, 'billio_show_thankyou_download' );
+		thankyouRow.addEventListener( 'click', function () {
+			markDirty( 'thankyou_download' );
+		} );
+	}
+
+	var watermarkRow = document.getElementById( 'billio-sw-watermark' );
+	if ( watermarkRow ) {
+		wireSwitch( watermarkRow, 'billio_watermark_paid', function () {
+			schedulePreview();
+		} );
+		watermarkRow.addEventListener( 'click', function () {
+			markDirty( 'watermark_paid' );
+			schedulePreview();
+		} );
+	}
+
+	var taxIdRow = document.getElementById( 'billio-sw-tax-id' );
+	if ( taxIdRow ) {
+		wireSwitch( taxIdRow, 'billio_enable_tax_id', function ( checked ) {
+			var optRow = document.getElementById( 'billio-tax-id-options' );
+			var reqRow = document.getElementById( 'billio-tax-id-req-row' );
+			if ( optRow ) {
+				optRow.classList.toggle( 'billio-dim-row', ! checked );
+			}
+			if ( reqRow ) {
+				reqRow.classList.toggle( 'billio-dim-row', ! checked );
+			}
+			schedulePreview();
+		} );
+		taxIdRow.addEventListener( 'click', function () {
+			markDirty( 'enable_tax_id' );
+		} );
+	}
+
+	var taxReqRow = document.getElementById( 'billio-sw-tax-req' );
+	if ( taxReqRow ) {
+		wireSwitch( taxReqRow, 'billio_tax_id_required' );
+		taxReqRow.addEventListener( 'click', function () {
+			markDirty( 'tax_id_required' );
+		} );
+	}
+
+	var taxIdLabelInput = document.getElementById( 'billio_tax_id_label' );
+	if ( taxIdLabelInput ) {
+		taxIdLabelInput.addEventListener( 'input', function () {
+			markDirty( 'tax_id_label' );
+			schedulePreview();
+		} );
+	}
+
 	/* ---------------------------------------------------------------
 	 * Paper size segmented control (real radios underneath)
 	 * ------------------------------------------------------------- */
@@ -504,6 +563,9 @@
 		'billio_template',
 		'billio_accent_color',
 		'billio_paper_size',
+		'billio_watermark_paid',
+		'billio_enable_tax_id',
+		'billio_tax_id_label',
 	];
 	var previewTimer = null;
 
@@ -517,7 +579,8 @@
 		overridable.forEach( function ( name ) {
 			var field = document.getElementById( name );
 			if ( field ) {
-				url.searchParams.set( name, field.value );
+				var val = ( 'checkbox' === field.type ) ? ( field.checked ? '1' : '' ) : field.value;
+				url.searchParams.set( name, val );
 			}
 		} );
 		frame.src = url.toString();

@@ -95,6 +95,7 @@ class NumberManager {
 	private static function increment( $option_key ) {
 		global $wpdb;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Atomic sequence increment requires direct SQL; caching cannot be used.
 		$updated = $wpdb->query(
 			$wpdb->prepare(
 				"UPDATE {$wpdb->options} SET option_value = LAST_INSERT_ID(CAST(option_value AS UNSIGNED) + 1) WHERE option_name = %s",
@@ -106,6 +107,7 @@ class NumberManager {
 			return null;
 		}
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Read atomic LAST_INSERT_ID(); cannot be cached.
 		return (int) $wpdb->get_var( 'SELECT LAST_INSERT_ID()' );
 	}
 
@@ -120,6 +122,7 @@ class NumberManager {
 	private static function increment_total_count() {
 		global $wpdb;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Atomic upsert counter increment requires direct SQL.
 		$wpdb->query(
 			$wpdb->prepare(
 				"INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, '1', 'no') ON DUPLICATE KEY UPDATE option_value = option_value + 1",

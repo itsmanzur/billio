@@ -23,11 +23,13 @@ class FileServer {
 	 * @return void
 	 */
 	public static function stream( $absolute_path, $download_name ) {
-		if ( ! is_readable( $absolute_path ) ) {
+		if ( ! Generator::pdf_exists( $absolute_path ) ) {
 			wp_die( esc_html__( 'Invoice not found.', 'billio' ), '', array( 'response' => 404 ) );
 		}
 
-		self::send_headers( $download_name, filesize( $absolute_path ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- disposition preference; authorization and nonce verified by caller endpoint.
+		$disposition = ! empty( $_GET['preview'] ) ? 'inline' : 'attachment';
+		self::send_headers( $download_name, filesize( $absolute_path ), $disposition );
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile -- streaming a download; WP_Filesystem has no direct-output equivalent and would require loading the whole PDF into memory.
 		readfile( $absolute_path );
@@ -44,7 +46,9 @@ class FileServer {
 	 * @return void
 	 */
 	public static function stream_bytes( $bytes, $download_name ) {
-		self::send_headers( $download_name, strlen( $bytes ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- disposition preference; authorization and nonce verified by caller endpoint.
+		$disposition = ! empty( $_GET['preview'] ) ? 'inline' : 'attachment';
+		self::send_headers( $download_name, strlen( $bytes ), $disposition );
 		echo $bytes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- raw binary PDF content, not HTML.
 		exit;
 	}
@@ -56,16 +60,17 @@ class FileServer {
 	 *
 	 * @param string $download_name Filename offered to the browser.
 	 * @param int    $length        Content-Length value.
+	 * @param string $disposition   Content-Disposition ('attachment' or 'inline').
 	 * @return void
 	 */
-	private static function send_headers( $download_name, $length ) {
+	private static function send_headers( $download_name, $length, $disposition = 'attachment' ) {
 		while ( ob_get_level() ) {
 			ob_end_clean();
 		}
 
 		nocache_headers();
 		header( 'Content-Type: application/pdf' );
-		header( 'Content-Disposition: attachment; filename="' . sanitize_file_name( $download_name ) . '"' );
+		header( 'Content-Disposition: ' . ( 'inline' === $disposition ? 'inline' : 'attachment' ) . '; filename="' . sanitize_file_name( $download_name ) . '"' );
 		header( 'Content-Length: ' . $length );
 	}
 }

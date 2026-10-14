@@ -79,7 +79,7 @@ class DashboardAjax {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- already verified in authorize() above; the sniff can't see across the method call.
 		$option = isset( $_POST['option'] ) ? sanitize_key( wp_unslash( $_POST['option'] ) ) : '';
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- see above.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- verified in authorize(); sanitized via Fields::sanitize() below.
 		$raw = isset( $_POST['value'] ) ? wp_unslash( $_POST['value'] ) : '';
 
 		$field = null;
@@ -94,7 +94,13 @@ class DashboardAjax {
 		// toggled from the dashboard; everything else (company name,
 		// address, VAT, etc.) is still Settings-page-only, so reject
 		// anything not on that short list even though it exists in Fields.
-		$allowed_quick_options = array( 'billio_email_triggers', 'billio_template', 'billio_paper_size' );
+		$allowed_quick_options = array(
+			'billio_email_triggers',
+			'billio_template',
+			'billio_paper_size',
+			'billio_enable_tax_id',
+			'billio_watermark_paid',
+		);
 
 		if ( ! $field || ! in_array( $option, $allowed_quick_options, true ) ) {
 			wp_send_json_error( array( 'message' => esc_html__( 'That setting cannot be changed from here.', 'billio' ) ) );
@@ -133,9 +139,9 @@ class DashboardAjax {
 	public function ajax_generate_batch() {
 		$this->authorize();
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- already verified in authorize() above.
-		$order_ids = isset( $_POST['order_ids'] ) ? (array) wp_unslash( $_POST['order_ids'] ) : array();
-		$order_ids = array_slice( array_map( 'absint', $order_ids ), 0, self::BATCH_SIZE );
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- already verified in authorize() above; array elements sanitized via absint() below.
+		$raw_order_ids = isset( $_POST['order_ids'] ) ? (array) wp_unslash( $_POST['order_ids'] ) : array();
+		$order_ids     = array_slice( array_map( 'absint', $raw_order_ids ), 0, self::BATCH_SIZE );
 
 		$results = array();
 

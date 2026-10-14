@@ -1,0 +1,784 @@
+# Copyright (C) 2026 Billio
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Billio 1.2.3\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-14 10:20+0600\n"
+"PO-Revision-Date: 2026-10-14 10:20+0600\n"
+"Last-Translator: getwpkit <support@getwpkit.com>\n"
+"Language-Team: Bengali <support@getwpkit.com>\n"
+"Language: bn_BD\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Billio i18n\n"
+
+msgid "Billio Docs & Features"
+msgstr "বিলিও ডকস ও ফিচারসমূহ"
+
+msgid "Docs & Features"
+msgstr "ডকস ও ফিচার"
+
+msgid "Official Documentation & Feature Tour"
+msgstr "অফিসিয়াল ডকুমেন্টেশন ও ফিচার পরিচিতি"
+
+msgid "Billio — WooCommerce PDF Invoicing & Automated Billing Suite"
+msgstr "বিলিও — উকমার্স পিডিএফ ইনভয়েসিং ও অটোমেটেড বিলিং স্যুট"
+
+msgid "The lightweight, high-performance, and gapless PDF invoicing plugin for WooCommerce. Automatically create, brand, and send PDF invoices, credit notes, and packing slips to your customers with reliable accounting and sequential numbering."
+msgstr "উকমার্সের জন্য দ্রুতগতির ও নির্ভরযোগ্য সিকোয়েন্সিয়াল পিডিএফ ইনভয়েসিং প্লাগিন। আপনার কাস্টমারদের জন্য স্বয়ংক্রিয়ভাবে ব্র্যান্ডেড পিডিএফ ইনভয়েস, ক্রেডিট নোট এবং প্যাকিং স্লিপ তৈরি ও প্রেরণ করুন।"
+
+msgid "Configure Billio Settings"
+msgstr "বিলিও সেটিংস কনফিগার করুন"
+
+msgid "View WooCommerce Orders"
+msgstr "উকমার্স অর্ডার দেখুন"
+
+msgid "Features & Overview"
+msgstr "ফিচার ও পরিচিতি"
+
+msgid "12 Features"
+msgstr "১২টি ফিচার"
+
+msgid "Non-Tech User Guide"
+msgstr "সহজ ব্যবহার নির্দেশিকা"
+
+msgid "Easy Steps"
+msgstr "সহজ ধাপসমূহ"
+
+msgid "Search features, topics, or FAQs..."
+msgstr "ফিচার, বিষয় বা প্রশ্ন উত্তর খুঁজুন..."
+
+msgid "All"
+msgstr "সবগুলো"
+
+msgid "Automation"
+msgstr "অটোমেশন"
+
+msgid "Templates & Branding"
+msgstr "টেমপ্লেট ও ব্র্যান্ডিং"
+
+msgid "Customer Experience"
+msgstr "কাস্টমার অভিজ্ঞতা"
+
+msgid "Accounting & Compliance"
+msgstr "হিসাব ও কমপ্লায়েন্স"
+
+msgid "Pro Roadmap"
+msgstr "প্রো রোডম্যাপ"
+
+msgid "Free Core"
+msgstr "ফ্রি কোর"
+
+msgid "Automated Email Invoicing"
+msgstr "অটোমেটেড ইমেইল ইনভয়েসিং"
+
+msgid "Hands-free delivery on order completion"
+msgstr "অর্ডার সম্পন্ন হলেই স্বয়ংক্রিয় ইমেইল ডেলিভারি"
+
+msgid "Automatically generates and attaches branded PDF invoices to WooCommerce Processing and Completed order emails. Zero manual work required."
+msgstr "অর্ডার প্রসেসিং বা কমপ্লিট হলে উকমার্স ইমেইলের সাথে স্বয়ংক্রিয়ভাবে ব্র্যান্ডেড পিডিএফ ইনভয়েস যুক্ত করে পাঠিয়ে দেয়। কোনো ম্যানুয়াল কাজের প্রয়োজন নেই।"
+
+msgid "WooCommerce Emails"
+msgstr "উকমার্স ইমেইল"
+
+msgid "Zero Admin Work"
+msgstr "স্বয়ংক্রিয় প্রসেসিং"
+
+msgid "PDF Attachment"
+msgstr "পিডিএফ অ্যাটাচমেন্ট"
+
+msgid "Automated Credit Notes"
+msgstr "স্বয়ংক্রিয় ক্রেডিট নোট"
+
+msgid "Order refund compliance"
+msgstr "অর্ডার রিফান্ড কমপ্লায়েন্স"
+
+msgid "Whenever an order is refunded, Billio automatically creates an official sequential Credit Note PDF and attaches it to the refund email."
+msgstr "যখনই কোনো অর্ডার রিফান্ড করা হয়, বিলিও স্বয়ংক্রিয়ভাবে ধারাবাহিক নম্বরযুক্ত অফিসিয়াল ক্রেডিট নোট পিডিএফ তৈরি করে রিফান্ড ইমেইলে পাঠিয়ে দেয়।"
+
+msgid "Refund Compliance"
+msgstr "রিফান্ড কমপ্লায়েন্স"
+
+msgid "Credit Notes"
+msgstr "ক্রেডিট নোট"
+
+msgid "Audit-Proof"
+msgstr "নিরীক্ষা-বান্ধব"
+
+msgid "Thank You Page Download"
+msgstr "থ্যাংক ইউ পেজ ডাউনলোড"
+
+msgid "Direct 1-click download after checkout"
+msgstr "চেকআউট শেষেই ১-ক্লিকে ইনভয়েস ডাউনলোড"
+
+msgid "A prominent \"Download Invoice (PDF)\" button appears directly on the checkout Order Received screen right after purchase."
+msgstr "চেকআউটের পর \"অর্ডার গৃহীত হয়েছে\" স্ক্রিনে সরাসরি একটি আকর্ষণীয় \"Download Invoice (PDF)\" বাটন প্রদর্শিত হয়।"
+
+msgid "Instant Download"
+msgstr "তাত্ক্ষণিক ডাউনলোড"
+
+msgid "Checkout UX"
+msgstr "সহজ চেকআউট"
+
+msgid "1-Click PDF"
+msgstr "১-ক্লিক পিডিএফ"
+
+msgid "Guest & My Account Access"
+msgstr "গেস্ট ও মাই অ্যাকাউন্ট অ্যাক্সেস"
+
+msgid "Secure downloads for members and guests"
+msgstr "নিবন্ধিত ক্রেতা ও গেস্ট উভয়ের জন্য নিরাপদ ডাউনলোড"
+
+msgid "Registered users can download invoices from their My Account orders list. Guest buyers can securely download using the order key."
+msgstr "নিবন্ধিত ব্যবহারকারীরা তাদের মাই অ্যাকাউন্ট অর্ডার তালিকা থেকে ইনভয়েস ডাউনলোড করতে পারেন এবং গেস্ট ক্রেতারা নিরাপদ অর্ডার কি দিয়ে সহজেই ডাউনলোড করতে পারেন।"
+
+msgid "Guest Friendly"
+msgstr "গেস্ট বান্ধব"
+
+msgid "My Account"
+msgstr "মাই অ্যাকাউন্ট"
+
+msgid "Secure Access"
+msgstr "নিরাপদ অ্যাক্সেস"
+
+msgid "PAID Watermark Stamp"
+msgstr "\"PAID\" ওয়াটারমার্ক স্ট্যাম্প"
+
+msgid "Professional paid stamp overlay"
+msgstr "পেইড অর্ডারে প্রফেশনাল সিল স্ট্যাম্প"
+
+msgid "Optionally display a modern, angled \"PAID\" stamp across fulfilled invoices. Easily toggleable with live preview in the settings page."
+msgstr "পরিশোধিত অর্ডারের ইনভয়েসে আধুনিক বাঁকানো \"PAID\" স্ট্যাম্প প্রদর্শন করার সুবিধা। সেটিংস পেজ থেকে লাইভ প্রিভিউ দেখে সহজেই অন/অফ করা যায়।"
+
+msgid "Watermark"
+msgstr "ওয়াটারমার্ক"
+
+msgid "Paid Stamp"
+msgstr "পেইড স্ট্যাম্প"
+
+msgid "Professional"
+msgstr "প্রফেশনাল"
+
+msgid "Modern & Default Templates"
+msgstr "মডার্ন ও ডিফল্ট টেমপ্লেট"
+
+msgid "Customizable layouts and branding"
+msgstr "কাস্টমাইজেবল লেআউট ও ব্র্যান্ডিং"
+
+msgid "Choose between clean Default and sleek Modern layouts. Customize brand accent color, upload company logo, and set paper size (A4 / Letter)."
+msgstr "মার্জিত ডিফল্ট বা স্লিক মডার্ন ডিজাইনের মধ্য থেকে পছন্দ করুন। ব্র্যান্ড কালার পরিবর্তন, লোগো যুক্ত করা এবং পেপারের সাইজ (A4 / Letter) নির্ধারণ করা যায়।"
+
+msgid "Brand Color"
+msgstr "ব্র্যান্ড কালার"
+
+msgid "A4 & Letter"
+msgstr "A4 ও লেটার সাইজ"
+
+msgid "Logo Upload"
+msgstr "লোগো আপলোড"
+
+msgid "Gapless Sequential Numbering"
+msgstr "ধারাবাহিক সিকোয়েন্সিয়াল নাম্বারিং"
+
+msgid "Sequential invoice numbering"
+msgstr "নির্ভুল ও ধারাবাহিক ইনভয়েস নম্বর"
+
+msgid "Lock-guarded atomic numbering ensures duplicate-free numbers without gaps. Fully customizable with {PREFIX}, {YEAR}, and {NUMBER} tokens."
+msgstr "লক-সুরক্ষিত অটোমিক নাম্বারিং কোনো ফাঁক বা ডুপ্লিকেট ছাড়া ধারাবাহিক নম্বর নিশ্চিত করে। প্রিফিক্স, সাল ও নম্বর টোকেন দিয়ে ইচ্ছামতো সাজানো যায়।"
+
+msgid "Atomic Lock"
+msgstr "অটোমিক লক"
+
+msgid "No Gaps"
+msgstr "ফাঁকহীন গণনা"
+
+msgid "Custom Tokens"
+msgstr "কাস্টম টোকেন"
+
+msgid "Warehouse Packing Slips"
+msgstr "প্যাকিং স্লিপ"
+
+msgid "1-click shipping slips"
+msgstr "১-ক্লিকে শিপিং প্যাকিং স্লিপ প্রিন্ট"
+
+msgid "Streamlined shipping slips for order fulfillment without displaying product prices. Generated on demand without keeping temporary files."
+msgstr "পণ্য সরবরাহের জন্য সুবিধাজনক শিপিং স্লিপ যেখানে পণ্যের দাম দেখানো হয় না। কোনো বাড়তি ফাইল জমা না করে তাৎক্ষণিকভাবে তৈরি হয়।"
+
+msgid "Warehouse Ready"
+msgstr "গুদাম উপযোগী"
+
+msgid "Price Free"
+msgstr "দামহীন স্লিপ"
+
+msgid "Order Edit Action"
+msgstr "অর্ডার পেজ অ্যাকশন"
+
+msgid "Bengali (Bangla) Script Support"
+msgstr "বাংলা স্ক্রিপ্ট সাপোর্ট"
+
+msgid "Noto Sans Bengali with vowel sign positioning"
+msgstr "নোটো সান্স বাংলা ফন্ট ও কার-চিহ্ন বিন্যাস"
+
+msgid "Includes bundled Noto Sans Bengali font and vowel-sign reordering (such as split vowels o-kar and ou-kar). Complex consonant conjuncts have known font rendering limitations (see FAQ)."
+msgstr "বিল্ট-ইন নোটো সান্স বাংলা ফন্ট এবং কার-চিহ্ন (যেমন ও-কার ও ঔ-কার) সঠিক বিন্যাস অন্তর্ভুক্ত। তবে কিছু জটিল যুক্তবর্ণে ফন্ট রেন্ডারিংয়ের সীমাবদ্ধতা রয়েছে (FAQ দেখুন)।"
+
+msgid "Noto Sans Bengali"
+msgstr "নোটো সান্স বাংলা"
+
+msgid "Vowel Correction"
+msgstr "কার-চিহ্ন সংশোধন"
+
+msgid "Bangla Support"
+msgstr "বাংলা সাপোর্ট"
+
+msgid "Real-Time Revenue Dashboard"
+msgstr "রিয়েল-টাইম রেভিনিউ ড্যাশবোর্ড"
+
+msgid "Revenue KPIs and recent activity"
+msgstr "বিক্রয় পরিসংখ্যান ও সাম্প্রতিক তথ্য"
+
+msgid "Monitor monthly revenue KPIs, document counts, 7/30/90-day activity trends, and search recent documents with optimized queries."
+msgstr "মাসিক আয়, মোট ইনভয়েস সংখ্যা, বিগত ৭/৩০/৯০ দিনের চার্ট ও দ্রুতগতির অপ্টিমাইজড কুয়েরির মাধ্যমে যেকোনো ইনভয়েস সহজে অনুসন্ধান করুন।"
+
+msgid "Fast Analytics"
+msgstr "দ্রুত অ্যানালিটিক্স"
+
+msgid "Document Search"
+msgstr "ডকুমেন্ট সার্চ"
+
+msgid "Optimized Queries"
+msgstr "অপ্টিমাইজড কুয়েরি"
+
+msgid "Bulk ZIP Download & Batch Print"
+msgstr "বাল্ক জিপ ডাউনলোড ও প্রিন্ট"
+
+msgid "Download or print multiple orders at once"
+msgstr "একসাথে একাধিক অর্ডারের ইনভয়েস ডাউনলোড বা প্রিন্ট"
+
+msgid "Download dozens of invoices in a single ZIP archive or merge selected invoices into a single multi-page PDF for instant batch warehouse printing."
+msgstr "এক ক্লিকে একাধিক ইনভয়েস জিপ ফাইলে ডাউনলোড করুন অথবা গুদামে একসাথে প্রিন্ট করার জন্য একটি কম্বাইন্ড ফাইলে মার্জ করুন।"
+
+msgid "Bulk Actions"
+msgstr "বাল্ক অ্যাকশন"
+
+msgid "ZIP Archive"
+msgstr "জিপ আর্কাইভ"
+
+msgid "Batch Print"
+msgstr "একত্রে প্রিন্ট"
+
+msgid "Dynamic QR Codes & Electronic Invoicing"
+msgstr "ডায়নামিক কিউআর কোড ও ই-ইনভয়েসিং"
+
+msgid "Payment and tax authority QR codes"
+msgstr "পেমেন্ট লিংক ও ট্যাক্স ভেরিফিকেশন কিউআর"
+
+msgid "Embed payment QR codes (bKash, Nagad, UPI) and explore electronic invoicing formats (including planned ZATCA e-invoicing support)."
+msgstr "পেমেন্ট কিউআর কোড (বিকাশ, নগদ, ইউপিআই) যুক্ত করার সুবিধা এবং আন্তর্জাতিক ই-ইনভয়েসিং স্ট্যান্ডার্ড (পরিকল্পিত ZATCA সাপোর্ট সহ)।"
+
+msgid "Planned ZATCA"
+msgstr "পরিকল্পিত ZATCA"
+
+msgid "Payment QR"
+msgstr "পেমেন্ট QR"
+
+msgid "E-Invoicing"
+msgstr "ই-ইনভয়েসিং"
+
+msgid "Quick Guide Topics"
+msgstr "নির্দেশিকার বিষয়সমূহ"
+
+msgid "1. Quick 3-Minute Setup"
+msgstr "১. শুরুতেই বেসিক সেটআপ (৩ মিনিট)"
+
+msgid "2. Invoice Numbering Format"
+msgstr "২. ইনভয়েস নম্বর কীভাবে সাজাবেন"
+
+msgid "3. How Customers Receive Invoices"
+msgstr "৩. কাস্টমার কীভাবে ইনভয়েস পাবে"
+
+msgid "4. Order Refunds & Credit Notes"
+msgstr "৪. রিফান্ড ও ক্রেডিট নোট হ্যান্ডলিং"
+
+msgid "5. Warehouse Packing Slips"
+msgstr "৫. গুদাম প্যাকিং স্লিপ প্রিন্ট"
+
+msgid "6. Frequently Asked Questions (FAQ)"
+msgstr "৬. সাধারণ প্রশ্নোত্তর (FAQ)"
+
+msgid "7. System Health & Diagnostics"
+msgstr "৭. সিস্টেম হেলথ ও ডায়াগনস্টিকস"
+
+msgid "Getting Started: Quick 3-Minute Setup"
+msgstr "শুরুতেই কী করবেন? (৩ মিনিটের কুইক সেটআপ)"
+
+msgid "After activating the plugin, you can set up professional invoicing for your store in just 3 minutes without writing any code:"
+msgstr "প্লাগিন অ্যাক্টিভ করার পর কোনো কোডিং ছাড়াই মাত্র ৩ মিনিটে আপনার শপের বিলিং প্রস্তুত করে নিতে পারেন:"
+
+msgid "Go to Settings:"
+msgstr "সেটিংস পেজে যান:"
+
+msgid "Click on Billio > Settings in your WordPress admin menu."
+msgstr "ওয়ার্ডপ্রেস ড্যাশবোর্ড থেকে Billio > Settings মেনুতে ক্লিক করুন।"
+
+msgid "Enter Company Info:"
+msgstr "কোম্পানির নাম ও ঠিকানা দিন:"
+
+msgid "In the Company Info card, enter your store name, business address, and contact or tax identification number."
+msgstr "\"Company Info\" কার্ডে আপনার প্রতিষ্ঠানের নাম, ঠিকানা এবং ফোন নম্বর বা ভ্যাট/ট্যাক্স নম্বর লিখুন।"
+
+msgid "Upload Brand Logo:"
+msgstr "লোগো আপলোড করুন:"
+
+msgid "Drag and drop your company logo into the Company Logo box. It will be positioned automatically at the top of your invoices."
+msgstr "\"Company Logo\" বক্সে আপনার ব্র্যান্ডের লোগো আপলোড করুন। এটি স্বয়ংক্রিয়ভাবে ইনভয়েসের উপরে বসে যাবে।"
+
+msgid "Save Changes:"
+msgstr "সেটিংস সেভ করুন:"
+
+msgid "Click the \"Save settings\" button at the bottom of the page. Your invoices are now ready!"
+msgstr "নিচে \"Save settings\" বাটনে ক্লিক করুন। আপনার ইনভয়েস পুরোপুরি প্রস্তুত!"
+
+msgid "Pro Tip:"
+msgstr "প্রো টিপ:"
+
+msgid "Using a logo with a transparent background (PNG) gives your invoices a clean and modern look."
+msgstr "লোগোর জন্য স্বচ্ছ ব্যাকগ্রাউন্ডযুক্ত (Transparent PNG) ফাইল ব্যবহার করলে ইনভয়েস দেখতে অত্যন্ত প্রফেশনাল লাগে।"
+
+msgid "Customizing Invoice Numbers"
+msgstr "ইনভয়েস নম্বর কীভাবে সাজাবেন"
+
+msgid "Billio keeps track of sequential invoice numbers (e.g., 0001, 0002, 0003) automatically. You can customize the pattern using standard tags:"
+msgstr "বিলিও স্বয়ংক্রিয়ভাবে ধারাবাহিক ইনভয়েস নম্বর (যেমন: 0001, 0002, 0003) সংরক্ষণ করে। আপনি নিচের টোকেন দিয়ে নিজের মতো ফরম্যাট করতে পারেন:"
+
+msgid "Your invoice prefix (e.g. INV or BILL)."
+msgstr "আপনার ইনভয়েসের প্রিফিক্স (যেমন: INV বা BILL)।"
+
+msgid "The current calendar year (e.g. 2026)."
+msgstr "বর্তমান সাল (যেমন: 2026)।"
+
+msgid "The sequential order counter padded with zeroes (e.g. 0001)."
+msgstr "অর্ডারের ধারাবাহিক নম্বর (যেমন: 0001)।"
+
+msgid "Example format:"
+msgstr "উদাহরণ ফরম্যাট:"
+
+msgid "Result: INV-2026-0001"
+msgstr "ফলাফল: INV-2026-0001"
+
+msgid "Reset yearly:"
+msgstr "বাৎসরিক রিসেট (Reset yearly):"
+
+msgid "When enabled, invoice counting resets back to 1 every January (e.g., INV-2026-0001, INV-2027-0001). When disabled, numbers continue sequentially without resetting."
+msgstr "এটি অন রাখলে প্রতি জানুয়ারি মাসে গণনা আবার ১ থেকে শুরু হবে (যেমন: INV-2026-0001, INV-2027-0001)। অফ রাখলে সবসময় ধারাবাহিকভাবে চলতে থাকবে।"
+
+msgid "How Customers Receive Invoices"
+msgstr "কাস্টমার কীভাবে ইনভয়েস পাবে"
+
+msgid "Your store customers can access their PDF invoices through 3 convenient delivery methods:"
+msgstr "আপনার স্টোরের ক্রেতারা ৩টি সহজ উপায়ে তাদের ইনভয়েস পিডিএফ পেতে পারেন:"
+
+msgid "Automated Email Attachments:"
+msgstr "অটোমেটিক ইমেইল অ্যাটাচমেন্ট:"
+
+msgid "When an order is marked Processing or Completed, WooCommerce automatically attaches the PDF invoice to the customer notification email."
+msgstr "অর্ডার কমপ্লিট বা প্রসেসিং হলে উকমার্স ইমেইলের সাথে পিডিএফ ইনভয়েস স্বয়ংক্রিয়ভাবে চলে যাবে।"
+
+msgid "Thank You Page Download:"
+msgstr "থ্যাংক ইউ পেজ বাটন:"
+
+msgid "Immediately after placing an order, customers can click the \"Download Invoice (PDF)\" button on the Order Received confirmation screen."
+msgstr "অর্ডার প্লেস করার সাথে সাথে কনফার্মেশন স্ক্রিনে সরাসরি \"Download Invoice (PDF)\" বাটন দেখতে পাবেন।"
+
+msgid "My Account Order History:"
+msgstr "মাই অ্যাকাউন্ট অর্ডার হিস্ট্রি:"
+
+msgid "Registered shoppers can log in anytime and download past invoices directly from their order list."
+msgstr "কাস্টমার যেকোনো সময় অ্যাকাউন্টে লগইন করে পূর্ববর্তী যেকোনো অর্ডারের ইনভয়েস ডাউনলোড করতে পারবেন।"
+
+msgid "Guest Shoppers:"
+msgstr "গেস্ট ক্রেতাদের সুবিধা:"
+
+msgid "Customers who checkout as guests can also securely download their invoice directly from the Thank You page using their unique order key."
+msgstr "যাদের অ্যাকাউন্ট নেই তারাও থ্যাংক ইউ পেজ থেকে তাদের নিজস্ব ইউনিক সিকিউর অর্ডার কি দিয়ে নিরাপদে ইনভয়েস ডাউনলোড করতে পারবেন।"
+
+msgid "Refunds & Credit Notes"
+msgstr "অর্ডার রিফান্ড ও ক্রেডিট নোট"
+
+msgid "When an order is refunded, maintaining proper accounting records requires issuing an official credit note:"
+msgstr "কোনো অর্ডার রিফান্ড করা হলে হিসাব ও কমপ্লায়েন্স সঠিক রাখার জন্য ক্রেডিট নোট অত্যন্ত জরুরি:"
+
+msgid "Open the order in WooCommerce > Orders and process the refund using the standard Refund button."
+msgstr "WooCommerce > Orders-এ গিয়ে সাধারণ নিয়মে \"Refund\" বাটনে ক্লিক করে রিফান্ড প্রসেস করুন।"
+
+msgid "Billio automatically generates a separate Credit Note document with sequential numbering (e.g., CN-0001)."
+msgstr "বিলিও স্বয়ংক্রিয়ভাবে রিফান্ডের জন্য একটি আলাদা ক্রেডিট নোট নম্বর (যেমন: CN-0001) দিয়ে নতুন পিডিএফ তৈরি করবে।"
+
+msgid "The Credit Note PDF is attached automatically to the customer refund email."
+msgstr "কাস্টমারের রিফান্ড কনফার্মেশন ইমেইলে ক্রেডিট নোট পিডিএফ স্বয়ংক্রিয়ভাবে যুক্ত হয়ে যাবে।"
+
+msgid "Packing slips simplify order fulfillment by providing a clean list of items for warehouse staff and couriers:"
+msgstr "পার্সেল প্যাক করা এবং ডেলিভারির জন্য পণ্যের তালিকা সম্বলিত প্যাকিং স্লিপ তৈরি করা যায়:"
+
+msgid "Go to WooCommerce > Orders and click on any order to open its details."
+msgstr "WooCommerce > Orders-এ গিয়ে যেকোনো অর্ডারের ভেতরে প্রবেশ করুন।"
+
+msgid "In the \"Billio Invoice\" sidebar box, click the \"Packing Slip\" button."
+msgstr "ডান পাশের \"Billio Invoice\" বক্সে \"Packing Slip\" বাটনে ক্লিক করুন।"
+
+msgid "A clean packing slip opens in your browser, ready to print without showing item prices."
+msgstr "পণ্যের দাম ছাড়া শুধু ডেলিভারি ঠিকানা এবং পণ্যের তালিকা সুন্দরভাবে প্রিন্ট করার জন্য ওপেন হবে।"
+
+msgid "Why are customers not receiving invoice attachments in their emails?"
+msgstr "প্রশ্ন: কাস্টমার ইমেইলে ইনভয়েস পিডিএফ পাচ্ছে না কেন?"
+
+msgid "Check two settings: 1) Go to Billio > Settings and ensure the \"Processing\" and/or \"Completed\" email checkboxes are selected under Email & Paper. 2) Go to WooCommerce > Settings > Emails and verify that customer order notification emails are enabled."
+msgstr "সমাধান: ১) Billio > Settings-এ যান এবং \"Email & Paper\" ট্যাবে \"Processing\" ও \"Completed\" বক্সে টিক চিহ্ন দেওয়া আছে কি না নিশ্চিত করুন। ২) WooCommerce > Settings > Emails-এ গিয়ে সংশ্লিষ্ট ইমেইলটি এনাবল আছে কি না তা দেখে নিন।"
+
+msgid "How do I display a \"PAID\" watermark stamp on the invoice?"
+msgstr "প্রশ্ন: ইনভয়েসের ব্যাকগ্রাউন্ডে \"PAID\" স্ট্যাম্প কীভাবে দেখাব?"
+
+msgid "Go to Billio > Settings > Invoice Styling card. Check the \"PAID watermark\" checkbox and click Save settings. Fulfilled orders will display a subtle, angled PAID stamp."
+msgstr "সমাধান: Billio > Settings-এর \"Invoice Styling\" কার্ডে যান। সেখানে \"PAID watermark\" চেকবক্সটি চালু করে Save settings দিন। পরিশোধিত অর্ডারে সুন্দর স্ট্যাম্প দেখা যাবে।"
+
+msgid "Are Bengali names and addresses supported?"
+msgstr "প্রশ্ন: বাংলা নাম ও ঠিকানা কি ইনভয়েসে সঠিকভাবে আসবে?"
+
+msgid "Yes. Billio includes the bundled Noto Sans Bengali font and vowel-sign reordering (such as split vowels o-kar and ou-kar). Please note that due to font shaping limitations in Dompdf, some complex consonant conjuncts may not connect properly."
+msgstr "হ্যাঁ! বিলিওতে নোটো সান্স বাংলা ফন্ট বিল্ট-ইন রয়েছে এবং কার-চিহ্ন বিন্যাস (যেমন ও-কার ও ঔ-কার) সংশোধন যুক্ত রয়েছে। তবে Dompdf-এর ফন্ট শেপিং সীমাবদ্ধতার কারণে কিছু জটিল যুক্তবর্ণ ঠিকভাবে নাও জুড়তে পারে।"
+
+msgid "Can I generate invoices for older, existing orders?"
+msgstr "প্রশ্ন: আমি কি আগের পুরনো অর্ডারের জন্য ইনভয়েস তৈরি করতে পারি?"
+
+msgid "Yes. In the Billio Dashboard, look for the \"Action Needed\" banner. You can generate invoices for past orders in safe background batches with a single click."
+msgstr "হ্যাঁ! বিলিও ড্যাশবোর্ডে গিয়ে \"Action Needed\" ব্যানারে ক্লিক করলে যেসব পুরনো অর্ডারের ইনভয়েস নেই, সেগুলো ব্যাকগ্রাউন্ডে নিরাপদ ব্যাচে তৈরি করে নেওয়া যায়।"
+
+msgid "System Health & Diagnostics"
+msgstr "সিস্টেম হেলথ ও ডায়াগনস্টিকস"
+
+msgid "Verify at a glance whether your hosting environment meets the optimal conditions for fast PDF generation:"
+msgstr "আপনার হোস্টিং পরিবেশ বিলিও ও দ্রুত পিডিএফ রেন্ডারিংয়ের জন্য শতভাগ প্রস্তুত কি না তা এক নজরে যাচাই করুন:"
+
+msgid "Environment / Component"
+msgstr "পরিবেশ / উপাদান"
+
+msgid "Current Value"
+msgstr "বর্তমান মান"
+
+msgid "Status"
+msgstr "স্ট্যাটাস"
+
+msgid "Compatible"
+msgstr "উপযোগী"
+
+msgid "Upgrade to 7.4+"
+msgstr "PHP ৭.৪ বা তদূর্ধ্ব প্রয়োজন"
+
+msgid "Protected with Auto-Raise"
+msgstr "সুরক্ষিত (স্বয়ংক্রিয় বৃদ্ধি)"
+
+msgid "Installed"
+msgstr "ইনস্টল করা আছে"
+
+msgid "Missing"
+msgstr "অনুপস্থিত"
+
+msgid "Active"
+msgstr "সক্রিয়"
+
+msgid "Recommended for Unicode"
+msgstr "ইউনিকোডের জন্য সাজেস্টেড"
+
+msgid "Recommended for Images"
+msgstr "ইমেজের জন্য সাজেস্টেড"
+
+msgid "Writable (.htaccess secured)"
+msgstr "লিখনযোগ্য (.htaccess দ্বারা সুরক্ষিত)"
+
+msgid "Check Permissions (755)"
+msgstr "পারমিশন চেক করুন (৭৫৫)"
+
+msgid "HPOS Active"
+msgstr "HPOS সক্রিয়"
+
+msgid "CPT Compatibility Mode"
+msgstr "CPT কম্প্যাটিবিলিটি মোড"
+
+msgid "100% Compatible"
+msgstr "১০০% কম্প্যাটিবল"
+
+msgid "Optimized (Subsetting On)"
+msgstr "অপ্টিমাইজড (সাবসেটিং চালু)"
+
+msgid "Need Additional Help or Have Questions?"
+msgstr "আরো কোনো প্রশ্ন বা সাহায্য প্রয়োজন?"
+
+msgid "Our support team is ready to assist with any questions or configuration needs. Visit the settings page or view the official documentation."
+msgstr "আমাদের সাপোর্ট টিম যেকোনো সমস্যা সমাধানে প্রস্তুত। সেটিংস পেজে ভিজিট করুন অথবা অফিশিয়াল ডকুমেন্টেশন দেখুন।"
+
+msgid "Open Settings Page"
+msgstr "সেটিংস পেজে যান"
+
+msgid "Preview Document"
+msgstr "ডকুমেন্ট প্রিভিউ"
+
+msgid "Close preview (Esc)"
+msgstr "প্রিভিউ বন্ধ করুন (Esc)"
+
+msgid "Print"
+msgstr "প্রিন্ট"
+
+msgid "Copy Link"
+msgstr "লিংক কপি করুন"
+
+msgid "Link copied to clipboard!"
+msgstr "ইনভয়েস লিংক ক্লিপবোর্ডে কপি হয়েছে!"
+
+msgid "WhatsApp"
+msgstr "হোয়াটসঅ্যাপ"
+
+msgid "Order Details"
+msgstr "অর্ডারের বিবরণ"
+
+msgid "Payment Method"
+msgstr "পেমেন্ট পদ্ধতি"
+
+msgid "Billing Address"
+msgstr "বিলিং ঠিকানা"
+
+msgid "Items"
+msgstr "আইটেম সংখ্যা"
+
+msgid "Email"
+msgstr "ইমেইল"
+
+msgid "Phone"
+msgstr "ফোন নম্বর"
+
+msgid "Open in WooCommerce →"
+msgstr "উকমার্স অর্ডারে যান →"
+
+msgid "Rendering live PDF preview…"
+msgstr "লাইভ পিডিএফ প্রিভিউ প্রস্তুত হচ্ছে…"
+
+msgid "VAT / Tax / BIN Number"
+msgstr "ভ্যাট / ট্যাক্স / বিআইএন নম্বর"
+
+msgid "VAT / Tax ID"
+msgstr "ভ্যাট / ট্যাক্স আইডি"
+
+msgid "Customer Tax ID at checkout"
+msgstr "চেকআউটে গ্রাহক ট্যাক্স / ভ্যাট আইডি"
+
+msgid "Allow B2B customers to enter their VAT / Tax / BIN number during checkout."
+msgstr "চেকআউটের সময় B2B গ্রাহকদের তাদের ভ্যাট / ট্যাক্স / বিআইএন নম্বর দেওয়ার সুবিধা দিন।"
+
+msgid "Customer Tax ID label"
+msgstr "গ্রাহক ট্যাক্স আইডি লেবেল"
+
+msgid "Label displayed on the checkout page, order details, and PDF invoice."
+msgstr "চেকআউট পেজ, অর্ডার ডিটেইলস এবং পিডিএফ ইনভয়েসে প্রদর্শিত লেবেল।"
+
+msgid "Require Tax ID at checkout"
+msgstr "চেকআউটে ট্যাক্স আইডি বাধ্যতামূলক করুন"
+
+msgid "Make entering a Tax ID mandatory for customers during checkout."
+msgstr "চেকআউটের সময় গ্রাহকদের জন্য ট্যাক্স আইডি দেওয়া বাধ্যতামূলক করুন।"
+
+msgid "B2B Customer Tax ID"
+msgstr "B2B গ্রাহক ট্যাক্স আইডি"
+
+msgid "Collect customer VAT, Tax, BIN, TRN, or GSTIN numbers at checkout and print on invoices."
+msgstr "চেকআউটে গ্রাহকদের ভ্যাট, ট্যাক্স, বিআইএন বা জিএসটিআইএন সংগ্রহ করুন এবং ইনভয়েসে প্রিন্ট করুন।"
+
+msgid "Checkout field"
+msgstr "চেকআউট ফিল্ড"
+
+msgid "Adds a Tax ID input field to WooCommerce checkout"
+msgstr "WooCommerce চেকআউটে একটি ট্যাক্স আইডি ইনপুট ফিল্ড যোগ করে"
+
+msgid "Enable Tax ID at checkout"
+msgstr "চেকআউটে ট্যাক্স আইডি চালু করুন"
+
+msgid "Works seamlessly with Classic shortcode checkout and Block checkout"
+msgstr "ক্লাসিক শর্টকোড চেকআউট এবং ব্লক চেকআউট উভয়ের সাথেই নির্বিঘ্নে কাজ করে"
+
+msgid "Field label"
+msgstr "ফিল্ড লেবেল"
+
+msgid "Shown on checkout, order details, and PDF invoices"
+msgstr "চেকআউট, অর্ডার বিবরণ এবং পিডিএফ ইনভয়েসে প্রদর্শিত হবে"
+
+msgid "Field requirement"
+msgstr "ফিল্ডের বাধ্যবাধকতা"
+
+msgid "Control whether buyers are required to fill this field"
+msgstr "ক্রেতাদের জন্য এই ফিল্ড পূরণ করা বাধ্যতামূলক কিনা তা নির্ধারণ করুন"
+
+msgid "Orders cannot be placed without entering a Tax ID"
+msgstr "ট্যাক্স আইডি প্রদান না করে অর্ডার সম্পন্ন করা যাবে না"
+
+msgid "B2B / Tax ID"
+msgstr "B2B / ট্যাক্স আইডি"
+
+msgid "B2B Customer Tax ID (VAT / BIN / GSTIN)"
+msgstr "B2B গ্রাহক ট্যাক্স আইডি (ভ্যাট / বিআইএন / জিএসটিআইএন)"
+
+msgid "Seamless checkout field & invoice display"
+msgstr "সহজ চেকআউট ফিল্ড এবং ইনভয়েসে সরাসরি প্রদর্শন"
+
+msgid "Collect customer VAT, BIN, TRN, or GSTIN numbers during checkout with full Classic and Block Checkout support, editable from the admin order screen."
+msgstr "ক্লাসিক এবং ব্লক চেকআউট উভয় সমর্থন সহ চেকআউটের সময় গ্রাহকের ভ্যাট/ট্যাক্স আইডি সংগ্রহ করুন এবং অ্যাডমিন অর্ডার স্ক্রিন থেকে সম্পাদনা করুন।"
+
+msgid "B2B Checkout"
+msgstr "B2B চেকআউট"
+
+msgid "Block & Classic"
+msgstr "ব্লক এবং ক্লাসিক"
+
+msgid "Tax ID on PDF"
+msgstr "পিডিএফ-এ ট্যাক্স আইডি"
+
+msgid "Customer VAT / Tax / BIN Number"
+msgstr "গ্রাহকের ভ্যাট / ট্যাক্স / বিআইএন নম্বর"
+
+msgid "e.g. VAT / Tax / BIN Number"
+msgstr "যেমনঃ ভ্যাট / ট্যাক্স / বিআইএন নম্বর"
+
+msgid "Smart Setup Checklist"
+msgstr "স্মার্ট সেটআপ চেকলিস্ট"
+
+msgid "Quick Actions"
+msgstr "কুইক অ্যাকশনস"
+
+msgid "Live Invoice Preview"
+msgstr "লাইভ ইনভয়েস প্রিভিউ"
+
+msgid "Customer Tax ID at checkout"
+msgstr "চেকআউটে গ্রাহক ট্যাক্স আইডি"
+
+msgid "Customer Tax ID enabled at checkout"
+msgstr "চেকআউটে গ্রাহক ট্যাক্স আইডি চালু করা হয়েছে"
+
+msgid "Customer Tax ID disabled at checkout"
+msgstr "চেকআউটে গ্রাহক ট্যাক্স আইডি বন্ধ করা হয়েছে"
+
+msgid "PAID stamp watermark"
+msgstr "PAID স্ট্যাম্প ওয়াটারমার্ক"
+
+msgid "PAID stamp enabled on paid invoices"
+msgstr "পরিশোধিত ইনভয়েসে PAID স্ট্যাম্প চালু করা হয়েছে"
+
+msgid "PAID stamp disabled"
+msgstr "PAID স্ট্যাম্প বন্ধ করা হয়েছে"
+
+msgid "🎉 All setup steps completed! Your store is fully branded."
+msgstr "🎉 সকল সেটআপ ধাপ সম্পন্ন হয়েছে! আপনার স্টোর এখন সম্পূর্ণ প্রস্তুত।"
+
+msgid "%1$d of %2$d complete"
+msgstr "%1$d এর মধ্যে %2$d সম্পন্ন"
+
+msgid "Show checklist"
+msgstr "চেকলিস্ট দেখুন"
+
+msgid "Hide checklist"
+msgstr "চেকলিস্ট লুকান"
+
+msgid "Sample Invoice Preview"
+msgstr "নমুনা ইনভয়েস প্রিভিউ"
+
+msgid "Company details & logo"
+msgstr "কোম্পানির বিবরণ ও লোগো"
+
+msgid "Invoice numbering format"
+msgstr "ইনভয়েস নম্বরিং ফরম্যাট"
+
+msgid "Email attachment triggers"
+msgstr "ইমেইল অ্যাটাচমেন্ট ট্রিগার"
+
+msgid "First invoice generated"
+msgstr "প্রথম ইনভয়েস তৈরি করা হয়েছে"
+
+msgid "15 Features"
+msgstr "১৫টি ফিচার"
+
+msgid "Slide-Over Preview Drawer & Instant Actions"
+msgstr "স্লাইড-ওভার প্রিভিউ ড্রয়ার ও তাৎক্ষণিক অ্যাকশন"
+
+msgid "Zero page reload live PDF viewing & sharing"
+msgstr "পেজ রিলোড ছাড়াই লাইভ পিডিএফ দর্শন ও শেয়ারিং"
+
+msgid "Preview live invoice PDFs directly from the dashboard or orders list in an elegant slide-over drawer. Share invoices to customers via WhatsApp in 1 click, print directly, copy download link, or resend invoice emails."
+msgstr "ড্যাশবোর্ড বা অর্ডার তালিকা থেকে পেজ রিলোড ছাড়াই চমৎকার স্লাইড-ওভার ড্রয়ারে লাইভ ইনভয়েস প্রিভিউ দেখুন। ১-ক্লিকে কাস্টমারকে হোয়াটসঅ্যাপে ইনভয়েস পাঠান, সরাসরি প্রিন্ট করুন, ডাউনলোড লিংক কপি করুন বা ইনভয়েস ইমেইল পুনরায় পাঠান।"
+
+msgid "Slide-Over Drawer"
+msgstr "স্লাইড-ওভার ড্রয়ার"
+
+msgid "WhatsApp Sharing"
+msgstr "হোয়াটসঅ্যাপ শেয়ারিং"
+
+msgid "1-Click Print"
+msgstr "১-ক্লিক প্রিন্ট"
+
+msgid "Copy Link"
+msgstr "লিংক কপি"
+
+msgid "Smart Setup Checklist & Quick Actions Hub"
+msgstr "স্মার্ট সেটআপ চেকলিস্ট ও কুইক অ্যাকশনস হাব"
+
+msgid "Animated onboarding & instant dashboard controls"
+msgstr "অ্যানিমেটেড অনবোর্ডিং ও তাৎক্ষণিক ড্যাশবোর্ড নিয়ন্ত্রণ"
+
+msgid "Guides store owners through essential setup steps with a live SVG radial progress ring. Quick Actions hub allows instant sample invoice preview, 1-click batch generation of missing invoices, and real-time AJAX toggles for B2B Tax ID and PAID watermark."
+msgstr "লাইভ এসভিজি রেডিয়াল প্রোগ্রেস রিংয়ের মাধ্যমে স্টোর মালিকদের ধাপে ধাপে সেটআপ সম্পন্ন করতে সাহায্য করে। কুইক অ্যাকশনস হাবের মাধ্যমে সরাসরি স্যাম্পল ইনভয়েস দেখা যায়, বাদ পড়া ইনভয়েস একসাথে তৈরি করা যায় এবং B2B ট্যাক্স আইডি ও PAID ওয়াটারমার্ক তাৎক্ষণিক টগল করা যায়।"
+
+msgid "Radial Progress"
+msgstr "রেডিয়াল প্রোগ্রেস"
+
+msgid "Onboarding Checklist"
+msgstr "অনবোর্ডিং চেকলিস্ট"
+
+msgid "Instant Toggles"
+msgstr "তাৎক্ষণিক টগল"
+
+msgid "4. B2B Customer Tax ID (VAT / BIN / GSTIN)"
+msgstr "৪. B2B গ্রাহক ট্যাক্স আইডি (ভ্যাট / বিআইএন / জিএসটিআইএন)"
+
+msgid "5. Live Preview Drawer & 1-Click Sharing"
+msgstr "৫. লাইভ প্রিভিউ ড্রয়ার ও ১-ক্লিক শেয়ারিং"
+
+msgid "6. Order Refunds & Credit Notes"
+msgstr "৬. অর্ডার রিফান্ড ও ক্রেডিট নোট"
+
+msgid "7. Warehouse Packing Slips"
+msgstr "৭. ওয়্যারহাউস প্যাকিং স্লিপ"
+
+msgid "8. Frequently Asked Questions (FAQ)"
+msgstr "৮. সচরাচর জিজ্ঞাস্য প্রশ্নাবলী (FAQ)"
+
+msgid "9. System Health & Diagnostics"
+msgstr "৯. সিস্টেম হেলথ ও ডায়াগনস্টিকস"
+
+msgid "B2B Customer Tax ID (VAT / BIN / GSTIN) at Checkout"
+msgstr "চেকআউটে B2B গ্রাহক ট্যাক্স আইডি (ভ্যাট / বিআইএন / জিএসটিআইএন)"
+
+msgid "Can I send invoices to customers via WhatsApp?"
+msgstr "আমি কি কাস্টমারকে হোয়াটসঅ্যাপের মাধ্যমে ইনভয়েস পাঠাতে পারি?"
+
+msgid "Yes! In the Billio Dashboard under Recent Documents, click the preview icon on any order to open the slide-over drawer, then click the green \"WhatsApp\" button. Billio opens WhatsApp Web or the WhatsApp mobile app with a personalized message and the secure invoice download link ready to send."
+msgstr "হ্যাঁ! বিলিও ড্যাশবোর্ডের Recent Documents তালিকায় যেকোনো অর্ডারের প্রিভিউ আইকনে ক্লিক করে স্লাইড-ওভার ড্রয়ারটি খুলুন এবং সবুজ \"WhatsApp\" বাটনে ক্লিক করুন। বিলিও কাস্টমারের নাম, অর্ডার নম্বর ও সুরক্ষিত পিডিএফ ডাউনলোড লিংকসহ একটি সুন্দর মেসেজ তৈরি করে হোয়াটসঅ্যাপে পাঠিয়ে দেবে।"
+
+msgid "Does Billio support both WooCommerce Block Checkout and Classic Checkout for Tax ID?"
+msgstr "ট্যাক্স আইডির জন্য বিলিও কি উকমার্স ব্লক চেকআউট এবং ক্লাসিক চেকআউট উভয়ই সমর্থন করে?"
+
+msgid "Yes! Billio natively supports both the modern WooCommerce Cart & Checkout Blocks (via the Store API) and classic shortcode checkout ([woocommerce_checkout]). Customer Tax ID inputs are saved seamlessly and displayed on the order screen and PDF invoices."
+msgstr "হ্যাঁ! বিলিও আধুনিক উকমার্স কার্ট ও চেকআউট ব্লক (Store API) এবং ঐতিহ্যবাহী ক্লাসিক শর্টকোড চেকআউট ([woocommerce_checkout]) উভয়ই শতভাগ সমর্থন করে। গ্রাহকের ট্যাক্স আইডি কোনো ঝামেলা ছাড়াই অর্ডার এবং পিডিএফ ইনভয়েসে যুক্ত হয়।"
+
+msgid "What does the Smart Setup Checklist on the Dashboard do?"
+msgstr "ড্যাশবোর্ডের স্মার্ট সেটআপ চেকলিস্ট কী কাজ করে?"
+
+msgid "The Smart Setup Checklist guides you step-by-step through configuring your company logo, numbering format, email delivery triggers, and B2B Tax ID. The radial progress ring updates automatically. Once 100% complete, you can dismiss or re-open the checklist anytime."
+msgstr "স্মার্ট সেটআপ চেকলিস্ট আপনাকে কোম্পানির লোগো, নম্বরিং ফরম্যাট, ইমেইল ডেলিভারি ট্রিগার এবং B2B ট্যাক্স আইডি ধাপে ধাপে কনফিগার করতে সাহায্য করে। প্রতিটি ধাপ সম্পন্ন হওয়ার সাথে সাথে রেডিয়াল প্রোগ্রেস রিং স্বয়ংক্রিয়ভাবে আপডেট হয়।"

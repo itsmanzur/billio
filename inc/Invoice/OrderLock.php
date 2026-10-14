@@ -39,6 +39,7 @@ class OrderLock {
 		$key     = self::PREFIX . $order_id;
 		$expires = time() + $ttl;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Concurrency mutex lock requires direct atomic queries without caching.
 		$inserted = $wpdb->query(
 			$wpdb->prepare(
 				"INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %s, 'no')",
@@ -53,6 +54,7 @@ class OrderLock {
 
 		// Lock already exists — reclaim it if it's stale (a previous holder
 		// never released it, e.g. a fatal error or timeout mid-request).
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Fresh lock expiry lookup cannot be cached.
 		$current_expiry = (int) $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $key ) );
 
 		if ( ! $current_expiry || $current_expiry >= time() ) {
@@ -63,6 +65,7 @@ class OrderLock {
 		// no condition on the old value would let two waiters who both read
 		// the same stale expiry both "succeed" and both believe they hold
 		// the lock. Only the one whose WHERE still matches wins.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Atomic compare-and-swap lock acquisition.
 		$reclaimed = $wpdb->update(
 			$wpdb->options,
 			array( 'option_value' => $expires ),
@@ -83,6 +86,7 @@ class OrderLock {
 	 */
 	public static function release( $order_id ) {
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Immediate lock release.
 		$wpdb->delete( $wpdb->options, array( 'option_name' => self::PREFIX . $order_id ) );
 	}
 }

@@ -53,12 +53,15 @@ class Dashboard {
 	const OPTION_SETUP_DISMISSED = 'billio_dashboard_setup_dismissed';
 
 	/**
-	 * Max candidates fetched per search sub-query (find_invoice_candidates(),
-	 * find_credit_note_candidates()) — bounds the worst case for a very
-	 * broad search term, since results are still paginated/sorted in PHP
-	 * after the two sub-queries are merged.
+	 * Hard ceiling on how many candidate IDs a single search sub-query can
+	 * return, per document type — protects a very broad search term (or
+	 * "browse all", $q === '') from resolving an unbounded number of rows
+	 * on a very large store. Pagination always runs over the full
+	 * (possibly capped-at-this-limit) ID list so the reported total/last
+	 * page are correct for anything under the cap; past it, the response
+	 * is flagged `truncated` and the UI asks for a narrower search.
 	 */
-	const SEARCH_CANDIDATE_CAP = 200;
+	const SEARCH_HARD_LIMIT = 5000;
 
 	/**
 	 * Short-lived lock debouncing bust_stats_cache() — see that method.
@@ -78,14 +81,14 @@ class Dashboard {
 	private $hook_suffix = '';
 
 	/**
-	 * @var \WC_Order[]|null Per-request memoization — see get_legacy_invoiced_orders().
+	 * @var DashboardOrderRecord[]|null Per-request memoization — see get_legacy_invoiced_orders().
 	 */
-	private $invoiced_orders_cache = null;
+	private static $invoiced_orders_cache = null;
 
 	/**
-	 * @var \WC_Order_Refund[]|null Per-request memoization — see get_legacy_credit_noted_refunds().
+	 * @var DashboardRefundRecord[]|null Per-request memoization — see get_legacy_credit_noted_refunds().
 	 */
-	private $credit_noted_refunds_cache = null;
+	private static $credit_noted_refunds_cache = null;
 
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
@@ -148,9 +151,14 @@ class Dashboard {
 	 * @return void
 	 */
 	private static function do_bust_stats_cache() {
+		self::$invoiced_orders_cache      = null;
+		self::$credit_noted_refunds_cache = null;
+
 		delete_transient( 'billio_dash_month_stats' );
 		delete_transient( 'billio_dash_last_month_stats' );
 		delete_transient( 'billio_dash_recent_documents' );
+		delete_transient( 'billio_dash_legacy_orders' );
+		delete_transient( 'billio_dash_legacy_refunds' );
 		foreach ( array( 7, 30, 90 ) as $days ) {
 			delete_transient( 'billio_dash_chart_' . $days );
 		}
@@ -223,10 +231,12 @@ class Dashboard {
 			// too (same action name for every order — not order-specific).
 			'orderActionNonce'  => wp_create_nonce( OrderActions::NONCE_ACTION ),
 			'urls'              => array(
-				'settings'        => admin_url( 'admin.php?page=' . SettingsPage::MENU_SLUG ),
-				'preview'         => admin_url( 'admin.php?page=' . SettingsPage::MENU_SLUG ) . '#billio-preview-frame',
-				'ordersList'      => admin_url( 'admin.php?page=wc-orders' ),
-				'editFormatField' => admin_url( 'admin.php?page=' . SettingsPage::MENU_SLUG . '#billio_number_format' ),
+				'settings'             => admin_url( 'admin.php?page=' . SettingsPage::MENU_SLUG ),
+				'docs'                 => admin_url( 'admin.php?page=' . DocsPage::MENU_SLUG ),
+				'preview'              => admin_url( 'admin.php?page=' . SettingsPage::MENU_SLUG ) . '#billio-preview-frame',
+				'sampleInvoicePreview' => wp_nonce_url( admin_url( 'admin-post.php?action=billio_preview&preview=1&doc=inv' ), 'billio_preview' ),
+				'ordersList'           => admin_url( 'admin.php?page=wc-orders' ),
+				'editFormatField'      => admin_url( 'admin.php?page=' . SettingsPage::MENU_SLUG . '#billio_number_format' ),
 			),
 			'currency'          => array(
 				'symbol'      => html_entity_decode( get_woocommerce_currency_symbol(), ENT_QUOTES, 'UTF-8' ),
@@ -253,6 +263,8 @@ class Dashboard {
 				'emailTriggers' => (array) get_option( 'billio_email_triggers', array( 'customer_completed_order' ) ),
 				'template'      => get_option( 'billio_template', 'default' ),
 				'paperSize'     => get_option( 'billio_paper_size', 'A4' ),
+				'enableTaxId'   => (bool) get_option( 'billio_enable_tax_id', false ),
+				'watermarkPaid' => (bool) get_option( 'billio_watermark_paid', false ),
 			),
 			'recentDocuments'   => $recent,
 			'setup'             => $setup,
@@ -308,6 +320,36 @@ class Dashboard {
 			'noRefundsThisMonth'     => __( 'No refunds this month', 'billio' ),
 			'noInvoicesYet'          => __( 'No invoices yet', 'billio' ),
 			'noCreditNotesYet'       => __( 'No credit notes yet', 'billio' ),
+			'searchResultsLimited'   => __( 'Results limited — search for something more specific.', 'billio' ),
+			'previewDocument'        => __( 'Preview Document', 'billio' ),
+			'closePreview'           => __( 'Close preview (Esc)', 'billio' ),
+			'printInvoice'           => __( 'Print', 'billio' ),
+			'copyLink'               => __( 'Copy Link', 'billio' ),
+			'linkCopied'             => __( 'Link copied to clipboard!', 'billio' ),
+			'sendWhatsApp'           => __( 'WhatsApp', 'billio' ),
+			'orderDetails'           => __( 'Order Details', 'billio' ),
+			'paymentMethod'          => __( 'Payment Method', 'billio' ),
+			'billingAddress'         => __( 'Billing Address', 'billio' ),
+			'items'                  => __( 'Items', 'billio' ),
+			'email'                  => __( 'Email', 'billio' ),
+			'phone'                  => __( 'Phone', 'billio' ),
+			'openOrder'              => __( 'Open in WooCommerce →', 'billio' ),
+			'loadingPreview'         => __( 'Rendering live PDF preview…', 'billio' ),
+			'smartChecklist'         => __( 'Smart Setup Checklist', 'billio' ),
+			'quickActions'           => __( 'Quick Actions', 'billio' ),
+			'instantInvoicePreview'  => __( 'Live Invoice Preview', 'billio' ),
+			'b2bTaxIdToggle'         => __( 'Customer Tax ID at checkout', 'billio' ),
+			'b2bTaxIdEnabled'        => __( 'Customer Tax ID enabled at checkout', 'billio' ),
+			'b2bTaxIdDisabled'       => __( 'Customer Tax ID disabled at checkout', 'billio' ),
+			'watermarkPaidToggle'    => __( 'PAID stamp watermark', 'billio' ),
+			'watermarkPaidOn'        => __( 'PAID stamp enabled on paid invoices', 'billio' ),
+			'watermarkPaidOff'       => __( 'PAID stamp disabled', 'billio' ),
+			'allStepsCompleted'      => __( '🎉 All setup steps completed! Your store is fully branded.', 'billio' ),
+			/* translators: 1: number of steps completed, 2: total number of steps. */
+			'setupProgress'          => __( '%1$d of %2$d complete', 'billio' ),
+			'showChecklist'          => __( 'Show checklist', 'billio' ),
+			'hideChecklist'          => __( 'Hide checklist', 'billio' ),
+			'sampleInvoice'          => __( 'Sample Invoice Preview', 'billio' ),
 		);
 	}
 
@@ -335,26 +377,32 @@ class Dashboard {
 	private function get_setup_state() {
 		$steps = array(
 			array(
-				'key'    => 'logo',
-				'label'  => esc_html__( 'Company logo', 'billio' ),
-				'done'   => (bool) get_option( 'billio_company_logo_id' ),
-				'anchor' => '#billio-field-billio_company_logo_id',
+				'key'    => 'company',
+				'label'  => __( 'Company details & logo', 'billio' ),
+				'done'   => (bool) get_option( 'billio_company_logo_id' ) && (bool) get_option( 'billio_company_address' ),
+				'anchor' => '#billio-sec-company',
 			),
 			array(
-				'key'    => 'address',
-				'label'  => esc_html__( 'Company address', 'billio' ),
-				'done'   => (bool) get_option( 'billio_company_address' ),
-				'anchor' => '#billio-field-billio_company_address',
+				'key'    => 'numbering',
+				'label'  => __( 'Invoice numbering format', 'billio' ),
+				'done'   => false !== strpos( (string) get_option( 'billio_number_format', '{PREFIX}-{YEAR}-{NUMBER}' ), '{NUMBER}' ),
+				'anchor' => '#billio-sec-numbering',
 			),
 			array(
 				'key'    => 'email',
-				'label'  => esc_html__( 'Email attachment enabled', 'billio' ),
+				'label'  => __( 'Email attachment triggers', 'billio' ),
 				'done'   => ! empty( get_option( 'billio_email_triggers', array( 'customer_completed_order' ) ) ),
-				'anchor' => '#billio-field-billio_email_triggers',
+				'anchor' => '#billio-sec-delivery',
+			),
+			array(
+				'key'    => 'tax_id',
+				'label'  => __( 'B2B Customer Tax ID', 'billio' ),
+				'done'   => (bool) get_option( 'billio_enable_tax_id', false ),
+				'anchor' => '#billio-sec-tax-id',
 			),
 			array(
 				'key'    => 'first_invoice',
-				'label'  => esc_html__( 'First invoice generated', 'billio' ),
+				'label'  => __( 'First invoice generated', 'billio' ),
 				'done'   => (int) get_option( NumberManager::OPTION_TOTAL_COUNT, 0 ) > 0,
 				'anchor' => '',
 			),
@@ -503,16 +551,90 @@ class Dashboard {
 	 *    invoice_issue_timestamp()'s paid/completed/created fallback chain
 	 *    still applied, but only to this normally-empty-or-tiny subset
 	 *    rather than on every request.
+	/**
+	 * Batch-convert order IDs to lightweight stat items in chunks to
+	 * prevent PHP memory exhaustion on stores with high volume.
+	 *
+	 * @param int[] $order_ids Order IDs.
+	 * @return DashboardOrderRecord[]
+	 */
+	private function ids_to_stat_orders( array $order_ids ) {
+		if ( empty( $order_ids ) ) {
+			return array();
+		}
+
+		$results = array();
+		$chunks  = array_chunk( $order_ids, 100 );
+
+		foreach ( $chunks as $chunk ) {
+			$orders = wc_get_orders(
+				array(
+					'limit'   => count( $chunk ),
+					'include' => $chunk,
+					'return'  => 'objects',
+				)
+			);
+
+			foreach ( $orders as $order ) {
+				$results[] = new DashboardOrderRecord(
+					$order->get_status(),
+					(float) $order->get_total(),
+					$this->invoice_issue_timestamp( $order )
+				);
+			}
+		}
+
+		return $results;
+	}
+
+	/**
+	 * Batch-convert refund IDs to lightweight stat items in chunks.
+	 *
+	 * @param int[] $refund_ids Refund IDs.
+	 * @return DashboardRefundRecord[]
+	 */
+	private function ids_to_stat_refunds( array $refund_ids ) {
+		if ( empty( $refund_ids ) ) {
+			return array();
+		}
+
+		$results = array();
+		$chunks  = array_chunk( $refund_ids, 100 );
+
+		foreach ( $chunks as $chunk ) {
+			$refunds = wc_get_orders(
+				array(
+					'type'    => 'shop_order_refund',
+					'limit'   => count( $chunk ),
+					'include' => $chunk,
+					'return'  => 'objects',
+				)
+			);
+
+			foreach ( $refunds as $refund ) {
+				$results[] = new DashboardRefundRecord(
+					(float) $refund->get_amount(),
+					$this->credit_note_issue_timestamp( $refund )
+				);
+			}
+		}
+
+		return $results;
+	}
+
+	/**
+	 * Every invoiced order whose *resolved issue date* falls within a
+	 * timestamp window.
 	 *
 	 * @param int $from Window start (unix timestamp).
 	 * @param int $to   Window end (unix timestamp).
-	 * @return \WC_Order[]
+	 * @return DashboardOrderRecord[]
 	 */
 	private function orders_issued_between( $from, $to ) {
-		$common = wc_get_orders(
+		$common_ids = wc_get_orders(
 			array(
 				'limit'      => -1,
-				'return'     => 'objects',
+				'return'     => 'ids',
 				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 					array(
 						'key'     => '_billio_invoice_date',
@@ -523,6 +645,8 @@ class Dashboard {
 				),
 			)
 		);
+
+		$common = $this->ids_to_stat_orders( $common_ids );
 
 		$legacy_in_window = array_filter(
 			$this->get_legacy_invoiced_orders(),
@@ -542,14 +666,14 @@ class Dashboard {
 	 *
 	 * @param int $from Window start (unix timestamp).
 	 * @param int $to   Window end (unix timestamp).
-	 * @return \WC_Order_Refund[]
+	 * @return DashboardRefundRecord[]
 	 */
 	private function credit_notes_issued_between( $from, $to ) {
-		$common = wc_get_orders(
+		$common_ids = wc_get_orders(
 			array(
 				'type'       => 'shop_order_refund',
 				'limit'      => -1,
-				'return'     => 'objects',
+				'return'     => 'ids',
 				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 					array(
 						'key'     => '_billio_credit_note_date',
@@ -560,6 +684,8 @@ class Dashboard {
 				),
 			)
 		);
+
+		$common = $this->ids_to_stat_refunds( $common_ids );
 
 		$legacy_in_window = array_filter(
 			$this->get_legacy_credit_noted_refunds(),
@@ -578,14 +704,20 @@ class Dashboard {
 	 * existed) — normally empty on a real install. Memoized per request:
 	 * called from up to three stats methods in the same page load.
 	 *
-	 * @return \WC_Order[]
+	 * @return DashboardOrderRecord[]
 	 */
 	private function get_legacy_invoiced_orders() {
-		if ( null === $this->invoiced_orders_cache ) {
-			$this->invoiced_orders_cache = wc_get_orders(
+		if ( null === self::$invoiced_orders_cache ) {
+			$cached = get_transient( 'billio_dash_legacy_orders' );
+			if ( false !== $cached && is_array( $cached ) ) {
+				self::$invoiced_orders_cache = $cached;
+				return self::$invoiced_orders_cache;
+			}
+
+			$ids = wc_get_orders(
 				array(
 					'limit'      => -1,
-					'return'     => 'objects',
+					'return'     => 'ids',
 					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 						'relation' => 'AND',
 						array(
@@ -599,24 +731,33 @@ class Dashboard {
 					),
 				)
 			);
+
+			self::$invoiced_orders_cache = $this->ids_to_stat_orders( $ids );
+			set_transient( 'billio_dash_legacy_orders', self::$invoiced_orders_cache, DAY_IN_SECONDS );
 		}
 
-		return $this->invoiced_orders_cache;
+		return self::$invoiced_orders_cache;
 	}
 
 	/**
 	 * Credit-noted refunds that never got _billio_credit_note_date at all —
 	 * same reasoning and memoization as get_legacy_invoiced_orders().
 	 *
-	 * @return \WC_Order_Refund[]
+	 * @return DashboardRefundRecord[]
 	 */
 	private function get_legacy_credit_noted_refunds() {
-		if ( null === $this->credit_noted_refunds_cache ) {
-			$this->credit_noted_refunds_cache = wc_get_orders(
+		if ( null === self::$credit_noted_refunds_cache ) {
+			$cached = get_transient( 'billio_dash_legacy_refunds' );
+			if ( false !== $cached && is_array( $cached ) ) {
+				self::$credit_noted_refunds_cache = $cached;
+				return self::$credit_noted_refunds_cache;
+			}
+
+			$ids = wc_get_orders(
 				array(
 					'type'       => 'shop_order_refund',
 					'limit'      => -1,
-					'return'     => 'objects',
+					'return'     => 'ids',
 					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 						'relation' => 'AND',
 						array(
@@ -630,9 +771,12 @@ class Dashboard {
 					),
 				)
 			);
+
+			self::$credit_noted_refunds_cache = $this->ids_to_stat_refunds( $ids );
+			set_transient( 'billio_dash_legacy_refunds', self::$credit_noted_refunds_cache, DAY_IN_SECONDS );
 		}
 
-		return $this->credit_noted_refunds_cache;
+		return self::$credit_noted_refunds_cache;
 	}
 
 	/**
@@ -643,27 +787,37 @@ class Dashboard {
 	 * that somehow never got that meta (e.g. invoiced by a pre-1.1.0
 	 * version of this plugin, before the meta existed).
 	 *
-	 * @param \WC_Order $order Invoiced order.
+	 * @param \WC_Order|DashboardOrderRecord $order Invoiced order.
 	 * @return int Unix timestamp.
 	 */
-	private function invoice_issue_timestamp( \WC_Order $order ) {
-		$meta = (int) $order->get_meta( '_billio_invoice_date' );
-		if ( $meta ) {
-			return $meta;
+	private function invoice_issue_timestamp( $order ) {
+		if ( method_exists( $order, 'get_meta' ) ) {
+			$meta = (int) $order->get_meta( '_billio_invoice_date' );
+			if ( $meta ) {
+				return $meta;
+			}
 		}
 
-		$date_paid = $order->get_date_paid();
-		if ( $date_paid ) {
-			return $date_paid->getTimestamp();
+		if ( method_exists( $order, 'get_date_paid' ) ) {
+			$date_paid = $order->get_date_paid();
+			if ( $date_paid ) {
+				return $date_paid->getTimestamp();
+			}
 		}
 
-		$date_completed = $order->get_date_completed();
-		if ( $date_completed ) {
-			return $date_completed->getTimestamp();
+		if ( method_exists( $order, 'get_date_completed' ) ) {
+			$date_completed = $order->get_date_completed();
+			if ( $date_completed ) {
+				return $date_completed->getTimestamp();
+			}
 		}
 
-		$date_created = $order->get_date_created();
-		return $date_created ? $date_created->getTimestamp() : 0;
+		if ( method_exists( $order, 'get_date_created' ) ) {
+			$date_created = $order->get_date_created();
+			return $date_created ? $date_created->getTimestamp() : 0;
+		}
+
+		return 0;
 	}
 
 	/**
@@ -671,17 +825,23 @@ class Dashboard {
 	 * invoice_issue_timestamp(), falling back to the refund's own creation
 	 * date (a refund has no "paid"/"completed" concept of its own).
 	 *
-	 * @param \WC_Order_Refund $refund Refund with a credit note.
+	 * @param \WC_Order_Refund|DashboardRefundRecord $refund Refund with a credit note.
 	 * @return int Unix timestamp.
 	 */
-	private function credit_note_issue_timestamp( \WC_Order_Refund $refund ) {
-		$meta = (int) $refund->get_meta( '_billio_credit_note_date' );
-		if ( $meta ) {
-			return $meta;
+	private function credit_note_issue_timestamp( $refund ) {
+		if ( method_exists( $refund, 'get_meta' ) ) {
+			$meta = (int) $refund->get_meta( '_billio_credit_note_date' );
+			if ( $meta ) {
+				return $meta;
+			}
 		}
 
-		$date_created = $refund->get_date_created();
-		return $date_created ? $date_created->getTimestamp() : 0;
+		if ( method_exists( $refund, 'get_date_created' ) ) {
+			$date_created = $refund->get_date_created();
+			return $date_created ? $date_created->getTimestamp() : 0;
+		}
+
+		return 0;
 	}
 
 	/**
@@ -870,77 +1030,92 @@ class Dashboard {
 	 * Search invoices/credit notes server-side (not just the localized
 	 * top-10), paginated. Backs the Dashboard table's search box.
 	 *
+	 * Works entirely over ID lists — never hydrates a full \WC_Order
+	 * object except for the current page's items — so the reported total
+	 * and page count are correct for the store's entire invoice/credit-note
+	 * history, not just whatever fit under an arbitrary per-query cap.
+	 *
 	 * @param string $q        Search text (invoice/CN number, order number, or customer name).
 	 * @param string $type     'all', 'inv', or 'cn'.
 	 * @param int    $page     1-indexed page number.
 	 * @param int    $per_page Results per page (already capped by the caller).
-	 * @return array{items: array[], total: int, page: int, perPage: int}
+	 * @return array{items: array[], total: int, page: int, perPage: int, truncated: bool}
 	 */
 	public function search_documents( $q, $type, $page, $per_page ) {
 		$page     = max( 1, (int) $page );
 		$per_page = min( 20, max( 1, (int) $per_page ) );
+		$offset   = ( $page - 1 ) * $per_page;
 
-		$documents = array();
+		$invoice_result = ( 'cn' === $type )
+			? array(
+				'ids'       => array(),
+				'truncated' => false,
+			)
+			: $this->find_invoice_candidate_ids( $q );
 
-		if ( 'cn' !== $type ) {
-			foreach ( $this->find_invoice_candidates( $q ) as $order ) {
-				$documents[] = $this->format_invoice_document( $order );
-			}
-		}
+		$credit_note_result = ( 'inv' === $type )
+			? array(
+				'ids'       => array(),
+				'truncated' => false,
+			)
+			: $this->find_credit_note_candidate_ids( $q );
 
-		if ( 'inv' !== $type ) {
-			foreach ( $this->find_credit_note_candidates( $q ) as $refund ) {
-				$parent_order = wc_get_order( $refund->get_parent_id() );
-				if ( ! $parent_order ) {
-					continue;
+		$invoice_ids     = $invoice_result['ids'];
+		$credit_note_ids = $credit_note_result['ids'];
+		$total           = count( $invoice_ids ) + count( $credit_note_ids );
+
+		$items = array();
+		foreach ( $this->merge_candidate_page( $invoice_ids, $credit_note_ids, $offset, $per_page ) as $ref ) {
+			if ( 'inv' === $ref['type'] ) {
+				$order = wc_get_order( $ref['id'] );
+				if ( $order ) {
+					$items[] = $this->format_invoice_document( $order );
 				}
-				$documents[] = $this->format_credit_note_document( $refund, $parent_order );
+				continue;
+			}
+
+			$refund       = wc_get_order( $ref['id'] );
+			$parent_order = $refund ? wc_get_order( $refund->get_parent_id() ) : false;
+			if ( $refund && $parent_order ) {
+				$items[] = $this->format_credit_note_document( $refund, $parent_order );
 			}
 		}
-
-		usort(
-			$documents,
-			static function ( $a, $b ) {
-				return $b['dateTimestamp'] - $a['dateTimestamp'];
-			}
-		);
-
-		$total = count( $documents );
-		$items = array_slice( $documents, ( $page - 1 ) * $per_page, $per_page );
 
 		return array(
-			'items'   => $items,
-			'total'   => $total,
-			'page'    => $page,
-			'perPage' => $per_page,
+			'items'     => $items,
+			'total'     => $total,
+			'page'      => $page,
+			'perPage'   => $per_page,
+			'truncated' => $invoice_result['truncated'] || $credit_note_result['truncated'],
 		);
 	}
 
 	/**
-	 * Candidate invoiced orders for a search term — two bounded queries
-	 * (number match, general WooCommerce order search for customer
-	 * name/email/numeric order id) merged and de-duplicated, rather than one
-	 * "OR across a meta LIKE and the general search" query (WooCommerce's
-	 * query API doesn't expose that combination in a single call). Both
-	 * queries are always scoped to _billio_invoice_number EXISTS — never a
-	 * full orders-table scan — and each internally capped so a broad search
-	 * term can't balloon into an unbounded fetch.
+	 * Candidate invoiced order IDs for a search term, deduped and sorted
+	 * descending by invoice date — two bounded ID-only queries (number
+	 * match, general WooCommerce order search for customer name/email/
+	 * numeric order id) merged, rather than one "OR across a meta LIKE and
+	 * the general search" query (WooCommerce's query API doesn't expose
+	 * that combination in a single call). Both are always scoped to
+	 * _billio_invoice_number EXISTS — never a full orders-table scan — and
+	 * each capped at SEARCH_HARD_LIMIT so a very broad term can't balloon
+	 * into an unbounded fetch.
 	 *
 	 * @param string $q Search text; empty string browses the most recent instead.
-	 * @return \WC_Order[]
+	 * @return array{ids: int[], truncated: bool}
 	 */
-	private function find_invoice_candidates( $q ) {
-		$base_args = array(
-			'limit'    => self::SEARCH_CANDIDATE_CAP,
-			'return'   => 'objects',
+	private function find_invoice_candidate_ids( $q ) {
+		$date_args = array(
 			'orderby'  => 'meta_value_num',
 			'meta_key' => '_billio_invoice_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'order'    => 'DESC',
 		);
 
 		if ( '' === $q ) {
-			return wc_get_orders(
-				$base_args + array(
+			$ids = wc_get_orders(
+				$date_args + array(
+					'limit'      => self::SEARCH_HARD_LIMIT,
+					'return'     => 'ids',
 					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 						array(
 							'key'     => '_billio_invoice_number',
@@ -949,10 +1124,17 @@ class Dashboard {
 					),
 				)
 			);
+
+			return array(
+				'ids'       => $ids,
+				'truncated' => count( $ids ) === self::SEARCH_HARD_LIMIT,
+			);
 		}
 
 		$by_number = wc_get_orders(
-			$base_args + array(
+			$date_args + array(
+				'limit'      => self::SEARCH_HARD_LIMIT,
+				'return'     => 'ids',
 				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 					'relation' => 'AND',
 					array(
@@ -969,9 +1151,9 @@ class Dashboard {
 		);
 
 		$by_customer = wc_get_orders(
-			array(
-				'limit'      => self::SEARCH_CANDIDATE_CAP,
-				'return'     => 'objects',
+			$date_args + array(
+				'limit'      => self::SEARCH_HARD_LIMIT,
+				'return'     => 'ids',
 				's'          => $q,
 				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 					array(
@@ -982,29 +1164,52 @@ class Dashboard {
 			)
 		);
 
-		return $this->dedupe_orders( array_merge( $by_number, $by_customer ) );
+		// Both sub-queries are already SQL-sorted desc by invoice date;
+		// merging (and de-duping, since a number match can also match the
+		// customer search) this way keeps that order instead of flattening
+		// it into two concatenated runs the way array_merge() would.
+		$merged = array_unique(
+			$this->lazy_merge_by_date(
+				$by_number,
+				$by_customer,
+				array( $this, 'invoice_date_for_id' ),
+				count( $by_number ) + count( $by_customer )
+			)
+		);
+
+		return array(
+			'ids'       => array_values( $merged ),
+			'truncated' => count( $by_number ) === self::SEARCH_HARD_LIMIT || count( $by_customer ) === self::SEARCH_HARD_LIMIT,
+		);
 	}
 
 	/**
-	 * Candidate credit-noted refunds for a search term — same two-query
-	 * merge-and-dedupe reasoning as find_invoice_candidates().
+	 * Candidate credit-noted refund IDs for a search term — same bounded,
+	 * ID-only, merge-and-dedupe shape as find_invoice_candidate_ids(), with
+	 * one difference: a refund carries no billing data of its own, so
+	 * matching a customer name/email/order number has to go through the
+	 * parent order first (a bounded 's' search for matching parent order
+	 * IDs), then back to whichever of those parents have a credit-noted
+	 * refund (via post_parent__in — a WooCommerce-core-supported query var
+	 * for both HPOS and the legacy post-based order store, so this never
+	 * drops to a direct wp_posts/wp_postmeta query).
 	 *
 	 * @param string $q Search text; empty string browses the most recent instead.
-	 * @return \WC_Order_Refund[]
+	 * @return array{ids: int[], truncated: bool}
 	 */
-	private function find_credit_note_candidates( $q ) {
-		$base_args = array(
+	private function find_credit_note_candidate_ids( $q ) {
+		$date_args = array(
 			'type'     => 'shop_order_refund',
-			'limit'    => self::SEARCH_CANDIDATE_CAP,
-			'return'   => 'objects',
 			'orderby'  => 'meta_value_num',
 			'meta_key' => '_billio_credit_note_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'order'    => 'DESC',
 		);
 
 		if ( '' === $q ) {
-			return wc_get_orders(
-				$base_args + array(
+			$ids = wc_get_orders(
+				$date_args + array(
+					'limit'      => self::SEARCH_HARD_LIMIT,
+					'return'     => 'ids',
 					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 						array(
 							'key'     => '_billio_credit_note_number',
@@ -1013,10 +1218,17 @@ class Dashboard {
 					),
 				)
 			);
+
+			return array(
+				'ids'       => $ids,
+				'truncated' => count( $ids ) === self::SEARCH_HARD_LIMIT,
+			);
 		}
 
 		$by_number = wc_get_orders(
-			$base_args + array(
+			$date_args + array(
+				'limit'      => self::SEARCH_HARD_LIMIT,
+				'return'     => 'ids',
 				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 					'relation' => 'AND',
 					array(
@@ -1032,13 +1244,20 @@ class Dashboard {
 			)
 		);
 
-		$by_customer = wc_get_orders(
+		$matching_parent_ids = wc_get_orders(
 			array(
-				'type'       => 'shop_order_refund',
-				'limit'      => self::SEARCH_CANDIDATE_CAP,
-				'return'     => 'objects',
-				's'          => $q,
-				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				'limit'  => self::SEARCH_HARD_LIMIT,
+				'return' => 'ids',
+				's'      => $q,
+			)
+		);
+
+		$by_customer = empty( $matching_parent_ids ) ? array() : wc_get_orders(
+			$date_args + array(
+				'limit'           => self::SEARCH_HARD_LIMIT,
+				'return'          => 'ids',
+				'post_parent__in' => $matching_parent_ids,
+				'meta_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 					array(
 						'key'     => '_billio_credit_note_number',
 						'compare' => 'EXISTS',
@@ -1047,30 +1266,139 @@ class Dashboard {
 			)
 		);
 
-		return $this->dedupe_orders( array_merge( $by_number, $by_customer ) );
+		$merged = array_unique(
+			$this->lazy_merge_by_date(
+				$by_number,
+				$by_customer,
+				array( $this, 'credit_note_date_for_id' ),
+				count( $by_number ) + count( $by_customer )
+			)
+		);
+
+		return array(
+			'ids'       => array_values( $merged ),
+			'truncated' => count( $by_number ) === self::SEARCH_HARD_LIMIT
+				|| count( $by_customer ) === self::SEARCH_HARD_LIMIT
+				|| count( $matching_parent_ids ) === self::SEARCH_HARD_LIMIT,
+		);
 	}
 
 	/**
-	 * De-duplicate a list of orders/refunds by ID, keeping the first
-	 * occurrence (used after merging two overlapping queries).
+	 * Merge two ID lists — each already sorted descending by whatever date
+	 * $resolve(...) computes for its elements — into one descending-by-date
+	 * list. $resolve is only called for elements actually visited while
+	 * producing the first $needed results, so cost scales with how deep
+	 * the caller actually reads rather than with either input list's size;
+	 * callers that need every element (full dedupe passes) simply pass
+	 * $needed = count( $a ) + count( $b ).
 	 *
-	 * @param \WC_Abstract_Order[] $orders Orders/refunds, possibly with duplicates.
+	 * @param array    $a      First sorted list.
+	 * @param array    $b      Second sorted list.
+	 * @param callable $resolve function( $element ): int timestamp.
+	 * @param int      $needed Max number of merged elements to produce.
 	 * @return array
 	 */
-	private function dedupe_orders( array $orders ) {
-		$seen   = array();
-		$result = array();
+	private function lazy_merge_by_date( array $a, array $b, callable $resolve, $needed ) {
+		$merged       = array();
+		$i            = 0;
+		$j            = 0;
+		$a_count      = count( $a );
+		$b_count      = count( $b );
+		$merged_count = 0;
 
-		foreach ( $orders as $order ) {
-			$id = $order->get_id();
-			if ( isset( $seen[ $id ] ) ) {
+		while ( $merged_count < $needed && ( $i < $a_count || $j < $b_count ) ) {
+			if ( $i >= $a_count ) {
+				$merged[] = $b[ $j++ ];
+				++$merged_count;
 				continue;
 			}
-			$seen[ $id ] = true;
-			$result[]    = $order;
+			if ( $j >= $b_count ) {
+				$merged[] = $a[ $i++ ];
+				++$merged_count;
+				continue;
+			}
+			if ( $resolve( $a[ $i ] ) >= $resolve( $b[ $j ] ) ) {
+				$merged[] = $a[ $i++ ];
+			} else {
+				$merged[] = $b[ $j++ ];
+			}
+			++$merged_count;
 		}
 
-		return $result;
+		return $merged;
+	}
+
+	/**
+	 * Resolve one invoiced order ID's issue timestamp — the per-element
+	 * date resolver lazy_merge_by_date() calls for invoice candidates.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return int Unix timestamp.
+	 */
+	private function invoice_date_for_id( $order_id ) {
+		$order = wc_get_order( $order_id );
+		return $order ? $this->invoice_issue_timestamp( $order ) : 0;
+	}
+
+	/**
+	 * Resolve one credit-noted refund ID's issue timestamp — the
+	 * per-element date resolver lazy_merge_by_date() calls for credit-note
+	 * candidates.
+	 *
+	 * @param int $refund_id Refund ID.
+	 * @return int Unix timestamp.
+	 */
+	private function credit_note_date_for_id( $refund_id ) {
+		$refund = wc_get_order( $refund_id );
+		return $refund ? $this->credit_note_issue_timestamp( $refund ) : 0;
+	}
+
+	/**
+	 * The current page's (type, id) pairs across both candidate ID lists,
+	 * in descending-date order — a second application of
+	 * lazy_merge_by_date(), this time across document types rather than
+	 * within one, bounded to $offset + $per_page (never the full candidate
+	 * pool) since invoice and credit-note IDs can't collide with each
+	 * other.
+	 *
+	 * @param int[] $invoice_ids     Invoice candidate IDs (sorted desc by date).
+	 * @param int[] $credit_note_ids Credit-note candidate IDs (sorted desc by date).
+	 * @param int   $offset          Zero-based offset into the merged list.
+	 * @param int   $per_page        Page size.
+	 * @return array{type: string, id: int}[]
+	 */
+	private function merge_candidate_page( array $invoice_ids, array $credit_note_ids, $offset, $per_page ) {
+		$tag = static function ( $type ) {
+			return static function ( $id ) use ( $type ) {
+				return array(
+					'type' => $type,
+					'id'   => $id,
+				);
+			};
+		};
+
+		$merged = $this->lazy_merge_by_date(
+			array_map( $tag( 'inv' ), $invoice_ids ),
+			array_map( $tag( 'cn' ), $credit_note_ids ),
+			array( $this, 'candidate_ref_date' ),
+			$offset + $per_page
+		);
+
+		return array_slice( $merged, $offset, $per_page );
+	}
+
+	/**
+	 * Date resolver for a {type, id} pair, as produced by
+	 * merge_candidate_page() — dispatches to the matching per-type
+	 * resolver.
+	 *
+	 * @param array{type: string, id: int} $ref Candidate reference.
+	 * @return int Unix timestamp.
+	 */
+	private function candidate_ref_date( array $ref ) {
+		return 'inv' === $ref['type']
+			? $this->invoice_date_for_id( $ref['id'] )
+			: $this->credit_note_date_for_id( $ref['id'] );
 	}
 
 	/**
@@ -1080,7 +1408,18 @@ class Dashboard {
 	 * @return array
 	 */
 	private function format_invoice_document( \WC_Order $order ) {
-		$timestamp = $this->invoice_issue_timestamp( $order );
+		$timestamp    = $this->invoice_issue_timestamp( $order );
+		$download_url = $this->raw_download_url( OrderActions::build_download_url( $order ) );
+		$name         = trim( $order->get_formatted_billing_full_name() );
+		$phone        = trim( (string) $order->get_billing_phone() );
+		$clean_phone  = preg_replace( '/[^0-9]/', '', $phone );
+		$wa_text      = sprintf(
+			/* translators: 1: customer name, 2: invoice number, 3: download URL */
+			__( 'Hello %1$s, here is your invoice %2$s: %3$s', 'billio' ),
+			$name ? $name : __( 'Customer', 'billio' ),
+			$order->get_meta( '_billio_invoice_number' ),
+			$download_url
+		);
 
 		return array(
 			'type'             => 'inv',
@@ -1088,13 +1427,20 @@ class Dashboard {
 			'orderId'          => $order->get_id(),
 			'orderNumber'      => $order->get_order_number(),
 			'orderEditUrl'     => $this->order_edit_url( $order ),
-			'customerName'     => trim( $order->get_formatted_billing_full_name() ),
+			'customerName'     => $name,
+			'customerEmail'    => $order->get_billing_email(),
+			'customerPhone'    => $phone,
+			'paymentMethod'    => $order->get_payment_method_title(),
+			'itemCount'        => (int) $order->get_item_count(),
+			'billingAddress'   => wp_strip_all_tags( $order->get_formatted_billing_address() ),
 			'orderStatus'      => $order->get_status(),
 			'orderStatusLabel' => wc_get_order_status_name( $order->get_status() ),
 			'dateDisplay'      => wp_date( get_option( 'date_format' ), $timestamp ),
 			'dateTimestamp'    => $timestamp,
 			'total'            => (float) $order->get_total(),
-			'downloadUrl'      => $this->raw_download_url( OrderActions::build_download_url( $order ) ),
+			'downloadUrl'      => $download_url,
+			'previewUrl'       => $download_url . '&preview=1',
+			'whatsappUrl'      => 'https://wa.me/' . ( $clean_phone ? $clean_phone : '' ) . '?text=' . rawurlencode( $wa_text ),
 		);
 	}
 
@@ -1106,7 +1452,18 @@ class Dashboard {
 	 * @return array
 	 */
 	private function format_credit_note_document( \WC_Order_Refund $refund, \WC_Order $parent_order ) {
-		$timestamp = $this->credit_note_issue_timestamp( $refund );
+		$timestamp    = $this->credit_note_issue_timestamp( $refund );
+		$download_url = $this->raw_download_url( MetaBox::credit_note_url( $parent_order, $refund ) );
+		$name         = trim( $parent_order->get_formatted_billing_full_name() );
+		$phone        = trim( (string) $parent_order->get_billing_phone() );
+		$clean_phone  = preg_replace( '/[^0-9]/', '', $phone );
+		$wa_text      = sprintf(
+			/* translators: 1: customer name, 2: credit note number, 3: download URL */
+			__( 'Hello %1$s, here is your credit note %2$s: %3$s', 'billio' ),
+			$name ? $name : __( 'Customer', 'billio' ),
+			$refund->get_meta( '_billio_credit_note_number' ),
+			$download_url
+		);
 
 		return array(
 			'type'             => 'cn',
@@ -1114,13 +1471,20 @@ class Dashboard {
 			'orderId'          => $parent_order->get_id(),
 			'orderNumber'      => $parent_order->get_order_number(),
 			'orderEditUrl'     => $this->order_edit_url( $parent_order ),
-			'customerName'     => trim( $parent_order->get_formatted_billing_full_name() ),
+			'customerName'     => $name,
+			'customerEmail'    => $parent_order->get_billing_email(),
+			'customerPhone'    => $phone,
+			'paymentMethod'    => $parent_order->get_payment_method_title(),
+			'itemCount'        => (int) $parent_order->get_item_count(),
+			'billingAddress'   => wp_strip_all_tags( $parent_order->get_formatted_billing_address() ),
 			'orderStatus'      => 'refunded',
 			'orderStatusLabel' => esc_html__( 'Refunded', 'billio' ),
 			'dateDisplay'      => wp_date( get_option( 'date_format' ), $timestamp ),
 			'dateTimestamp'    => $timestamp,
 			'total'            => -abs( (float) $refund->get_amount() ),
-			'downloadUrl'      => $this->raw_download_url( MetaBox::credit_note_url( $parent_order, $refund ) ),
+			'downloadUrl'      => $download_url,
+			'previewUrl'       => $download_url . '&preview=1',
+			'whatsappUrl'      => 'https://wa.me/' . ( $clean_phone ? $clean_phone : '' ) . '?text=' . rawurlencode( $wa_text ),
 		);
 	}
 

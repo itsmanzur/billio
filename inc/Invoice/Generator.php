@@ -39,7 +39,7 @@ class Generator {
 		}
 
 		$relative_path = $order->get_meta( '_billio_invoice_pdf_path' );
-		if ( $relative_path && file_exists( self::get_absolute_path( $relative_path ) ) ) {
+		if ( $relative_path && self::pdf_exists( self::get_absolute_path( $relative_path ) ) ) {
 			return $relative_path;
 		}
 
@@ -160,6 +160,11 @@ class Generator {
 	 * @return string Relative path (from the uploads basedir) to the saved PDF.
 	 */
 	private static function render_and_save( \WC_Order $order, $invoice_number ) {
+		// Raise memory limit temporarily if needed to safely render PDF.
+		if ( function_exists( 'wp_raise_memory_limit' ) ) {
+			wp_raise_memory_limit( 'admin' );
+		}
+
 		$html = TemplateEngine::render( $order, $invoice_number );
 
 		$dompdf = self::make_dompdf();
@@ -178,7 +183,7 @@ class Generator {
 		// previous PDF orphaned on disk forever.
 		if ( $old_relative_path && $old_relative_path !== $relative_path ) {
 			$old_absolute_path = self::get_absolute_path( $old_relative_path );
-			if ( file_exists( $old_absolute_path ) ) {
+			if ( self::pdf_exists( $old_absolute_path ) ) {
 				wp_delete_file( $old_absolute_path );
 			}
 		}
@@ -208,11 +213,15 @@ class Generator {
 	 */
 	public static function make_dompdf() {
 		$cache_dir = trailingslashit( wp_get_upload_dir()['basedir'] ) . 'billio/font-cache';
-		wp_mkdir_p( $cache_dir );
+		if ( ! file_exists( $cache_dir ) ) {
+			wp_mkdir_p( $cache_dir );
+		}
 
 		$options = new Options();
 		$options->setIsRemoteEnabled( false );
 		$options->setIsPhpEnabled( false );
+		$options->setIsFontSubsettingEnabled( true );
+		$options->setIsHtml5ParserEnabled( true );
 		$options->setDefaultFont( 'Noto Sans Bengali' );
 		$options->setFontDir( $cache_dir );
 		$options->setFontCache( $cache_dir );
@@ -220,6 +229,13 @@ class Generator {
 		// Local file reads (our bundled fonts, via registerFont()) are
 		// rejected unless their realpath falls under one of these roots.
 		$options->setChroot( array( BILLIO_PATH, wp_get_upload_dir()['basedir'] ) );
+
+		/**
+		 * Filter Dompdf options before rendering.
+		 *
+		 * @param Options $options Configured Dompdf options.
+		 */
+		$options = apply_filters( 'billio_dompdf_options', $options );
 
 		$dompdf = new Dompdf( $options );
 		self::register_fonts( $dompdf );
@@ -307,7 +323,10 @@ class Generator {
 		$filename = $order->get_id() . '-' . wp_generate_password( 24, false, false ) . '.pdf';
 		$path     = trailingslashit( $dir ) . $filename;
 
-		file_put_contents( $path, $pdf_content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		$written = file_put_contents( $path, $pdf_content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		if ( false === $written ) {
+			throw new \RuntimeException( 'Could not write invoice PDF to disk.' );
+		}
 
 		return 'billio/' . $year . '/' . $filename;
 	}
@@ -320,9 +339,18 @@ class Generator {
 	 * @return string
 	 */
 	public static function get_absolute_path( $relative_path ) {
-		$base_dir   = trailingslashit( wp_get_upload_dir()['basedir'] );
-		$billio_dir = trailingslashit( wp_normalize_path( $base_dir . 'billio' ) );
-		$candidate  = wp_normalize_path( $base_dir . $relative_path );
+		$base_dir  = trailingslashit( wp_get_upload_dir()['basedir'] );
+		$candidate = wp_normalize_path( $base_dir . $relative_path );
+
+		// $base_dir itself can contain unresolved "." / ".." segments (some
+		// hosts report an uploads basedir like ".../sites/2/../uploads") —
+		// resolving only $candidate and comparing it against an
+		// un-resolved $billio_dir would make the two sides disagree on
+		// what the same real directory looks like, wrongly blocking every
+		// legitimate path. Both sides go through the same
+		// resolve_path_segments() so they're compared on equal footing.
+		$billio_dir = trailingslashit( self::resolve_path_segments( wp_normalize_path( $base_dir . 'billio' ) ) );
+		$resolved   = self::resolve_path_segments( $candidate );
 
 		// Containment is checked against uploads/billio specifically, not
 		// the whole uploads directory, and resolved with a plain string
@@ -330,24 +358,24 @@ class Generator {
 		// uploads/billio doesn't exist on disk yet (realpath() would just
 		// return false for a path that isn't there, which would otherwise
 		// skip the check entirely and let a path through unexamined). The
-		// prefix comparison itself requires a trailing separator (or an
-		// exact match), not a bare strpos() === 0 — a bare prefix check
-		// against the broader uploads dir would let a *sibling* directory
-		// like "uploads-backup/..." through, since "uploads-backup" also
-		// starts with the string "uploads".
-		$resolved = self::resolve_path_segments( $candidate );
-
-		$contained = rtrim( $billio_dir, '/' ) === $resolved
-			|| 0 === strpos( $resolved, $billio_dir );
+		// prefix comparison requires $resolved to be *strictly inside*
+		// $billio_dir (which already has a trailing separator) — not equal
+		// to it — so a relative path that resolves to the "billio"
+		// directory itself (e.g. corrupted meta of just "billio" or
+		// "billio/") is blocked rather than treated as contained; a bare
+		// prefix check against the broader uploads dir would also let a
+		// *sibling* directory like "uploads-backup/..." through, since
+		// "uploads-backup" also starts with the string "uploads".
+		$contained = 0 === strpos( $resolved, $billio_dir );
 
 		if ( ! $contained ) {
-			// Not $base_dir itself: is_readable() returns true for a
-			// directory, so FileServer::stream()'s is_readable() guard
-			// would pass and fall through to filesize()/readfile() on a
-			// directory instead of 404ing cleanly. This sentinel name
+			// Not $base_dir (or any other real directory) itself: is_file()
+			// is used everywhere this return value is checked (see
+			// pdf_exists() below) specifically because is_readable() alone
+			// returns true for a directory, which would let this fallback
+			// slip past a bare is_readable() guard. This sentinel name
 			// cannot exist as a real invoice path (those are always
-			// "billio/<year>/<id>-<random>.pdf"), so is_readable() on it
-			// correctly returns false.
+			// "billio/<year>/<id>-<random>.pdf"), so it's never a real file.
 			return $base_dir . '__billio_blocked__';
 		}
 
@@ -380,6 +408,23 @@ class Generator {
 		}
 
 		return ( $is_absolute ? '/' : '' ) . implode( '/', $segments );
+	}
+
+	/**
+	 * Whether an absolute path (as returned by get_absolute_path()) points
+	 * at an actual, readable PDF file — not a directory and not a
+	 * corrupted/blocked path. is_readable() alone returns true for a
+	 * directory too, which would let a corrupted meta value that resolves
+	 * to a bare directory (or get_absolute_path()'s own blocked-path
+	 * fallback) slip past a bare is_readable() check in every caller that
+	 * reads, streams, or attaches an invoice/credit-note PDF — this is the
+	 * one place that logic lives, so every such caller stays consistent.
+	 *
+	 * @param string $absolute_path Absolute filesystem path.
+	 * @return bool
+	 */
+	public static function pdf_exists( $absolute_path ) {
+		return is_file( $absolute_path ) && is_readable( $absolute_path );
 	}
 
 	/**

@@ -18,6 +18,8 @@ use Billio\Invoice\TemplateEngine;
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template variables are scoped inside TemplateEngine render methods.
 ?>
 <!DOCTYPE html>
 <html>
@@ -91,6 +93,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="bill-to">
 		<strong><?php echo esc_html( trim( $order->get_formatted_billing_full_name() ) ); ?></strong><br>
 		<?php echo wp_kses_post( $order->get_formatted_billing_address() ); ?>
+		<?php if ( ! empty( $customer_tax_id ) ) : ?>
+			<br><strong><?php echo esc_html( $customer_tax_id_label ); ?>:</strong> <?php echo esc_html( $customer_tax_id ); ?>
+		<?php endif; ?>
 	</div>
 
 	<table class="items">

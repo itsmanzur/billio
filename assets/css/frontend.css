@@ -1,0 +1,35 @@
+/**
+ * Frontend styles for Billio: Thank You and View Order invoice download.
+ *
+ * @package Billio
+ */
+
+.billio-thankyou-wrap {
+	margin: 20px 0 24px;
+	padding: 16px 20px;
+	background: #f8fafc;
+	border: 1px solid #e2e8f0;
+	border-radius: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 12px;
+}
+
+.billio-thankyou-content strong,
+.billio-thankyou-title {
+	display: block;
+	font-size: 14px;
+	color: #0f172a;
+}
+
+.billio-thankyou-content span,
+.billio-thankyou-desc {
+	font-size: 12px;
+	color: #64748b;
+}
+
+.billio-thankyou-btn {
+	text-decoration: none;
+}

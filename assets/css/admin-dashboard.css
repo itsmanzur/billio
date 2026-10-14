@@ -45,15 +45,24 @@
 	font-size: 17px;
 }
 
-.billio-setup h3 {
+.billio-setup h3,
+.billio-ui .billio-setup h3 {
 	margin: 0 0 4px;
 	font-size: 16px;
+	color: #fff !important;
 }
 
-.billio-setup p {
+.billio-setup h3 span,
+.billio-ui .billio-setup h3 span {
+	color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.billio-setup p,
+.billio-ui .billio-setup p {
 	margin: 0;
-	opacity: .8;
+	opacity: .9;
 	font-size: 13px;
+	color: rgba(255, 255, 255, 0.9) !important;
 }
 
 .billio-steps {
@@ -665,6 +674,16 @@
 	white-space: nowrap;
 }
 
+.billio-truncated-notice {
+	margin-top: 8px;
+	font-size: 12px;
+	color: var(--billio-muted);
+}
+
+.billio-truncated-notice:empty {
+	display: none;
+}
+
 @media (max-width: 760px) {
 	.billio-tbl .billio-hm {
 		display: none;
@@ -723,3 +742,370 @@
 	background: linear-gradient(90deg, var(--billio-brand), var(--billio-brand2));
 	transition: width .2s;
 }
+
+/* ---------------------------------------------------------------
+ * Slide-over Preview Drawer
+ * ------------------------------------------------------------- */
+.billio-drawer-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(15, 23, 42, .45);
+	backdrop-filter: blur(4px);
+	-webkit-backdrop-filter: blur(4px);
+	z-index: 100002;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity .25s ease;
+}
+
+.billio-drawer-overlay.billio-open {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.billio-drawer {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: min(740px, 94vw);
+	background: #fff;
+	box-shadow: -10px 0 40px rgba(15, 23, 42, .18);
+	display: flex;
+	flex-direction: column;
+	transform: translateX(100%);
+	transition: transform .32s cubic-bezier(.16, 1, .3, 1);
+	z-index: 100003;
+}
+
+.billio-drawer-overlay.billio-open .billio-drawer {
+	transform: translateX(0);
+}
+
+.billio-drawer-header {
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--billio-line);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background: #fff;
+}
+
+.billio-drawer-title-wrap {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.billio-drawer-title-wrap h3 {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 700;
+	color: var(--billio-ink);
+	line-height: 1.2;
+}
+
+.billio-drawer-sub {
+	font-size: 12.5px;
+	color: var(--billio-ink2);
+	margin-top: 2px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.billio-drawer-close {
+	background: transparent;
+	border: none;
+	width: 32px;
+	height: 32px;
+	border-radius: 8px;
+	display: grid;
+	place-items: center;
+	cursor: pointer;
+	color: var(--billio-ink2);
+	transition: all .15s;
+}
+
+.billio-drawer-close:hover {
+	background: var(--billio-bg);
+	color: var(--billio-ink);
+}
+
+.billio-drawer-close svg {
+	width: 18px;
+	height: 18px;
+}
+
+.billio-drawer-actions {
+	padding: 10px 20px;
+	background: #fafbfc;
+	border-bottom: 1px solid var(--billio-line);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+}
+
+.billio-drawer-actions .billio-btn {
+	padding: 6px 12px;
+	font-size: 12.5px;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	border-radius: 6px;
+	text-decoration: none;
+}
+
+.billio-drawer-actions .billio-btn svg {
+	width: 14px;
+	height: 14px;
+}
+
+.billio-btn-wa {
+	background: #10b981 !important;
+	color: #fff !important;
+	border-color: #059669 !important;
+}
+
+.billio-btn-wa:hover {
+	background: #059669 !important;
+	color: #fff !important;
+}
+
+.billio-drawer-tabs {
+	display: flex;
+	border-bottom: 1px solid var(--billio-line);
+	padding: 0 20px;
+	background: #fff;
+}
+
+.billio-drawer-tab {
+	background: none;
+	border: none;
+	padding: 10px 16px;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--billio-ink2);
+	cursor: pointer;
+	border-bottom: 2px solid transparent;
+	transition: all .15s;
+}
+
+.billio-drawer-tab:hover {
+	color: var(--billio-ink);
+}
+
+.billio-drawer-tab.active {
+	color: var(--billio-brand);
+	border-bottom-color: var(--billio-brand);
+	font-weight: 600;
+}
+
+.billio-drawer-body {
+	flex: 1;
+	overflow: hidden;
+	position: relative;
+	background: #f1f5f9;
+}
+
+.billio-drawer-panel {
+	display: none;
+	height: 100%;
+	width: 100%;
+}
+
+.billio-drawer-panel.active {
+	display: block;
+}
+
+.billio-drawer-frame-wrap {
+	width: 100%;
+	height: 100%;
+	position: relative;
+}
+
+.billio-drawer-frame-wrap iframe {
+	width: 100%;
+	height: 100%;
+	border: none;
+	display: block;
+	background: #fff;
+}
+
+.billio-drawer-loading {
+	position: absolute;
+	inset: 0;
+	background: rgba(255, 255, 255, .88);
+	backdrop-filter: blur(2px);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	font-size: 13px;
+	color: var(--billio-ink2);
+	z-index: 10;
+}
+
+.billio-drawer-loading .billio-spinner {
+	width: 24px;
+	height: 24px;
+	border: 2px solid rgba(79, 70, 229, .2);
+	border-top-color: var(--billio-brand);
+	border-radius: 50%;
+	animation: billio-spin .7s linear infinite;
+}
+
+@keyframes billio-spin {
+	to { transform: rotate(360deg); }
+}
+
+.billio-drawer-details {
+	padding: 24px;
+	overflow-y: auto;
+	height: 100%;
+	background: #fff;
+}
+
+.billio-detail-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 16px;
+	margin-bottom: 24px;
+}
+
+.billio-detail-card {
+	background: #fafbfc;
+	border: 1px solid var(--billio-line);
+	border-radius: 8px;
+	padding: 14px 16px;
+}
+
+.billio-detail-label {
+	font-size: 11.5px;
+	text-transform: uppercase;
+	letter-spacing: .03em;
+	color: var(--billio-muted);
+	font-weight: 600;
+	margin-bottom: 4px;
+}
+
+.billio-detail-val {
+	font-size: 13.5px;
+	color: var(--billio-ink);
+	font-weight: 500;
+	word-break: break-word;
+}
+
+/* Row hover effect for interactive table */
+.billio-table tbody tr {
+	cursor: pointer;
+	transition: background-color .15s ease;
+}
+
+.billio-table tbody tr:hover {
+	background: #f8fafc;
+}
+
+/* Quick Actions Hub */
+.billio-quick-actions {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.billio-qa-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	background: #fff;
+	border: 1px solid var(--billio-line);
+	border-radius: 10px;
+	padding: 10px 16px;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--billio-ink2);
+	text-decoration: none;
+	cursor: pointer;
+	box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+	transition: all .2s ease;
+}
+
+.billio-qa-btn:hover {
+	border-color: var(--billio-brand);
+	color: var(--billio-brand);
+	background: var(--billio-brand-soft);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(79, 70, 229, .1);
+	text-decoration: none;
+}
+
+.billio-qa-btn .billio-i {
+	width: 17px;
+	height: 17px;
+	color: var(--billio-brand);
+}
+
+.billio-qa-badge {
+	background: #f59e0b;
+	color: #fff;
+	font-size: 11px;
+	padding: 1px 7px;
+	border-radius: 99px;
+	font-weight: 700;
+	margin-left: 4px;
+}
+
+/* Smart Setup Checklist Complete state */
+.billio-setup-complete-card {
+	background: linear-gradient(135deg, #ecfdf5, #f0fdf4);
+	border: 1px solid #a7f3d0;
+	border-radius: var(--billio-r);
+	padding: 16px 20px;
+	margin-bottom: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 14px;
+}
+
+.billio-setup-complete-info {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	color: #065f46;
+	font-size: 13.5px;
+	font-weight: 600;
+}
+
+.billio-setup-complete-icon {
+	width: 32px;
+	height: 32px;
+	background: #10b981;
+	color: #fff;
+	border-radius: 50%;
+	display: grid;
+	place-items: center;
+	flex-shrink: 0;
+	font-size: 16px;
+}
+
+.billio-checklist-toggle {
+	background: #fff;
+	border: 1px solid #a7f3d0;
+	color: #059669;
+	font-size: 12.5px;
+	font-weight: 600;
+	border-radius: 8px;
+	padding: 6px 14px;
+	cursor: pointer;
+	transition: .15s;
+}
+
+.billio-checklist-toggle:hover {
+	background: #d1fae5;
+}
+
