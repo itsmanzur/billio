@@ -39,7 +39,8 @@ $devVendorFolders = @(
     "vendor/bin",
     "vendor/squizlabs",
     "vendor/wp-coding-standards",
-    "vendor/dealerdirect"
+    "vendor/dealerdirect",
+    "vendor/phpcsstandards"
 )
 
 foreach ($devFolder in $devVendorFolders) {

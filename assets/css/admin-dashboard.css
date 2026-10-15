@@ -45,6 +45,13 @@
 	font-size: 17px;
 }
 
+.billio-setup-body {
+	flex: 1;
+	min-width: 240px;
+	position: relative;
+	z-index: 1;
+}
+
 .billio-setup h3,
 .billio-ui .billio-setup h3 {
 	margin: 0 0 4px;
@@ -54,6 +61,8 @@
 
 .billio-setup h3 span,
 .billio-ui .billio-setup h3 span {
+	font-size: 12px;
+	font-weight: 400;
 	color: rgba(255, 255, 255, 0.85) !important;
 }
 
@@ -86,6 +95,13 @@
 .billio-step.billio-done {
 	opacity: .65;
 	text-decoration: line-through;
+}
+
+.billio-dash a.billio-step,
+.billio-dash a.billio-step:link,
+.billio-dash a.billio-step:visited {
+	color: #fff;
+	text-decoration: none;
 }
 
 /* Rendered as an <a>, so without enough specificity here it can pick up
@@ -782,6 +798,17 @@
 	transform: translateX(0);
 }
 
+body.rtl .billio-drawer {
+	right: auto;
+	left: 0;
+	box-shadow: 10px 0 40px rgba(15, 23, 42, .18);
+	transform: translateX(-100%);
+}
+
+body.rtl .billio-drawer-overlay.billio-open .billio-drawer {
+	transform: translateX(0);
+}
+
 .billio-drawer-header {
 	padding: 16px 20px;
 	border-bottom: 1px solid var(--billio-line);
@@ -1107,5 +1134,35 @@
 
 .billio-checklist-toggle:hover {
 	background: #d1fae5;
+}
+
+@media (max-width: 782px) {
+	.billio-drawer {
+		width: 100vw;
+		max-width: 100vw;
+	}
+
+	.billio-hdr {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 12px;
+	}
+
+	.billio-hdr .billio-sp {
+		display: none;
+	}
+
+	.billio-quick-actions {
+		width: 100%;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+
+	.billio-qa-btn {
+		flex: 1 1 auto;
+		justify-content: center;
+		min-width: 140px;
+	}
 }
 

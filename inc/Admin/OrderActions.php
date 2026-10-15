@@ -180,9 +180,9 @@ class OrderActions {
 			'billioAdmin',
 			array(
 				'ajaxUrl'               => admin_url( 'admin-ajax.php' ),
-				'i18nError'             => esc_html__( 'Something went wrong. Please try again.', 'billio' ),
-				'i18nSent'              => esc_html__( 'Invoice email sent.', 'billio' ),
-				'i18nConfirmRegenerate' => esc_html__( 'Regenerate this invoice\'s PDF? This replaces the existing file (same number) with freshly rendered content.', 'billio' ),
+				'i18nError'             => __( 'Something went wrong. Please try again.', 'billio' ),
+				'i18nSent'              => __( 'Invoice email sent.', 'billio' ),
+				'i18nConfirmRegenerate' => __( 'Regenerate this invoice\'s PDF? This replaces the existing file (same number) with freshly rendered content.', 'billio' ),
 			)
 		);
 	}

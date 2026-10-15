@@ -159,6 +159,7 @@ class Dashboard {
 		delete_transient( 'billio_dash_recent_documents' );
 		delete_transient( 'billio_dash_legacy_orders' );
 		delete_transient( 'billio_dash_legacy_refunds' );
+		delete_transient( 'billio_dash_missing_order_ids' );
 		foreach ( array( 7, 30, 90 ) as $days ) {
 			delete_transient( 'billio_dash_chart_' . $days );
 		}
@@ -282,74 +283,131 @@ class Dashboard {
 	 */
 	private function i18n_strings() {
 		return array(
-			'error'                  => __( 'Something went wrong. Please try again.', 'billio' ),
-			'allInvoiced'            => __( 'All orders invoiced', 'billio' ),
+			'error'                    => __( 'Something went wrong. Please try again.', 'billio' ),
+			'allInvoiced'              => __( 'All orders invoiced', 'billio' ),
 			/* translators: %d: number of orders missing an invoice. */
-			'generateMissing'        => __( 'Generate missing (%d)', 'billio' ),
-			'allCaughtUp'            => __( 'All caught up', 'billio' ),
-			'generateThemNow'        => __( 'Generate them now →', 'billio' ),
-			'downloadingPdf'         => __( 'Downloading…', 'billio' ),
-			'invoiceEmailed'         => __( 'Invoice emailed to customer', 'billio' ),
-			'confirmRegenerateTitle' => __( 'Regenerate this invoice?', 'billio' ),
-			'confirmRegenerateBody'  => __( 'The PDF will be rebuilt with your current settings and template. The invoice number stays the same.', 'billio' ),
-			'cancel'                 => __( 'Cancel', 'billio' ),
-			'regenerate'             => __( 'Regenerate', 'billio' ),
+			'generateMissing'          => __( 'Generate missing (%d)', 'billio' ),
+			'allCaughtUp'              => __( 'All caught up', 'billio' ),
+			'generateThemNow'          => __( 'Generate them now →', 'billio' ),
+			'downloadingPdf'           => __( 'Downloading…', 'billio' ),
+			'invoiceEmailed'           => __( 'Invoice emailed to customer', 'billio' ),
+			'confirmRegenerateTitle'   => __( 'Regenerate this invoice?', 'billio' ),
+			'confirmRegenerateBody'    => __( 'The PDF will be rebuilt with your current settings and template. The invoice number stays the same.', 'billio' ),
+			'cancel'                   => __( 'Cancel', 'billio' ),
+			'regenerate'               => __( 'Regenerate', 'billio' ),
 			/* translators: %s: document number. */
-			'regenerated'            => __( '%s regenerated', 'billio' ),
-			'generateModalTitle'     => __( 'Generate missing invoices', 'billio' ),
-			'generateModalNote'      => __( 'Orders will be processed oldest-first so numbering stays chronological.', 'billio' ),
-			'start'                  => __( 'Start', 'billio' ),
-			'ready'                  => __( 'Ready', 'billio' ),
+			'regenerated'              => __( '%s regenerated', 'billio' ),
+			'generateModalTitle'       => __( 'Generate missing invoices', 'billio' ),
+			'generateModalNote'        => __( 'Orders will be processed oldest-first so numbering stays chronological.', 'billio' ),
+			'start'                    => __( 'Start', 'billio' ),
+			'ready'                    => __( 'Ready', 'billio' ),
 			/* translators: 1: number done so far, 2: total number, 3: latest invoice number assigned. */
-			'progressOf'             => __( '%1$d of %2$d · %3$s', 'billio' ),
+			'progressOf'               => __( '%1$d of %2$d · %3$s', 'billio' ),
 			/* translators: %d: number of invoices generated. */
-			'generatedCount'         => __( '%d invoices generated', 'billio' ),
-			'noDocumentsYet'         => __( 'No invoices generated yet — they appear here as soon as an order is invoiced.', 'billio' ),
+			'generatedCount'           => __( '%d invoices generated', 'billio' ),
+			'noDocumentsYet'           => __( 'No invoices generated yet — they appear here as soon as an order is invoiced.', 'billio' ),
 			/* translators: %s: the search term that matched nothing. */
-			'noSearchMatch'          => __( 'No documents match "%s"', 'billio' ),
+			'noSearchMatch'            => __( 'No documents match "%s"', 'billio' ),
 			/* translators: 1: number of documents shown, 2: total number of documents. */
-			'showingOf'              => __( 'Showing %1$d of %2$d', 'billio' ),
-			'viewAllInOrders'        => __( 'View all in Orders →', 'billio' ),
-			'paperSizeSet'           => __( 'Paper size updated', 'billio' ),
-			'templateSet'            => __( 'Invoice template updated', 'billio' ),
-			'emailTriggerOn'         => __( 'Invoice will be attached to this email', 'billio' ),
-			'emailTriggerOff'        => __( 'Invoice will no longer be attached to this email', 'billio' ),
-			'settingsSaveFailed'     => __( 'Could not save — please try again.', 'billio' ),
-			'setupComplete'          => __( '🎉 You\'re all set — every invoice is fully branded', 'billio' ),
-			'today'                  => __( 'Today', 'billio' ),
-			'noRefundsThisMonth'     => __( 'No refunds this month', 'billio' ),
-			'noInvoicesYet'          => __( 'No invoices yet', 'billio' ),
-			'noCreditNotesYet'       => __( 'No credit notes yet', 'billio' ),
-			'searchResultsLimited'   => __( 'Results limited — search for something more specific.', 'billio' ),
-			'previewDocument'        => __( 'Preview Document', 'billio' ),
-			'closePreview'           => __( 'Close preview (Esc)', 'billio' ),
-			'printInvoice'           => __( 'Print', 'billio' ),
-			'copyLink'               => __( 'Copy Link', 'billio' ),
-			'linkCopied'             => __( 'Link copied to clipboard!', 'billio' ),
-			'sendWhatsApp'           => __( 'WhatsApp', 'billio' ),
-			'orderDetails'           => __( 'Order Details', 'billio' ),
-			'paymentMethod'          => __( 'Payment Method', 'billio' ),
-			'billingAddress'         => __( 'Billing Address', 'billio' ),
-			'items'                  => __( 'Items', 'billio' ),
-			'email'                  => __( 'Email', 'billio' ),
-			'phone'                  => __( 'Phone', 'billio' ),
-			'openOrder'              => __( 'Open in WooCommerce →', 'billio' ),
-			'loadingPreview'         => __( 'Rendering live PDF preview…', 'billio' ),
-			'smartChecklist'         => __( 'Smart Setup Checklist', 'billio' ),
-			'quickActions'           => __( 'Quick Actions', 'billio' ),
-			'instantInvoicePreview'  => __( 'Live Invoice Preview', 'billio' ),
-			'b2bTaxIdToggle'         => __( 'Customer Tax ID at checkout', 'billio' ),
-			'b2bTaxIdEnabled'        => __( 'Customer Tax ID enabled at checkout', 'billio' ),
-			'b2bTaxIdDisabled'       => __( 'Customer Tax ID disabled at checkout', 'billio' ),
-			'watermarkPaidToggle'    => __( 'PAID stamp watermark', 'billio' ),
-			'watermarkPaidOn'        => __( 'PAID stamp enabled on paid invoices', 'billio' ),
-			'watermarkPaidOff'       => __( 'PAID stamp disabled', 'billio' ),
-			'allStepsCompleted'      => __( '🎉 All setup steps completed! Your store is fully branded.', 'billio' ),
+			'showingOf'                => __( 'Showing %1$d of %2$d', 'billio' ),
+			'viewAllInOrders'          => __( 'View all in Orders →', 'billio' ),
+			'paperSizeSet'             => __( 'Paper size updated', 'billio' ),
+			'templateSet'              => __( 'Invoice template updated', 'billio' ),
+			'emailTriggerOn'           => __( 'Invoice will be attached to this email', 'billio' ),
+			'emailTriggerOff'          => __( 'Invoice will no longer be attached to this email', 'billio' ),
+			'settingsSaveFailed'       => __( 'Could not save — please try again.', 'billio' ),
+			'setupComplete'            => __( '🎉 You\'re all set — every invoice is fully branded', 'billio' ),
+			'today'                    => __( 'Today', 'billio' ),
+			'noRefundsThisMonth'       => __( 'No refunds this month', 'billio' ),
+			'noInvoicesYet'            => __( 'No invoices yet', 'billio' ),
+			'noCreditNotesYet'         => __( 'No credit notes yet', 'billio' ),
+			'searchResultsLimited'     => __( 'Results limited — search for something more specific.', 'billio' ),
+			'previewDocument'          => __( 'Preview Document', 'billio' ),
+			'closePreview'             => __( 'Close preview (Esc)', 'billio' ),
+			'printInvoice'             => __( 'Print', 'billio' ),
+			'copyLink'                 => __( 'Copy Link', 'billio' ),
+			'linkCopied'               => __( 'Link copied to clipboard!', 'billio' ),
+			'sendWhatsApp'             => __( 'WhatsApp', 'billio' ),
+			'orderDetails'             => __( 'Order Details', 'billio' ),
+			'paymentMethod'            => __( 'Payment Method', 'billio' ),
+			'billingAddress'           => __( 'Billing Address', 'billio' ),
+			'items'                    => __( 'Items', 'billio' ),
+			'email'                    => __( 'Email', 'billio' ),
+			'phone'                    => __( 'Phone', 'billio' ),
+			'openOrder'                => __( 'Open in WooCommerce →', 'billio' ),
+			'loadingPreview'           => __( 'Rendering live PDF preview…', 'billio' ),
+			'smartChecklist'           => __( 'Smart Setup Checklist', 'billio' ),
+			'quickActions'             => __( 'Quick Actions', 'billio' ),
+			'instantInvoicePreview'    => __( 'Live Invoice Preview', 'billio' ),
+			'b2bTaxIdToggle'           => __( 'Customer Tax ID at checkout', 'billio' ),
+			'b2bTaxIdEnabled'          => __( 'Customer Tax ID enabled at checkout', 'billio' ),
+			'b2bTaxIdDisabled'         => __( 'Customer Tax ID disabled at checkout', 'billio' ),
+			'watermarkPaidToggle'      => __( 'PAID stamp watermark', 'billio' ),
+			'watermarkPaidOn'          => __( 'PAID stamp enabled on paid invoices', 'billio' ),
+			'watermarkPaidOff'         => __( 'PAID stamp disabled', 'billio' ),
+			'allStepsCompleted'        => __( '🎉 All setup steps completed! Your store is fully branded.', 'billio' ),
 			/* translators: 1: number of steps completed, 2: total number of steps. */
-			'setupProgress'          => __( '%1$d of %2$d complete', 'billio' ),
-			'showChecklist'          => __( 'Show checklist', 'billio' ),
-			'hideChecklist'          => __( 'Hide checklist', 'billio' ),
-			'sampleInvoice'          => __( 'Sample Invoice Preview', 'billio' ),
+			'setupProgress'            => __( '%1$d of %2$d complete', 'billio' ),
+			'showChecklist'            => __( 'Show checklist', 'billio' ),
+			'hideChecklist'            => __( 'Hide checklist', 'billio' ),
+			'sampleInvoice'            => __( 'Sample Invoice Preview', 'billio' ),
+			'recentDocuments'          => __( 'Recent documents', 'billio' ),
+			'filterAll'                => __( 'All', 'billio' ),
+			'filterInvoices'           => __( 'Invoices', 'billio' ),
+			'filterCreditNotes'        => __( 'Credit notes', 'billio' ),
+			'searchPlaceholder'        => __( 'Search by number, order or customer…', 'billio' ),
+			'colDocument'              => __( 'Document', 'billio' ),
+			'colOrder'                 => __( 'Order', 'billio' ),
+			'colCustomer'              => __( 'Customer', 'billio' ),
+			'colOrderStatus'           => __( 'Order status', 'billio' ),
+			'colDate'                  => __( 'Date', 'billio' ),
+			'colTotal'                 => __( 'Total', 'billio' ),
+			'colActions'               => __( 'Actions', 'billio' ),
+			'invoicesThisMonth'        => __( 'Invoices this month', 'billio' ),
+			'revenueInvoicedThisMonth' => __( 'Revenue invoiced this month', 'billio' ),
+			'creditNotesThisMonth'     => __( 'Credit notes this month', 'billio' ),
+			'ordersWithoutInvoice'     => __( 'Orders without invoice', 'billio' ),
+			'setupBannerDesc'          => __( 'A few quick steps make every invoice fully branded, sequential, and tax compliant.', 'billio' ),
+			/* translators: %d: number of invoices created. */
+			'reviewEnjoying'           => __( 'Billio has created %d invoices for you. Enjoying it?', 'billio' ),
+			'leaveReview'              => __( 'Leave a review', 'billio' ),
+			'notNow'                   => __( 'Not now', 'billio' ),
+			'metricInvoices'           => __( 'Invoices', 'billio' ),
+			'metricRevenue'            => __( 'Revenue', 'billio' ),
+			'chartTotalInRange'        => __( 'Total in range', 'billio' ),
+			'chartDailyAverage'        => __( 'Daily average', 'billio' ),
+			'chartBestDay'             => __( 'Best day', 'billio' ),
+			'chartActivityByDay'       => __( 'Invoice activity, by day', 'billio' ),
+			'invoiceSetupAtGlance'     => __( 'Invoice setup at a glance', 'billio' ),
+			'nextInvoiceNumber'        => __( 'Next invoice number', 'billio' ),
+			'editFormat'               => __( 'Edit format', 'billio' ),
+			'attachToEmail'            => __( 'Attach to email', 'billio' ),
+			'processingOrder'          => __( 'Processing order', 'billio' ),
+			'completedOrder'           => __( 'Completed order', 'billio' ),
+			'b2bTax'                   => __( 'B2B / Tax', 'billio' ),
+			'watermark'                => __( 'Watermark', 'billio' ),
+			'paperSize'                => __( 'Paper size', 'billio' ),
+			'invoiceTemplate'          => __( 'Invoice template', 'billio' ),
+			'templateDefault'          => __( 'Default', 'billio' ),
+			'templateModern'           => __( 'Modern', 'billio' ),
+			'downloadPdf'              => __( 'Download PDF', 'billio' ),
+			'download'                 => __( 'Download', 'billio' ),
+			'resendEmail'              => __( 'Resend email', 'billio' ),
+			'resend'                   => __( 'Resend', 'billio' ),
+			'customer'                 => __( 'Customer', 'billio' ),
+			'total'                    => __( 'Total', 'billio' ),
+			'previousPage'             => __( 'Previous page', 'billio' ),
+			'nextPage'                 => __( 'Next page', 'billio' ),
+			'generateMissingBtn'       => __( 'Generate Missing', 'billio' ),
+			'settings'                 => __( 'Settings', 'billio' ),
+			'docsAndGuide'             => __( 'Docs & Guide', 'billio' ),
+			'tagline'                  => __( 'Invoices, credit notes & packing slips for your WooCommerce store', 'billio' ),
+			'invoiceActivity'          => __( 'Invoice activity', 'billio' ),
+			'hide'                     => __( 'Hide', 'billio' ),
+			/* translators: %s: formatted refund amount. */
+			'refundedThisMonth'        => __( '%s refunded this month', 'billio' ),
+			/* translators: %d: percentage complete. */
+			'percentComplete'          => __( '(%d%% complete)', 'billio' ),
 		);
 	}
 
@@ -919,15 +977,25 @@ class Dashboard {
 	 * cutoff window — feeds both the KPI/header count and the "Generate
 	 * missing" modal's batch list.
 	 *
+	 * Cached to protect performance on high-volume stores, and invalidated
+	 * automatically when new invoices are generated.
+	 *
 	 * @return int[]
 	 */
 	public function get_missing_order_ids() {
-		$cutoff = $this->site_now()->modify( '-' . self::ACTION_NEEDED_CUTOFF_DAYS . ' days' )->getTimestamp();
+		$cache_key = 'billio_dash_missing_order_ids';
+		$cached    = get_transient( $cache_key );
+		if ( false !== $cached && is_array( $cached ) ) {
+			return $cached;
+		}
 
-		return wc_get_orders(
+		$cutoff = $this->site_now()->modify( '-' . self::ACTION_NEEDED_CUTOFF_DAYS . ' days' )->getTimestamp();
+		$limit  = (int) apply_filters( 'billio_dashboard_missing_orders_limit', 500 );
+
+		$ids = wc_get_orders(
 			array(
 				'status'       => 'completed',
-				'limit'        => -1,
+				'limit'        => $limit,
 				'orderby'      => 'date',
 				'order'        => 'ASC',
 				'return'       => 'ids',
@@ -940,6 +1008,10 @@ class Dashboard {
 				),
 			)
 		);
+
+		set_transient( $cache_key, $ids, self::STATS_CACHE_TTL );
+
+		return $ids;
 	}
 
 	/**

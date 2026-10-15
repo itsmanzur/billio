@@ -4,7 +4,7 @@ Tags: woocommerce, invoice, pdf invoice, billing, packing slip
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.3.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -60,6 +60,14 @@ No. Invoice numbers are assigned with an atomic, lock-guarded database operation
 Vowel signs (ি ে ৈ ো ৌ) are repositioned so names and addresses display correctly. Complex consonant conjuncts (e.g. ক্ষ, ম্ম) currently render with a visible connecting mark rather than a fully stacked ligature glyph, which is a limitation of the underlying PDF renderer rather than something Billio's text processing can fully correct. This does not affect the accuracy of any amounts or data on the invoice.
 
 == Changelog ==
+
+= 1.3.1 =
+* Polish: Full internationalization audit — 100% translatable interface strings across Dashboard, Settings, Quick Actions, and setup checklist with complete bundled Bengali (bn_BD) translation.
+* Fix: Restored safe JIT bundled translation fallback via `load_textdomain_mofile` filter ensuring complete Plugin Check compliance without deprecated function calls.
+* Fix: Corrected placeholder argument handling and added positional printf formatting support for JavaScript localized strings.
+* Polish: Cleaned up deprecated UI listeners and streamlined Quick Actions event bindings.
+* Polish: Replaced preemptive HTML entity escaping in localized script parameters to prevent double-escaping in client-side text rendering.
+* Hardening: Strengthened uninstall routine to clean up per-user checklist dismissal metadata.
 
 = 1.3.0 =
 * New: Interactive Slide-over Quick Preview Drawer on the Dashboard with instant inline PDF viewer, 1-click print, WhatsApp sharing, invoice link copy, and customer contact details.

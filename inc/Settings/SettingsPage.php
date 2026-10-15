@@ -252,8 +252,8 @@ class SettingsPage {
 		return array(
 			'nonce'       => wp_create_nonce( 'billio_preview' ),
 			'previewUrl'  => admin_url( 'admin-post.php?action=billio_preview' ),
-			'mediaTitle'  => esc_html__( 'Choose a logo', 'billio' ),
-			'mediaButton' => esc_html__( 'Use this logo', 'billio' ),
+			'mediaTitle'  => __( 'Choose a logo', 'billio' ),
+			'mediaButton' => __( 'Use this logo', 'billio' ),
 			'current'     => array(
 				'numberPrefix'      => get_option( 'billio_number_prefix', 'INV' ),
 				'creditNotePrefix'  => get_option( 'billio_credit_note_prefix', 'CN' ),
@@ -264,22 +264,25 @@ class SettingsPage {
 			),
 			'i18n'        => array(
 				/* translators: %d: digit count example, e.g. "4 → 0001". */
-				'paddingExample'       => esc_html__( '%1$d → %2$s', 'billio' ),
-				'formatMissingNumber'  => esc_html__( 'The format must include {NUMBER}, otherwise every invoice gets the same number.', 'billio' ),
-				'resetYearlyHasYear'   => esc_html__( 'Your format includes {YEAR}, so numbers stay unique.', 'billio' ),
-				'resetYearlyNoYear'    => esc_html__( 'Add {YEAR} to the format, otherwise numbers will repeat each year.', 'billio' ),
-				'noEmailStatus'        => esc_html__( 'No status selected — customers won\'t receive invoices by email.', 'billio' ),
-				'confirmNoEmailStatus' => esc_html__( 'No email status selected — customers won\'t receive invoices automatically. Save anyway?', 'billio' ),
+				'paddingExample'       => __( '%1$d → %2$s', 'billio' ),
+				'formatMissingNumber'  => __( 'The format must include {NUMBER}, otherwise every invoice gets the same number.', 'billio' ),
+				'resetYearlyHasYear'   => __( 'Your format includes {YEAR}, so numbers stay unique.', 'billio' ),
+				'resetYearlyNoYear'    => __( 'Add {YEAR} to the format, otherwise numbers will repeat each year.', 'billio' ),
+				'noEmailStatus'        => __( 'No status selected — customers won\'t receive invoices by email.', 'billio' ),
+				'confirmNoEmailStatus' => __( 'No email status selected — customers won\'t receive invoices automatically. Save anyway?', 'billio' ),
 				/* translators: %d: number of unsaved changes. */
-				'unsavedChange'        => esc_html__( '%d unsaved change', 'billio' ),
+				'unsavedChange'        => __( '%d unsaved change', 'billio' ),
 				/* translators: %d: number of unsaved changes. */
-				'unsavedChanges'       => esc_html__( '%d unsaved changes', 'billio' ),
-				'settingsSaved'        => esc_html__( '✓ Settings saved', 'billio' ),
-				'fixFormatFirst'       => esc_html__( 'Fix the number format first', 'billio' ),
-				'addressMissing'       => esc_html__( 'Add your company address', 'billio' ),
-				'logoUploaded'         => esc_html__( 'Logo uploaded', 'billio' ),
-				'logoRemoved'          => esc_html__( 'Logo removed', 'billio' ),
-				'invalidImageFile'     => esc_html__( 'Please drop an image file (PNG or JPG).', 'billio' ),
+				'unsavedChanges'       => __( '%d unsaved changes', 'billio' ),
+				'settingsSaved'        => __( '✓ Settings saved', 'billio' ),
+				'fixFormatFirst'       => __( 'Fix the number format first', 'billio' ),
+				'addressMissing'       => __( 'Add your company address', 'billio' ),
+				'logoUploaded'         => __( 'Logo uploaded', 'billio' ),
+				'logoRemoved'          => __( 'Logo removed', 'billio' ),
+				'invalidImageFile'     => __( 'Please drop an image file (PNG or JPG).', 'billio' ),
+				'profileComplete'      => __( 'Complete', 'billio' ),
+				/* translators: %d: percentage complete. */
+				'profilePctComplete'   => __( '%d%% complete', 'billio' ),
 			),
 		);
 	}

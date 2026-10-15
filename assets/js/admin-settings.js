@@ -20,8 +20,12 @@
 		var str = t( key );
 		var args = Array.prototype.slice.call( arguments, 1 );
 		var i = 0;
-		return str.replace( /%(\d\$)?[ds]/g, function () {
-			return args[ i++ ];
+		return str.replace( /%(?:(\d+)\$)?([ds])/g, function ( match, p1 ) {
+			if ( p1 ) {
+				var idx = parseInt( p1, 10 ) - 1;
+				return args[ idx ] !== undefined ? args[ idx ] : match;
+			}
+			return args[ i++ ] !== undefined ? args[ i - 1 ] : match;
 		} );
 	}
 
@@ -147,7 +151,7 @@
 		var hasEmail = anyEmailStatusOn();
 		var done = [ hasLogo, hasName, hasAddress, hasEmail ].filter( Boolean ).length;
 		var pct = Math.round( ( done / 4 ) * 100 );
-		document.getElementById( 'billio-profile-pct' ).textContent = 100 === pct ? '✓ ' + 'Complete' : pct + '% complete';
+		document.getElementById( 'billio-profile-pct' ).textContent = 100 === pct ? ( '✓ ' + t( 'profileComplete' ) ) : tf( 'profilePctComplete', pct );
 		document.getElementById( 'billio-profile-bar-fill' ).style.width = pct + '%';
 	}
 
@@ -361,8 +365,14 @@
 	 * ------------------------------------------------------------- */
 
 	function wireSwitch( rowEl, checkboxId, onToggle ) {
+		if ( ! rowEl ) {
+			return;
+		}
 		var checkbox = document.getElementById( checkboxId );
 		var btn = rowEl.querySelector( '.billio-tg' );
+		if ( ! checkbox || ! btn ) {
+			return;
+		}
 
 		function apply( checked ) {
 			checkbox.checked = checked;
@@ -372,6 +382,13 @@
 				onToggle( checked );
 			}
 		}
+
+		btn.addEventListener( 'keydown', function ( e ) {
+			if ( ' ' === e.key || 'Enter' === e.key ) {
+				e.preventDefault();
+				apply( ! checkbox.checked );
+			}
+		} );
 
 		// The whole row is clickable (matches the mockup) — it only ever
 		// contains text and the switch button itself, nothing else

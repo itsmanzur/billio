@@ -80,8 +80,12 @@
 		var str = t( key );
 		var args = Array.prototype.slice.call( arguments, 1 );
 		var i = 0;
-		return str.replace( /%(\d\$)?[ds]/g, function () {
-			return args[ i++ ];
+		return str.replace( /%(?:(\d+)\$)?([ds])/g, function ( match, p1 ) {
+			if ( p1 ) {
+				var idx = parseInt( p1, 10 ) - 1;
+				return args[ idx ] !== undefined ? args[ idx ] : match;
+			}
+			return args[ i++ ] !== undefined ? args[ i - 1 ] : match;
 		} );
 	}
 
@@ -125,9 +129,11 @@
 	dashWrap.appendChild( ov );
 	var modalEl = ov.querySelector( '.billio-modal' );
 	var modalReturnFocus = null;
+	var modalOnClose = null;
 
-	function openModal( html, onOpen ) {
+	function openModal( html, onOpen, onClose ) {
 		modalReturnFocus = document.activeElement;
+		modalOnClose = onClose || null;
 		modalEl.innerHTML = html;
 		ov.classList.add( 'billio-show' );
 		var focusable = modalEl.querySelector( 'button, [href], input, select, textarea' );
@@ -140,10 +146,15 @@
 	}
 
 	function closeModal() {
+		if ( modalOnClose ) {
+			modalOnClose();
+			modalOnClose = null;
+		}
 		ov.classList.remove( 'billio-show' );
 		modalEl.innerHTML = '';
 		if ( modalReturnFocus && typeof modalReturnFocus.focus === 'function' ) {
 			modalReturnFocus.focus();
+			modalReturnFocus = null;
 		}
 	}
 
@@ -178,6 +189,20 @@
 				e.preventDefault();
 				first.focus();
 			}
+		} else if ( 'Tab' === e.key && drawerOverlay.classList.contains( 'billio-open' ) ) {
+			var drawerFocusables = drawerOverlay.querySelectorAll( 'button:not([disabled]), [href], input, select, textarea' );
+			if ( ! drawerFocusables.length ) {
+				return;
+			}
+			var dFirst = drawerFocusables[ 0 ];
+			var dLast = drawerFocusables[ drawerFocusables.length - 1 ];
+			if ( e.shiftKey && document.activeElement === dFirst ) {
+				e.preventDefault();
+				dLast.focus();
+			} else if ( ! e.shiftKey && document.activeElement === dLast ) {
+				e.preventDefault();
+				dFirst.focus();
+			}
 		}
 	} );
 
@@ -204,7 +229,7 @@
 			'</div>' +
 			'<div class="billio-drawer-actions">' +
 				'<button type="button" class="billio-btn" id="billio-drawer-download">' +
-					'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg> ' + escapeHtml( 'Download' ) +
+					'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg> ' + escapeHtml( t( 'download' ) ) +
 				'</button>' +
 				'<button type="button" class="billio-btn" id="billio-drawer-print">' +
 					'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> ' + escapeHtml( t( 'printInvoice' ) ) +
@@ -216,7 +241,7 @@
 					'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg> ' + escapeHtml( t( 'sendWhatsApp' ) ) +
 				'</a>' +
 				'<button type="button" class="billio-btn" id="billio-drawer-resend">' +
-					'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg> ' + escapeHtml( 'Resend' ) +
+					'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg> ' + escapeHtml( t( 'resend' ) ) +
 				'</button>' +
 			'</div>' +
 			'<div class="billio-drawer-tabs">' +
@@ -315,7 +340,10 @@
 		} );
 	} );
 
+	var drawerReturnFocus = null;
+
 	function openDrawer( doc ) {
+		drawerReturnFocus = document.activeElement;
 		activeDoc = doc;
 		document.getElementById( 'billio-drawer-title' ).textContent = doc.number;
 		var badge = document.getElementById( 'billio-drawer-badge' );
@@ -344,12 +372,12 @@
 
 		var detailsHtml =
 			'<div class="billio-detail-grid">' +
-				'<div class="billio-detail-card"><div class="billio-detail-label">' + escapeHtml( 'Customer' ) + '</div><div class="billio-detail-val">' + escapeHtml( doc.customerName || '—' ) + '</div></div>' +
+				'<div class="billio-detail-card"><div class="billio-detail-label">' + escapeHtml( t( 'customer' ) ) + '</div><div class="billio-detail-val">' + escapeHtml( doc.customerName || '—' ) + '</div></div>' +
 				'<div class="billio-detail-card"><div class="billio-detail-label">' + escapeHtml( t( 'email' ) ) + '</div><div class="billio-detail-val">' + ( doc.customerEmail ? '<a href="mailto:' + escapeAttr( doc.customerEmail ) + '">' + escapeHtml( doc.customerEmail ) + '</a>' : '—' ) + '</div></div>' +
 				'<div class="billio-detail-card"><div class="billio-detail-label">' + escapeHtml( t( 'phone' ) ) + '</div><div class="billio-detail-val">' + ( doc.customerPhone ? '<a href="tel:' + escapeAttr( doc.customerPhone ) + '">' + escapeHtml( doc.customerPhone ) + '</a>' : '—' ) + '</div></div>' +
 				'<div class="billio-detail-card"><div class="billio-detail-label">' + escapeHtml( t( 'paymentMethod' ) ) + '</div><div class="billio-detail-val">' + escapeHtml( doc.paymentMethod || '—' ) + '</div></div>' +
 				'<div class="billio-detail-card"><div class="billio-detail-label">' + escapeHtml( t( 'items' ) ) + '</div><div class="billio-detail-val">' + escapeHtml( doc.itemCount || 1 ) + '</div></div>' +
-				'<div class="billio-detail-card"><div class="billio-detail-label">' + escapeHtml( 'Total' ) + '</div><div class="billio-detail-val" style="font-weight:700;font-size:15px;color:var(--billio-brand)">' + fmtMoney( doc.total ) + '</div></div>' +
+				'<div class="billio-detail-card"><div class="billio-detail-label">' + escapeHtml( t( 'total' ) ) + '</div><div class="billio-detail-val" style="font-weight:700;font-size:15px;color:var(--billio-brand)">' + fmtMoney( doc.total ) + '</div></div>' +
 			'</div>' +
 			'<div class="billio-detail-card" style="margin-bottom:20px"><div class="billio-detail-label">' + escapeHtml( t( 'billingAddress' ) ) + '</div><div class="billio-detail-val" style="white-space:pre-line;line-height:1.5">' + escapeHtml( doc.billingAddress || '—' ) + '</div></div>' +
 			'<a href="' + escapeAttr( doc.orderEditUrl ) + '" class="button button-secondary" style="display:inline-flex;align-items:center;gap:6px">' + escapeHtml( t( 'openOrder' ) ) + '</a>';
@@ -358,6 +386,9 @@
 
 		drawerOverlay.classList.add( 'billio-open' );
 		drawerOverlay.setAttribute( 'aria-hidden', 'false' );
+		if ( drawerCloseBtn ) {
+			drawerCloseBtn.focus();
+		}
 	}
 
 	function closeDrawer() {
@@ -365,6 +396,10 @@
 		drawerOverlay.setAttribute( 'aria-hidden', 'true' );
 		drawerIframe.src = 'about:blank';
 		activeDoc = null;
+		if ( drawerReturnFocus && typeof drawerReturnFocus.focus === 'function' ) {
+			drawerReturnFocus.focus();
+			drawerReturnFocus = null;
+		}
 	}
 
 	function openDrawerForSample() {
@@ -482,16 +517,16 @@
 				'</button>' +
 				'<button type="button" class="billio-qa-btn" id="billio-qa-generate">' +
 					'<svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>' +
-					escapeHtml( 'Generate Missing' ) +
+					escapeHtml( t( 'generateMissingBtn' ) ) +
 					( missingCount > 0 ? ' <span class="billio-qa-badge" id="billio-qa-missing-badge">' + missingCount + '</span>' : '' ) +
 				'</button>' +
 				'<a class="billio-qa-btn" href="' + escapeAttr( data.urls.settings ) + '">' +
 					'<svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>' +
-					escapeHtml( 'Settings' ) +
+					escapeHtml( t( 'settings' ) ) +
 				'</a>' +
 				'<a class="billio-qa-btn" href="' + escapeAttr( data.urls.docs ) + '">' +
 					'<svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>' +
-					escapeHtml( 'Docs & Guide' ) +
+					escapeHtml( t( 'docsAndGuide' ) ) +
 				'</a>' +
 				'<span id="billio-header-status-slot">' + statusBadge + '</span>' +
 			'</div>';
@@ -500,7 +535,7 @@
 			'<div class="billio-hdr">' +
 				'<div class="billio-logo">' + iconGeneric() + '</div>' +
 				'<div><h2>Billio <span class="billio-ver">v' + escapeHtml( root.dataset.version || '' ) + '</span></h2>' +
-				'<div class="billio-sub">' + escapeHtml( 'Invoices, credit notes & packing slips for your WooCommerce store' ) + '</div></div>' +
+				'<div class="billio-sub">' + escapeHtml( t( 'tagline' ) ) + '</div></div>' +
 				'<div class="billio-sp"></div>' +
 				quickActionsHtml +
 			'</div>' +
@@ -509,10 +544,10 @@
 			'<div id="billio-review-slot"></div>' +
 			'<div class="billio-grid">' +
 				'<div class="billio-card billio-chart-card">' +
-					'<div class="billio-ch"><h3>' + escapeHtml( 'Invoice activity' ) + '</h3><div class="billio-sp"></div>' +
+					'<div class="billio-ch"><h3>' + escapeHtml( t( 'invoiceActivity' ) ) + '</h3><div class="billio-sp"></div>' +
 						'<div class="billio-seg" id="billio-metric-seg">' +
-							'<button type="button" aria-pressed="true" data-m="invoices">' + escapeHtml( 'Invoices' ) + '</button>' +
-							'<button type="button" aria-pressed="false" data-m="revenue">' + escapeHtml( 'Revenue' ) + '</button>' +
+							'<button type="button" aria-pressed="true" data-m="invoices">' + escapeHtml( t( 'metricInvoices' ) ) + '</button>' +
+							'<button type="button" aria-pressed="false" data-m="revenue">' + escapeHtml( t( 'metricRevenue' ) ) + '</button>' +
 						'</div>' +
 						'<div class="billio-seg" id="billio-range-seg">' +
 							'<button type="button" aria-pressed="false" data-r="7">7D</button>' +
@@ -521,56 +556,51 @@
 						'</div>' +
 					'</div>' +
 					'<div class="billio-chart-summary">' +
-						'<div><div class="billio-label">' + escapeHtml( 'Total in range' ) + '</div><div class="billio-value" id="billio-chart-tot">—</div></div>' +
-						'<div><div class="billio-label">' + escapeHtml( 'Daily average' ) + '</div><div class="billio-value" id="billio-chart-avg">—</div></div>' +
-						'<div><div class="billio-label">' + escapeHtml( 'Best day' ) + '</div><div class="billio-value" id="billio-chart-best">—</div></div>' +
+						'<div><div class="billio-label">' + escapeHtml( t( 'chartTotalInRange' ) ) + '</div><div class="billio-value" id="billio-chart-tot">—</div></div>' +
+						'<div><div class="billio-label">' + escapeHtml( t( 'chartDailyAverage' ) ) + '</div><div class="billio-value" id="billio-chart-avg">—</div></div>' +
+						'<div><div class="billio-label">' + escapeHtml( t( 'chartBestDay' ) ) + '</div><div class="billio-value" id="billio-chart-best">—</div></div>' +
 					'</div>' +
-					'<div class="billio-chartbox" id="billio-chart" aria-label="' + escapeAttr( 'Invoice activity chart' ) + '">' +
+					'<div class="billio-chartbox" id="billio-chart" aria-label="' + escapeAttr( t( 'invoiceActivity' ) ) + '">' +
 						'<div class="billio-tip" id="billio-tip"></div>' +
 					'</div>' +
-					'<table class="billio-sr-table" id="billio-chart-table"><caption>' + escapeHtml( 'Invoice activity, by day' ) + '</caption></table>' +
+					'<table class="billio-sr-table" id="billio-chart-table"><caption>' + escapeHtml( t( 'chartActivityByDay' ) ) + '</caption></table>' +
 					'<div class="billio-legend">' +
-						'<span><i style="background:#4f46e5"></i>' + escapeHtml( 'Invoices' ) + '</span>' +
-						'<span><i style="background:#f87171"></i>' + escapeHtml( 'Credit notes' ) + '</span>' +
+						'<span><i style="background:#4f46e5"></i>' + escapeHtml( t( 'filterInvoices' ) ) + '</span>' +
+						'<span><i style="background:#f87171"></i>' + escapeHtml( t( 'filterCreditNotes' ) ) + '</span>' +
 					'</div>' +
 				'</div>' +
 				'<div class="billio-card">' +
-					'<div class="billio-ch"><h3>' + escapeHtml( 'Invoice setup at a glance' ) + '</h3></div>' +
+					'<div class="billio-ch"><h3>' + escapeHtml( t( 'invoiceSetupAtGlance' ) ) + '</h3></div>' +
 					'<div class="billio-cfg" id="billio-cfg"></div>' +
 				'</div>' +
 			'</div>' +
 			'<div class="billio-card">' +
-				'<div class="billio-ch"><h3>' + escapeHtml( 'Recent documents' ) + '</h3><div class="billio-sp"></div>' +
+				'<div class="billio-ch"><h3>' + escapeHtml( t( 'recentDocuments' ) ) + '</h3><div class="billio-sp"></div>' +
 					'<div class="billio-seg" id="billio-ftype">' +
-						'<button type="button" aria-pressed="true" data-t="all">' + escapeHtml( 'All' ) + '</button>' +
-						'<button type="button" aria-pressed="false" data-t="inv">' + escapeHtml( 'Invoices' ) + '</button>' +
-						'<button type="button" aria-pressed="false" data-t="cn">' + escapeHtml( 'Credit notes' ) + '</button>' +
+						'<button type="button" aria-pressed="true" data-t="all">' + escapeHtml( t( 'filterAll' ) ) + '</button>' +
+						'<button type="button" aria-pressed="false" data-t="inv">' + escapeHtml( t( 'filterInvoices' ) ) + '</button>' +
+						'<button type="button" aria-pressed="false" data-t="cn">' + escapeHtml( t( 'filterCreditNotes' ) ) + '</button>' +
 					'</div>' +
 				'</div>' +
 				'<div class="billio-tools"><div class="billio-search">' +
 					'<svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>' +
-					'<input type="search" id="billio-q" placeholder="' + escapeAttr( 'Search by number, order or customer…' ) + '">' +
+					'<input type="search" id="billio-q" placeholder="' + escapeAttr( t( 'searchPlaceholder' ) ) + '">' +
 				'</div></div>' +
 				'<div class="billio-table-wrap"><table class="billio-tbl">' +
 					'<thead><tr>' +
-						'<th>' + escapeHtml( 'Document' ) + '</th>' +
-						'<th class="billio-hm">' + escapeHtml( 'Order' ) + '</th>' +
-						'<th>' + escapeHtml( 'Customer' ) + '</th>' +
-						'<th class="billio-hm">' + escapeHtml( 'Order status' ) + '</th>' +
-						'<th class="billio-hm">' + escapeHtml( 'Date' ) + '</th>' +
-						'<th class="billio-r">' + escapeHtml( 'Total' ) + '</th>' +
-						'<th class="billio-r">' + escapeHtml( 'Actions' ) + '</th>' +
+						'<th>' + escapeHtml( t( 'colDocument' ) ) + '</th>' +
+						'<th class="billio-hm">' + escapeHtml( t( 'colOrder' ) ) + '</th>' +
+						'<th>' + escapeHtml( t( 'colCustomer' ) ) + '</th>' +
+						'<th class="billio-hm">' + escapeHtml( t( 'colOrderStatus' ) ) + '</th>' +
+						'<th class="billio-hm">' + escapeHtml( t( 'colDate' ) ) + '</th>' +
+						'<th class="billio-r">' + escapeHtml( t( 'colTotal' ) ) + '</th>' +
+						'<th class="billio-r">' + escapeHtml( t( 'colActions' ) ) + '</th>' +
 					'</tr></thead>' +
 					'<tbody id="billio-rows"></tbody>' +
 				'</table></div>' +
 				'<div class="billio-tfoot"><span id="billio-cnt"></span><div class="billio-sp"></div><div class="billio-pager" id="billio-pager"></div><a class="billio-lnk" href="' + escapeAttr( data.urls.ordersList ) + '">' + escapeHtml( t( 'viewAllInOrders' ) ) + '</a></div>' +
 				'<div class="billio-truncated-notice" id="billio-truncated-notice"></div>' +
 			'</div>';
-
-		var previewBtn = document.getElementById( 'billio-preview-template-btn' );
-		if ( previewBtn ) {
-			previewBtn.addEventListener( 'click', openDrawerForSample );
-		}
 
 		var qaPreviewBtn = document.getElementById( 'billio-qa-preview' );
 		if ( qaPreviewBtn ) {
@@ -624,22 +654,22 @@
 		var k = data.kpis;
 		var wrap = document.getElementById( 'billio-kpis' );
 		wrap.innerHTML =
-			'<div class="billio-kpi"><div class="billio-top"><span class="billio-ic" style="background:#eef2ff;color:#4f46e5">' + iconGeneric() + '</span>' + escapeHtml( 'Invoices this month' ) + '</div>' +
+			'<div class="billio-kpi"><div class="billio-top"><span class="billio-ic" style="background:#eef2ff;color:#4f46e5">' + iconGeneric() + '</span>' + escapeHtml( t( 'invoicesThisMonth' ) ) + '</div>' +
 				'<div class="billio-v" id="billio-kpi-inv">0</div>' +
 				'<div class="billio-d">' + trendHtml( k.invoicesThisMonth, k.invoicesLastMonth ) + '</div>' + sparkline( '#4f46e5' ) +
 			'</div>' +
-			'<div class="billio-kpi"><div class="billio-top"><span class="billio-ic" style="background:#ecfdf5;color:#059669">' + iconGeneric() + '</span>' + escapeHtml( 'Revenue invoiced this month' ) + '</div>' +
+			'<div class="billio-kpi"><div class="billio-top"><span class="billio-ic" style="background:#ecfdf5;color:#059669">' + iconGeneric() + '</span>' + escapeHtml( t( 'revenueInvoicedThisMonth' ) ) + '</div>' +
 				'<div class="billio-v" id="billio-kpi-rev">' + fmtMoney( 0 ) + '</div>' +
 				'<div class="billio-d">' + trendHtml( k.revenueThisMonth, k.revenueLastMonth ) + '</div>' + sparkline( '#059669' ) +
 			'</div>' +
-			'<div class="billio-kpi"><div class="billio-top"><span class="billio-ic" style="background:#fef2f2;color:#dc2626">' + iconGeneric() + '</span>' + escapeHtml( 'Credit notes this month' ) + '</div>' +
+			'<div class="billio-kpi"><div class="billio-top"><span class="billio-ic" style="background:#fef2f2;color:#dc2626">' + iconGeneric() + '</span>' + escapeHtml( t( 'creditNotesThisMonth' ) ) + '</div>' +
 				'<div class="billio-v">' + k.creditNotesThisMonth + '</div>' +
 				'<div class="billio-d">' + ( k.creditNotesRefundedTotal > 0
-					? '<span class="billio-dn">−' + fmtMoney( k.creditNotesRefundedTotal ) + '</span> refunded this month'
+					? '<span class="billio-dn">−' + fmtMoney( k.creditNotesRefundedTotal ) + '</span> ' + escapeHtml( tf( 'refundedThisMonth', '' ).trim() )
 					: escapeHtml( t( 'noRefundsThisMonth' ) ) ) +
 				'</div>' +
 			'</div>' +
-			'<div class="billio-kpi' + ( k.ordersWithoutInvoice > 0 ? ' billio-alert' : '' ) + '"><div class="billio-top"><span class="billio-ic" style="background:#fef3c7;color:#d97706">' + iconGeneric() + '</span>' + escapeHtml( 'Orders without invoice' ) + '</div>' +
+			'<div class="billio-kpi' + ( k.ordersWithoutInvoice > 0 ? ' billio-alert' : '' ) + '"><div class="billio-top"><span class="billio-ic" style="background:#fef3c7;color:#d97706">' + iconGeneric() + '</span>' + escapeHtml( t( 'ordersWithoutInvoice' ) ) + '</div>' +
 				'<div class="billio-v">' + k.ordersWithoutInvoice + '</div>' +
 				'<div class="billio-d">' + ( k.ordersWithoutInvoice > 0
 					? '<button type="button" class="billio-lnk billio-kpi-generate">' + escapeHtml( t( 'generateThemNow' ) ) + '</button>'
@@ -676,7 +706,7 @@
 						'<div class="billio-setup-complete-icon">✓</div>' +
 						'<div>' +
 							'<div>' + escapeHtml( t( 'allStepsCompleted' ) ) + '</div>' +
-							'<small style="color:#059669;font-weight:400">' + escapeHtml( tf( 'setupProgress', s.done, s.total, 100 ) ) + '</small>' +
+							'<small style="color:#059669;font-weight:400">' + escapeHtml( tf( 'setupProgress', s.done, s.total ) ) + '</small>' +
 						'</div>' +
 					'</div>' +
 					'<button type="button" class="billio-checklist-toggle" id="billio-toggle-checklist">' + escapeHtml( t( 'showChecklist' ) ) + ' ▾</button>' +
@@ -740,7 +770,7 @@
 				return '<a class="billio-step billio-todo" href="' + escapeAttr( data.urls.settings + step.anchor ) + '">＋ ' + escapeHtml( step.label ) + ' →</a>';
 			}
 			if ( step.anchor ) {
-				return '<a class="billio-step" href="' + escapeAttr( data.urls.settings + step.anchor ) + '" style="color:#fff;text-decoration:none;">○ ' + escapeHtml( step.label ) + '</a>';
+				return '<a class="billio-step" href="' + escapeAttr( data.urls.settings + step.anchor ) + '">○ ' + escapeHtml( step.label ) + '</a>';
 			}
 			return '<span class="billio-step">○ ' + escapeHtml( step.label ) + '</span>';
 		} ).join( '' );
@@ -749,14 +779,14 @@
 
 		container.innerHTML =
 			'<div class="billio-setup" id="billio-setup">' +
-				( isComplete ? '' : '<button type="button" class="billio-x" id="billio-setup-dismiss" aria-label="' + escapeAttr( 'Hide' ) + '">×</button>' ) +
+				( isComplete ? '' : '<button type="button" class="billio-x" id="billio-setup-dismiss" aria-label="' + escapeAttr( t( 'hide' ) ) + '">×</button>' ) +
 				'<div class="billio-ring"><svg viewBox="0 0 36 36" width="72" height="72">' +
 					'<circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="3"/>' +
 					'<circle cx="18" cy="18" r="15.9" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="' + pct + ' 100" transform="rotate(-90 18 18)"/>' +
 				'</svg><b>' + s.done + '/' + s.total + '</b></div>' +
-				'<div style="flex:1;min-width:240px;position:relative;z-index:1">' +
-					'<h3 style="color:#ffffff !important;margin:0 0 4px;font-size:16px;">' + escapeHtml( t( 'smartChecklist' ) ) + ' <span style="font-size:12px;color:rgba(255,255,255,0.85) !important;font-weight:400">(' + pct + '% complete)</span></h3>' +
-					'<p style="color:rgba(255,255,255,0.9) !important;margin:0;font-size:13px;">' + escapeHtml( 'A few quick steps make every invoice fully branded, sequential, and tax compliant.' ) + '</p>' +
+				'<div class="billio-setup-body">' +
+					'<h3>' + escapeHtml( t( 'smartChecklist' ) ) + ' <span>' + escapeHtml( tf( 'percentComplete', pct ) ) + '</span></h3>' +
+					'<p>' + escapeHtml( t( 'setupBannerDesc' ) ) + '</p>' +
 					'<div class="billio-steps">' + stepsHtml + '</div>' +
 				'</div>' +
 			'</div>';
@@ -786,10 +816,10 @@
 		slot.innerHTML =
 			'<div class="billio-review" id="billio-review">' +
 				'<span class="billio-stars">★★★★★</span>' +
-				escapeHtml( 'Billio has created ' + r.total + ' invoices for you. Enjoying it?' ) +
+				escapeHtml( tf( 'reviewEnjoying', r.total ) ) +
 				'<span class="billio-sp"></span>' +
-				'<a class="billio-lnk" href="' + escapeAttr( r.url ) + '" target="_blank" rel="noopener">' + escapeHtml( 'Leave a review' ) + '</a>' +
-				'<button type="button" class="billio-lnk" id="billio-review-dismiss" style="color:var(--billio-muted)">' + escapeHtml( 'Not now' ) + '</button>' +
+				'<a class="billio-lnk" href="' + escapeAttr( r.url ) + '" target="_blank" rel="noopener">' + escapeHtml( t( 'leaveReview' ) ) + '</a>' +
+				'<button type="button" class="billio-lnk" id="billio-review-dismiss" style="color:var(--billio-muted)">' + escapeHtml( t( 'notNow' ) ) + '</button>' +
 			'</div>';
 
 		document.getElementById( 'billio-review-dismiss' ).addEventListener( 'click', function () {
@@ -964,11 +994,11 @@
 		document.getElementById( 'billio-chart-best' ).textContent = fmtDate( Math.floor( new Date( best.date ).getTime() / 1000 ) );
 
 		var srTable = document.getElementById( 'billio-chart-table' );
-		var rows = '<tr><th>' + escapeHtml( 'Date' ) + '</th><th>' + escapeHtml( 'Invoices' ) + '</th><th>' + escapeHtml( 'Revenue' ) + '</th><th>' + escapeHtml( 'Credit notes' ) + '</th></tr>';
+		var rows = '<tr><th>' + escapeHtml( t( 'colDate' ) ) + '</th><th>' + escapeHtml( t( 'filterInvoices' ) ) + '</th><th>' + escapeHtml( t( 'metricRevenue' ) ) + '</th><th>' + escapeHtml( t( 'filterCreditNotes' ) ) + '</th></tr>';
 		days.forEach( function ( d ) {
 			rows += '<tr><td>' + escapeHtml( d.date ) + '</td><td>' + d.invoices + '</td><td>' + fmtMoney( d.revenue ) + '</td><td>' + d.creditNotes + '</td></tr>';
 		} );
-		srTable.innerHTML = '<caption>' + escapeHtml( 'Invoice activity, by day' ) + '</caption>' + rows;
+		srTable.innerHTML = '<caption>' + escapeHtml( t( 'chartActivityByDay' ) ) + '</caption>' + rows;
 	}
 
 	function loadRange( days ) {
@@ -1061,22 +1091,31 @@
 
 		var cfg = document.getElementById( 'billio-cfg' );
 		cfg.innerHTML =
-			'<div class="billio-row"><span class="billio-ic">#</span><div class="billio-t"><small>' + escapeHtml( 'Next invoice number' ) + '</small><span class="billio-mono">' + escapeHtml( data.nextInvoiceNumber ) + '</span></div><a class="billio-lnk" href="' + escapeAttr( data.urls.editFormatField ) + '">' + escapeHtml( 'Edit format' ) + '</a></div>' +
-			'<div class="billio-row"><span class="billio-ic">✉</span><div class="billio-t"><small>' + escapeHtml( 'Attach to email' ) + '</small><span>' + escapeHtml( 'Processing order' ) + '</span></div><button type="button" class="billio-tg" id="billio-tg-processing" role="switch" aria-checked="' + ( processingOn ? 'true' : 'false' ) + '"></button></div>' +
-			'<div class="billio-row"><span class="billio-ic">✉</span><div class="billio-t"><small>' + escapeHtml( 'Attach to email' ) + '</small><span>' + escapeHtml( 'Completed order' ) + '</span></div><button type="button" class="billio-tg" id="billio-tg-completed" role="switch" aria-checked="' + ( completedOn ? 'true' : 'false' ) + '"></button></div>' +
-			'<div class="billio-row"><span class="billio-ic"><svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span><div class="billio-t"><small>' + escapeHtml( 'B2B / Tax' ) + '</small><span>' + escapeHtml( t( 'b2bTaxIdToggle' ) ) + '</span></div><button type="button" class="billio-tg" id="billio-tg-tax-id" role="switch" aria-checked="' + ( qs.enableTaxId ? 'true' : 'false' ) + '"></button></div>' +
-			'<div class="billio-row"><span class="billio-ic"><svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span><div class="billio-t"><small>' + escapeHtml( 'Watermark' ) + '</small><span>' + escapeHtml( t( 'watermarkPaidToggle' ) ) + '</span></div><button type="button" class="billio-tg" id="billio-tg-watermark" role="switch" aria-checked="' + ( qs.watermarkPaid ? 'true' : 'false' ) + '"></button></div>' +
-			'<div class="billio-row"><span class="billio-ic"><svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/></svg></span><div class="billio-t"><small>' + escapeHtml( 'Paper size' ) + '</small><span id="billio-paper-value">' + escapeHtml( qs.paperSize ) + '</span></div><div class="billio-seg" id="billio-paper-seg">' +
+			'<div class="billio-row"><span class="billio-ic">#</span><div class="billio-t"><small>' + escapeHtml( t( 'nextInvoiceNumber' ) ) + '</small><span class="billio-mono">' + escapeHtml( data.nextInvoiceNumber ) + '</span></div><a class="billio-lnk" href="' + escapeAttr( data.urls.editFormatField ) + '">' + escapeHtml( t( 'editFormat' ) ) + '</a></div>' +
+			'<div class="billio-row"><span class="billio-ic">✉</span><div class="billio-t"><small>' + escapeHtml( t( 'attachToEmail' ) ) + '</small><span>' + escapeHtml( t( 'processingOrder' ) ) + '</span></div><button type="button" class="billio-tg" id="billio-tg-processing" role="switch" aria-checked="' + ( processingOn ? 'true' : 'false' ) + '" aria-label="' + escapeAttr( t( 'processingOrder' ) ) + '"></button></div>' +
+			'<div class="billio-row"><span class="billio-ic">✉</span><div class="billio-t"><small>' + escapeHtml( t( 'attachToEmail' ) ) + '</small><span>' + escapeHtml( t( 'completedOrder' ) ) + '</span></div><button type="button" class="billio-tg" id="billio-tg-completed" role="switch" aria-checked="' + ( completedOn ? 'true' : 'false' ) + '" aria-label="' + escapeAttr( t( 'completedOrder' ) ) + '"></button></div>' +
+			'<div class="billio-row"><span class="billio-ic"><svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span><div class="billio-t"><small>' + escapeHtml( t( 'b2bTax' ) ) + '</small><span>' + escapeHtml( t( 'b2bTaxIdToggle' ) ) + '</span></div><button type="button" class="billio-tg" id="billio-tg-tax-id" role="switch" aria-checked="' + ( qs.enableTaxId ? 'true' : 'false' ) + '" aria-label="' + escapeAttr( t( 'b2bTaxIdToggle' ) ) + '"></button></div>' +
+			'<div class="billio-row"><span class="billio-ic"><svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span><div class="billio-t"><small>' + escapeHtml( t( 'watermark' ) ) + '</small><span>' + escapeHtml( t( 'watermarkPaidToggle' ) ) + '</span></div><button type="button" class="billio-tg" id="billio-tg-watermark" role="switch" aria-checked="' + ( qs.watermarkPaid ? 'true' : 'false' ) + '" aria-label="' + escapeAttr( t( 'watermarkPaidToggle' ) ) + '"></button></div>' +
+			'<div class="billio-row"><span class="billio-ic"><svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/></svg></span><div class="billio-t"><small>' + escapeHtml( t( 'paperSize' ) ) + '</small><span id="billio-paper-value">' + escapeHtml( qs.paperSize ) + '</span></div><div class="billio-seg" id="billio-paper-seg">' +
 				'<button type="button" data-v="A4" aria-pressed="' + ( qs.paperSize === 'A4' ? 'true' : 'false' ) + '">A4</button>' +
 				'<button type="button" data-v="Letter" aria-pressed="' + ( qs.paperSize === 'Letter' ? 'true' : 'false' ) + '">Letter</button>' +
 			'</div></div>' +
 			'<div class="billio-row" style="flex-direction:column;align-items:stretch">' +
-				'<small style="color:var(--billio-muted);font-size:12px">' + escapeHtml( 'Invoice template' ) + '</small>' +
+				'<small style="color:var(--billio-muted);font-size:12px">' + escapeHtml( t( 'invoiceTemplate' ) ) + '</small>' +
 				'<div class="billio-tpl" id="billio-tpl-seg">' +
-					'<button type="button" data-v="default" aria-pressed="' + ( qs.template === 'default' ? 'true' : 'false' ) + '"><div class="billio-mini"><i style="width:40%"></i><i></i><i style="width:70%"></i><i></i></div>' + escapeHtml( 'Default' ) + '</button>' +
-					'<button type="button" data-v="modern" aria-pressed="' + ( qs.template === 'modern' ? 'true' : 'false' ) + '"><div class="billio-mini billio-modern"><i></i><i style="width:60%"></i><i></i><i style="width:80%"></i></div>' + escapeHtml( 'Modern' ) + '</button>' +
+					'<button type="button" data-v="default" aria-pressed="' + ( qs.template === 'default' ? 'true' : 'false' ) + '"><div class="billio-mini"><i style="width:40%"></i><i></i><i style="width:70%"></i><i></i></div>' + escapeHtml( t( 'templateDefault' ) ) + '</button>' +
+					'<button type="button" data-v="modern" aria-pressed="' + ( qs.template === 'modern' ? 'true' : 'false' ) + '"><div class="billio-mini billio-modern"><i></i><i style="width:60%"></i><i></i><i style="width:80%"></i></div>' + escapeHtml( t( 'templateModern' ) ) + '</button>' +
 				'</div>' +
 			'</div>';
+
+		cfg.querySelectorAll( '.billio-tg' ).forEach( function ( btn ) {
+			btn.addEventListener( 'keydown', function ( e ) {
+				if ( ' ' === e.key || 'Enter' === e.key ) {
+					e.preventDefault();
+					btn.click();
+				}
+			} );
+		} );
 
 		function wireToggle( id, statusKey, label ) {
 			var btn = document.getElementById( id );
@@ -1207,12 +1246,12 @@
 	function buildRowHtml( doc, idx ) {
 		var actions = '<button type="button" class="billio-ib billio-act-preview" data-index="' + idx + '" aria-label="' + escapeAttr( t( 'previewDocument' ) ) + '" title="' + escapeAttr( t( 'previewDocument' ) ) + '">' +
 			'<svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>' +
-			'<button type="button" class="billio-ib billio-act-download" data-url="' + escapeAttr( doc.downloadUrl ) + '" data-number="' + escapeAttr( doc.number ) + '" aria-label="' + escapeAttr( 'Download PDF' ) + '" title="' + escapeAttr( 'Download PDF' ) + '">' +
+			'<button type="button" class="billio-ib billio-act-download" data-url="' + escapeAttr( doc.downloadUrl ) + '" data-number="' + escapeAttr( doc.number ) + '" aria-label="' + escapeAttr( t( 'downloadPdf' ) ) + '" title="' + escapeAttr( t( 'downloadPdf' ) ) + '">' +
 			'<svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></button>';
 		if ( 'inv' === doc.type ) {
-			actions += '<button type="button" class="billio-ib billio-act-resend" data-order-id="' + doc.orderId + '" aria-label="' + escapeAttr( 'Resend email' ) + '" title="' + escapeAttr( 'Resend email' ) + '">' +
+			actions += '<button type="button" class="billio-ib billio-act-resend" data-order-id="' + doc.orderId + '" aria-label="' + escapeAttr( t( 'resendEmail' ) ) + '" title="' + escapeAttr( t( 'resendEmail' ) ) + '">' +
 				'<svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg></button>' +
-				'<button type="button" class="billio-ib billio-act-regen" data-order-id="' + doc.orderId + '" data-number="' + escapeAttr( doc.number ) + '" aria-label="' + escapeAttr( 'Regenerate' ) + '" title="' + escapeAttr( 'Regenerate' ) + '">' +
+				'<button type="button" class="billio-ib billio-act-regen" data-order-id="' + doc.orderId + '" data-number="' + escapeAttr( doc.number ) + '" aria-label="' + escapeAttr( t( 'regenerate' ) ) + '" title="' + escapeAttr( t( 'regenerate' ) ) + '">' +
 				'<svg class="billio-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.5 9a9 9 0 0 1 14.8-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15"/></svg></button>';
 		}
 
@@ -1245,9 +1284,9 @@
 		}
 
 		pagerEl.innerHTML =
-			'<button type="button" class="billio-ib" id="billio-page-prev" aria-label="' + escapeAttr( 'Previous page' ) + '"' + ( page <= 1 ? ' disabled' : '' ) + '>‹</button>' +
+			'<button type="button" class="billio-ib" id="billio-page-prev" aria-label="' + escapeAttr( t( 'previousPage' ) ) + '"' + ( page <= 1 ? ' disabled' : '' ) + '>‹</button>' +
 			'<span class="billio-page-info">' + page + ' / ' + totalPages + '</span>' +
-			'<button type="button" class="billio-ib" id="billio-page-next" aria-label="' + escapeAttr( 'Next page' ) + '"' + ( page >= totalPages ? ' disabled' : '' ) + '>›</button>';
+			'<button type="button" class="billio-ib" id="billio-page-next" aria-label="' + escapeAttr( t( 'nextPage' ) ) + '"' + ( page >= totalPages ? ' disabled' : '' ) + '>›</button>';
 
 		var prevBtn = document.getElementById( 'billio-page-prev' );
 		var nextBtn = document.getElementById( 'billio-page-next' );
@@ -1435,16 +1474,20 @@
 	 * ------------------------------------------------------------- */
 
 	function openGenerateModal() {
+		var cancelled = false;
 		openModal(
 			'<h3>' + escapeHtml( t( 'generateModalTitle' ) ) + '</h3>' +
 			'<p>' + escapeHtml( t( 'generateModalNote' ) ) + '</p>' +
 			'<div class="billio-prog"><i id="billio-prog-bar"></i></div>' +
 			'<div id="billio-prog-text" style="font-size:12.5px;color:var(--billio-muted);margin:-8px 0 16px">' + escapeHtml( t( 'ready' ) ) + '</div>' +
 			'<div class="billio-f"><button type="button" class="billio-btn" id="billio-gen-cancel">' + escapeHtml( t( 'cancel' ) ) + '</button>' +
-			'<button type="button" class="billio-btn billio-pri" id="billio-gen-start">' + escapeHtml( t( 'start' ) ) + '</button></div>'
+			'<button type="button" class="billio-btn billio-pri" id="billio-gen-start">' + escapeHtml( t( 'start' ) ) + '</button></div>',
+			null,
+			function () {
+				cancelled = true;
+			}
 		);
 
-		var cancelled = false;
 		document.getElementById( 'billio-gen-cancel' ).addEventListener( 'click', function () {
 			cancelled = true;
 			closeModal();
@@ -1554,9 +1597,4 @@
 	wireChartControls();
 	wireTableControls();
 	drawChart();
-
-	var openGenBtn = document.getElementById( 'billio-open-generate' );
-	if ( openGenBtn ) {
-		openGenBtn.addEventListener( 'click', openGenerateModal );
-	}
 }() );

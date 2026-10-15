@@ -54,6 +54,9 @@ class Plugin {
 		add_action( 'billio_credit_note_generated', array( Dashboard::class, 'bust_stats_cache' ) );
 		add_action( Dashboard::DEFERRED_BUST_HOOK, array( Dashboard::class, 'deferred_bust_stats_cache' ) );
 
+		// Fallback for bundled translation files before translate.wordpress.org packs exist.
+		add_filter( 'load_textdomain_mofile', array( $this, 'fallback_bundled_mofile' ), 10, 2 );
+
 		if ( is_admin() ) {
 			Upgrader::maybe_upgrade();
 
@@ -65,5 +68,23 @@ class Plugin {
 			new DocsPage();
 			new ReviewNotice();
 		}
+	}
+
+	/**
+	 * Fallback to bundled translation files in languages/ if the core language directory does not contain one yet.
+	 *
+	 * @param string $mofile Path to the .mo file.
+	 * @param string $domain The domain name.
+	 * @return string
+	 */
+	public function fallback_bundled_mofile( $mofile, $domain ) {
+		if ( 'billio' === $domain && ! file_exists( $mofile ) ) {
+			$bundled = BILLIO_PATH . 'languages/' . basename( $mofile );
+			if ( file_exists( $bundled ) ) {
+				return $bundled;
+			}
+		}
+
+		return $mofile;
 	}
 }

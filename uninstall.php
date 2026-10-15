@@ -64,3 +64,6 @@ foreach ( $billio_transients as $billio_transient ) {
 
 // Clear any remaining deferred cron hook (Dashboard::DEFERRED_BUST_HOOK).
 wp_clear_scheduled_hook( 'billio_dashboard_deferred_bust' );
+
+// Delete per-user dismiss flags.
+delete_metadata( 'user', 0, 'billio_dashboard_setup_dismissed', '', true );
