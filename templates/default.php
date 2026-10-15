@@ -54,7 +54,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <body>
 <div class="wrap">
 
-	<?php if ( ! empty( $show_paid_watermark ) && ( $order->is_paid() || in_array( $order->get_status(), array( 'completed', 'processing' ), true ) ) ) : ?>
+	<?php if ( ! empty( $show_paid_watermark ) ) : ?>
 		<div class="watermark-paid"><?php esc_html_e( 'PAID', 'billio' ); ?></div>
 	<?php endif; ?>
 

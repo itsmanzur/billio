@@ -4,7 +4,7 @@ Tags: woocommerce, invoice, pdf invoice, billing, packing slip
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.1
+Stable tag: 1.3.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -60,6 +60,17 @@ No. Invoice numbers are assigned with an atomic, lock-guarded database operation
 Vowel signs (ি ে ৈ ো ৌ) are repositioned so names and addresses display correctly. Complex consonant conjuncts (e.g. ক্ষ, ম্ম) currently render with a visible connecting mark rather than a fully stacked ligature glyph, which is a limitation of the underlying PDF renderer rather than something Billio's text processing can fully correct. This does not affect the accuracy of any amounts or data on the invoice.
 
 == Changelog ==
+
+= 1.3.2 =
+* Fix: Customer Tax ID entered on the Block (Store API) checkout now reaches the invoice, credit note and order screens — previously only the classic checkout value was saved.
+* Fix: Dashboard "Copy link" and WhatsApp now share the customer download link (order-key protected) instead of an admin-only link customers couldn't open.
+* Fix: Dashboard download/preview links no longer fail with "link expired" for a second admin — per-admin links are no longer cached.
+* Fix: Bengali text in the Settings live preview no longer appears scrambled (PDF output was already correct).
+* Fix: Turning "Reset numbering each year" off and on again in the same year could reissue existing invoice / credit note numbers.
+* Fix: The PAID watermark is no longer stamped on Cash on Delivery orders before they're completed.
+* Fix: A product name containing an invalid UTF-8 character no longer produces a blank PDF.
+* Fix: Backslashes in settings (e.g. the company address) are no longer stripped on save.
+* Hardening: Download links given a refund ID instead of an order ID now return "not found" instead of a PHP fatal error.
 
 = 1.3.1 =
 * Polish: Full internationalization audit — 100% translatable interface strings across Dashboard, Settings, Quick Actions, and setup checklist with complete bundled Bengali (bn_BD) translation.

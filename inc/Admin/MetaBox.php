@@ -138,7 +138,7 @@ class MetaBox {
 		}
 
 		$order = $order_id ? wc_get_order( $order_id ) : false;
-		if ( ! $order ) {
+		if ( ! $order instanceof \WC_Order ) {
 			wp_die( esc_html__( 'Order not found.', 'billio' ), '', array( 'response' => 404 ) );
 		}
 
@@ -166,9 +166,24 @@ class MetaBox {
 	 * @return string
 	 */
 	public static function credit_note_url( \WC_Order $order, \WC_Order_Refund $refund ) {
+		return self::credit_note_url_for( $order->get_id(), $refund->get_id() );
+	}
+
+	/**
+	 * Same as credit_note_url(), from plain IDs (for callers that only
+	 * hold cached row data, not order/refund objects).
+	 *
+	 * @param int $order_id  Parent order ID.
+	 * @param int $refund_id Refund ID.
+	 * @return string HTML-escaped URL, as wp_nonce_url() returns it.
+	 */
+	public static function credit_note_url_for( $order_id, $refund_id ) {
+		$order_id  = (int) $order_id;
+		$refund_id = (int) $refund_id;
+
 		return wp_nonce_url(
-			admin_url( 'admin-post.php?action=billio_credit_note_download&order_id=' . $order->get_id() . '&refund_id=' . $refund->get_id() ),
-			self::CREDIT_NOTE_NONCE_ACTION . '_' . $refund->get_id()
+			admin_url( 'admin-post.php?action=billio_credit_note_download&order_id=' . $order_id . '&refund_id=' . $refund_id ),
+			self::CREDIT_NOTE_NONCE_ACTION . '_' . $refund_id
 		);
 	}
 
@@ -191,7 +206,7 @@ class MetaBox {
 		$order  = $order_id ? wc_get_order( $order_id ) : false;
 		$refund = $refund_id ? wc_get_order( $refund_id ) : false;
 
-		if ( ! $order || ! $refund instanceof \WC_Order_Refund ) {
+		if ( ! $order instanceof \WC_Order || ! $refund instanceof \WC_Order_Refund ) {
 			wp_die( esc_html__( 'Credit note not found.', 'billio' ), '', array( 'response' => 404 ) );
 		}
 

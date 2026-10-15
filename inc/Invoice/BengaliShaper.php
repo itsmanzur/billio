@@ -63,11 +63,16 @@ class BengaliShaper {
 			return $html;
 		}
 
-		$html = self::decompose_two_part_vowels( $html );
+		$decomposed = self::decompose_two_part_vowels( $html );
 
 		$pattern = '/((?:' . self::CONSONANT . self::VIRAMA . ')*' . self::CONSONANT . ')(' . self::PRE_BASE . ')/u';
 
-		return preg_replace( $pattern, '$2$1', $html );
+		$reordered = preg_replace( $pattern, '$2$1', $decomposed );
+
+		// preg_replace() with /u returns null on any invalid UTF-8 byte (e.g.
+		// a product name with a broken character) — that would hand Dompdf
+		// an empty document. Unshaped Bengali beats a blank PDF.
+		return null === $reordered ? $html : $reordered;
 	}
 
 	/**

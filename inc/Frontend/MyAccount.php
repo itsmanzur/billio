@@ -144,11 +144,46 @@ class MyAccount {
 	 * @return string
 	 */
 	private function download_url( \WC_Order $order ) {
+		return self::invoice_url_for( $order->get_id(), $order->get_order_key() );
+	}
+
+	/**
+	 * Customer-facing invoice URL from plain IDs — authorized by order_key,
+	 * so it works for the customer (logged in or guest) it's shared with.
+	 * Public/static so the Dashboard's share links (WhatsApp, Copy link)
+	 * can hand customers a URL they can actually open, unlike the
+	 * admin-only, per-admin-nonce download URL.
+	 *
+	 * @param int    $order_id  Order ID.
+	 * @param string $order_key Order key.
+	 * @return string Raw (not HTML-escaped) URL.
+	 */
+	public static function invoice_url_for( $order_id, $order_key ) {
 		return add_query_arg(
 			array(
 				'action'    => 'billio_download',
-				'order_id'  => $order->get_id(),
-				'order_key' => $order->get_order_key(),
+				'order_id'  => (int) $order_id,
+				'order_key' => rawurlencode( (string) $order_key ),
+			),
+			admin_url( 'admin-post.php' )
+		);
+	}
+
+	/**
+	 * Customer-facing credit note URL from plain IDs — see invoice_url_for().
+	 *
+	 * @param int    $order_id  Parent order ID.
+	 * @param int    $refund_id Refund ID.
+	 * @param string $order_key Parent order key.
+	 * @return string Raw (not HTML-escaped) URL.
+	 */
+	public static function credit_note_url_for( $order_id, $refund_id, $order_key ) {
+		return add_query_arg(
+			array(
+				'action'    => 'billio_customer_credit_note',
+				'order_id'  => (int) $order_id,
+				'refund_id' => (int) $refund_id,
+				'order_key' => rawurlencode( (string) $order_key ),
 			),
 			admin_url( 'admin-post.php' )
 		);
@@ -162,15 +197,7 @@ class MyAccount {
 	 * @return string
 	 */
 	private function credit_note_download_url( \WC_Order $order, \WC_Order_Refund $refund ) {
-		return add_query_arg(
-			array(
-				'action'    => 'billio_customer_credit_note',
-				'order_id'  => $order->get_id(),
-				'refund_id' => $refund->get_id(),
-				'order_key' => $order->get_order_key(),
-			),
-			admin_url( 'admin-post.php' )
-		);
+		return self::credit_note_url_for( $order->get_id(), $refund->get_id(), $order->get_order_key() );
 	}
 
 	/**
@@ -183,7 +210,9 @@ class MyAccount {
 		$order_id = isset( $_GET['order_id'] ) ? absint( $_GET['order_id'] ) : 0;
 		$order    = $order_id ? wc_get_order( $order_id ) : false;
 
-		if ( ! $order ) {
+		// wc_get_order() also resolves refund IDs — a WC_Order_Refund has no
+		// customer/order key, and would fatal further down.
+		if ( ! $order instanceof \WC_Order ) {
 			wp_die( esc_html__( 'Order not found.', 'billio' ), '', array( 'response' => 404 ) );
 		}
 
@@ -243,7 +272,7 @@ class MyAccount {
 		$order     = $order_id ? wc_get_order( $order_id ) : false;
 		$refund    = $refund_id ? wc_get_order( $refund_id ) : false;
 
-		if ( ! $order || ! $refund instanceof \WC_Order_Refund || (int) $refund->get_parent_id() !== $order->get_id() ) {
+		if ( ! $order instanceof \WC_Order || ! $refund instanceof \WC_Order_Refund || (int) $refund->get_parent_id() !== $order->get_id() ) {
 			wp_die( esc_html__( 'Credit note not found.', 'billio' ), '', array( 'response' => 404 ) );
 		}
 

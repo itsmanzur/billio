@@ -57,6 +57,10 @@ class Upgrader {
 			self::migrate_to_1_3_0();
 		}
 
+		if ( version_compare( $installed, '1.3.2', '<' ) ) {
+			self::migrate_to_1_3_2();
+		}
+
 		update_option( self::OPTION_VERSION, BILLIO_VERSION );
 	}
 
@@ -119,5 +123,15 @@ class Upgrader {
 	 */
 	private static function migrate_to_1_3_0() {
 		Installer::seed_default_options();
+	}
+
+	/**
+	 * 1.3.2: the recent-documents cache moved to a new key (rows no longer
+	 * carry per-admin nonce URLs) — drop the old one so it doesn't linger.
+	 *
+	 * @return void
+	 */
+	private static function migrate_to_1_3_2() {
+		delete_transient( 'billio_dash_recent_documents' );
 	}
 }

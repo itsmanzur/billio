@@ -163,13 +163,14 @@ class Fields {
 	 * Sanitize a single submitted value according to its field type.
 	 *
 	 * @param array $field Field definition (from self::get()).
-	 * @param mixed $value Raw submitted value.
+	 * @param mixed $value Submitted value, already wp_unslash()'d by the caller —
+	 *                     unslashing again here would strip real backslashes.
 	 * @return mixed
 	 */
 	public static function sanitize( array $field, $value ) {
 		switch ( $field['type'] ) {
 			case 'textarea':
-				return sanitize_textarea_field( wp_unslash( $value ) );
+				return sanitize_textarea_field( $value );
 			case 'media':
 				return absint( $value );
 			case 'checkbox':
@@ -185,7 +186,7 @@ class Fields {
 				if ( ! is_array( $value ) ) {
 					return array();
 				}
-				return array_values( array_intersect( array_map( 'sanitize_text_field', wp_unslash( $value ) ), array_keys( $field['choices'] ) ) );
+				return array_values( array_intersect( array_map( 'sanitize_text_field', $value ), array_keys( $field['choices'] ) ) );
 			case 'select':
 				// array_key_exists() throws a TypeError on PHP 8 if $value
 				// isn't scalar — a crafted field[]=a&field[]=b POST turns
@@ -194,10 +195,10 @@ class Fields {
 				$value = is_scalar( $value ) ? (string) $value : '';
 				return array_key_exists( $value, $field['choices'] ) ? $value : $field['default'];
 			case 'color':
-				$hex = sanitize_text_field( wp_unslash( $value ) );
+				$hex = sanitize_text_field( $value );
 				return preg_match( '/^#[0-9a-fA-F]{6}$/', $hex ) ? $hex : $field['default'];
 			default:
-				return sanitize_text_field( wp_unslash( $value ) );
+				return sanitize_text_field( $value );
 		}
 	}
 }

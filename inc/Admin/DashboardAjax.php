@@ -147,7 +147,7 @@ class DashboardAjax {
 
 		foreach ( $order_ids as $order_id ) {
 			$order = $order_id ? wc_get_order( $order_id ) : false;
-			if ( ! $order ) {
+			if ( ! $order instanceof \WC_Order ) {
 				$results[] = array(
 					'orderId' => $order_id,
 					'success' => false,

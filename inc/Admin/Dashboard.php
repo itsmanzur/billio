@@ -9,6 +9,7 @@
 
 namespace Billio\Admin;
 
+use Billio\Frontend\MyAccount;
 use Billio\Invoice\NumberManager;
 use Billio\Settings\SettingsPage;
 
@@ -74,6 +75,13 @@ class Dashboard {
 	 * debounced — see that method.
 	 */
 	const DEFERRED_BUST_HOOK = 'billio_dashboard_deferred_bust';
+
+	/**
+	 * Recent-documents cache. "v2" since 1.3.2: rows no longer carry
+	 * per-admin URLs (see add_document_urls()), so pre-1.3.2 rows under the
+	 * old "billio_dash_recent_documents" key must never be read back.
+	 */
+	const RECENT_DOCS_TRANSIENT = 'billio_dash_recent_docs_v2';
 
 	/**
 	 * @var string Hook suffix for this page, as returned by add_menu_page().
@@ -156,7 +164,7 @@ class Dashboard {
 
 		delete_transient( 'billio_dash_month_stats' );
 		delete_transient( 'billio_dash_last_month_stats' );
-		delete_transient( 'billio_dash_recent_documents' );
+		delete_transient( self::RECENT_DOCS_TRANSIENT );
 		delete_transient( 'billio_dash_legacy_orders' );
 		delete_transient( 'billio_dash_legacy_refunds' );
 		delete_transient( 'billio_dash_missing_order_ids' );
@@ -1029,7 +1037,17 @@ class Dashboard {
 	 * @return array[]
 	 */
 	private function get_recent_documents() {
-		$cache_key = 'billio_dash_recent_documents';
+		return array_map( array( $this, 'add_document_urls' ), $this->get_cached_recent_documents() );
+	}
+
+	/**
+	 * The cache-safe half of get_recent_documents(): rows without any
+	 * per-admin URL, shared by every admin through one transient.
+	 *
+	 * @return array[]
+	 */
+	private function get_cached_recent_documents() {
+		$cache_key = self::RECENT_DOCS_TRANSIENT;
 		$cached    = get_transient( $cache_key );
 		if ( false !== $cached ) {
 			return $cached;
@@ -1154,7 +1172,7 @@ class Dashboard {
 		}
 
 		return array(
-			'items'     => $items,
+			'items'     => array_map( array( $this, 'add_document_urls' ), $items ),
 			'total'     => $total,
 			'page'      => $page,
 			'perPage'   => $per_page,
@@ -1480,23 +1498,16 @@ class Dashboard {
 	 * @return array
 	 */
 	private function format_invoice_document( \WC_Order $order ) {
-		$timestamp    = $this->invoice_issue_timestamp( $order );
-		$download_url = $this->raw_download_url( OrderActions::build_download_url( $order ) );
-		$name         = trim( $order->get_formatted_billing_full_name() );
-		$phone        = trim( (string) $order->get_billing_phone() );
-		$clean_phone  = preg_replace( '/[^0-9]/', '', $phone );
-		$wa_text      = sprintf(
-			/* translators: 1: customer name, 2: invoice number, 3: download URL */
-			__( 'Hello %1$s, here is your invoice %2$s: %3$s', 'billio' ),
-			$name ? $name : __( 'Customer', 'billio' ),
-			$order->get_meta( '_billio_invoice_number' ),
-			$download_url
-		);
+		$timestamp = $this->invoice_issue_timestamp( $order );
+		$name      = trim( $order->get_formatted_billing_full_name() );
+		$phone     = trim( (string) $order->get_billing_phone() );
 
 		return array(
 			'type'             => 'inv',
 			'number'           => $order->get_meta( '_billio_invoice_number' ),
 			'orderId'          => $order->get_id(),
+			'refundId'         => 0,
+			'orderKey'         => $order->get_order_key(),
 			'orderNumber'      => $order->get_order_number(),
 			'orderEditUrl'     => $this->order_edit_url( $order ),
 			'customerName'     => $name,
@@ -1510,9 +1521,6 @@ class Dashboard {
 			'dateDisplay'      => wp_date( get_option( 'date_format' ), $timestamp ),
 			'dateTimestamp'    => $timestamp,
 			'total'            => (float) $order->get_total(),
-			'downloadUrl'      => $download_url,
-			'previewUrl'       => $download_url . '&preview=1',
-			'whatsappUrl'      => 'https://wa.me/' . ( $clean_phone ? $clean_phone : '' ) . '?text=' . rawurlencode( $wa_text ),
 		);
 	}
 
@@ -1524,23 +1532,16 @@ class Dashboard {
 	 * @return array
 	 */
 	private function format_credit_note_document( \WC_Order_Refund $refund, \WC_Order $parent_order ) {
-		$timestamp    = $this->credit_note_issue_timestamp( $refund );
-		$download_url = $this->raw_download_url( MetaBox::credit_note_url( $parent_order, $refund ) );
-		$name         = trim( $parent_order->get_formatted_billing_full_name() );
-		$phone        = trim( (string) $parent_order->get_billing_phone() );
-		$clean_phone  = preg_replace( '/[^0-9]/', '', $phone );
-		$wa_text      = sprintf(
-			/* translators: 1: customer name, 2: credit note number, 3: download URL */
-			__( 'Hello %1$s, here is your credit note %2$s: %3$s', 'billio' ),
-			$name ? $name : __( 'Customer', 'billio' ),
-			$refund->get_meta( '_billio_credit_note_number' ),
-			$download_url
-		);
+		$timestamp = $this->credit_note_issue_timestamp( $refund );
+		$name      = trim( $parent_order->get_formatted_billing_full_name() );
+		$phone     = trim( (string) $parent_order->get_billing_phone() );
 
 		return array(
 			'type'             => 'cn',
 			'number'           => $refund->get_meta( '_billio_credit_note_number' ),
 			'orderId'          => $parent_order->get_id(),
+			'refundId'         => $refund->get_id(),
+			'orderKey'         => $parent_order->get_order_key(),
 			'orderNumber'      => $parent_order->get_order_number(),
 			'orderEditUrl'     => $this->order_edit_url( $parent_order ),
 			'customerName'     => $name,
@@ -1554,10 +1555,48 @@ class Dashboard {
 			'dateDisplay'      => wp_date( get_option( 'date_format' ), $timestamp ),
 			'dateTimestamp'    => $timestamp,
 			'total'            => -abs( (float) $refund->get_amount() ),
-			'downloadUrl'      => $download_url,
-			'previewUrl'       => $download_url . '&preview=1',
-			'whatsappUrl'      => 'https://wa.me/' . ( $clean_phone ? $clean_phone : '' ) . '?text=' . rawurlencode( $wa_text ),
 		);
+	}
+
+	/**
+	 * Attach the URLs to a formatted document row, for the current admin.
+	 *
+	 * Kept out of format_*_document() on purpose: those rows are cached in
+	 * a transient shared by every admin, while the admin download URL
+	 * carries a nonce bound to whoever's viewing — caching it would hand
+	 * other admins a nonce that fails for them ("link expired").
+	 *
+	 * Share links (Copy link, WhatsApp) use the customer-facing,
+	 * order_key-authorized URL — the admin URL is useless to a customer.
+	 *
+	 * @param array $doc Row from format_invoice_document()/format_credit_note_document().
+	 * @return array The row with downloadUrl/previewUrl/shareUrl/whatsappUrl set and orderKey removed.
+	 */
+	private function add_document_urls( array $doc ) {
+		$order_key = isset( $doc['orderKey'] ) ? $doc['orderKey'] : '';
+		unset( $doc['orderKey'] );
+
+		if ( 'cn' === $doc['type'] ) {
+			$download_url = $this->raw_download_url( MetaBox::credit_note_url_for( $doc['orderId'], $doc['refundId'] ) );
+			$share_url    = MyAccount::credit_note_url_for( $doc['orderId'], $doc['refundId'], $order_key );
+			/* translators: 1: customer name, 2: credit note number, 3: download URL */
+			$wa_format = __( 'Hello %1$s, here is your credit note %2$s: %3$s', 'billio' );
+		} else {
+			$download_url = $this->raw_download_url( OrderActions::build_download_url_for( $doc['orderId'] ) );
+			$share_url    = MyAccount::invoice_url_for( $doc['orderId'], $order_key );
+			/* translators: 1: customer name, 2: invoice number, 3: download URL */
+			$wa_format = __( 'Hello %1$s, here is your invoice %2$s: %3$s', 'billio' );
+		}
+
+		$wa_text     = sprintf( $wa_format, $doc['customerName'] ? $doc['customerName'] : __( 'Customer', 'billio' ), $doc['number'], $share_url );
+		$clean_phone = preg_replace( '/[^0-9]/', '', (string) $doc['customerPhone'] );
+
+		$doc['downloadUrl'] = $download_url;
+		$doc['previewUrl']  = $download_url . '&preview=1';
+		$doc['shareUrl']    = $share_url;
+		$doc['whatsappUrl'] = 'https://wa.me/' . $clean_phone . '?text=' . rawurlencode( $wa_text );
+
+		return $doc;
 	}
 
 	/**

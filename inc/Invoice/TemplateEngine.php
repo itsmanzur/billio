@@ -7,6 +7,8 @@
 
 namespace Billio\Invoice;
 
+use Billio\Frontend\CheckoutTaxId;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -18,9 +20,14 @@ class TemplateEngine {
 	 *
 	 * @param \WC_Order $order          Order being invoiced.
 	 * @param string    $invoice_number Already-assigned invoice number.
+	 * @param bool      $for_pdf        True (default) for Dompdf output. Pass false
+	 *                                  for HTML shown in a browser (the settings
+	 *                                  live preview): browsers shape Bengali
+	 *                                  themselves, so BengaliShaper's Dompdf-only
+	 *                                  reordering would scramble it there.
 	 * @return string Full HTML document, ready for Dompdf::loadHtml().
 	 */
-	public static function render( \WC_Order $order, $invoice_number ) {
+	public static function render( \WC_Order $order, $invoice_number, $for_pdf = true ) {
 		$template_file = self::locate_template( get_option( 'billio_template', 'default' ), 'default' );
 		$data          = self::prepare_data( $order, $invoice_number );
 
@@ -49,16 +56,17 @@ class TemplateEngine {
 			$html = ob_get_clean();
 		}
 
-		return BengaliShaper::reorder( $html );
+		return $for_pdf ? BengaliShaper::reorder( $html ) : $html;
 	}
 
 	/**
 	 * Render the packing-slip template for an order.
 	 *
-	 * @param \WC_Order $order Order being packed.
+	 * @param \WC_Order $order   Order being packed.
+	 * @param bool      $for_pdf See render().
 	 * @return string Full HTML document, ready for Dompdf::loadHtml().
 	 */
-	public static function render_packing_slip( \WC_Order $order ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- $order is used by templates/packing-slip.php via PHP's include() scope sharing, not referenced directly in this method.
+	public static function render_packing_slip( \WC_Order $order, $for_pdf = true ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- $order is used by templates/packing-slip.php via PHP's include() scope sharing, not referenced directly in this method.
 		$company = array(
 			'name' => get_option( 'billio_company_name', get_bloginfo( 'name' ) ),
 			'logo' => self::get_logo_data_uri(),
@@ -71,7 +79,7 @@ class TemplateEngine {
 			$html = ob_get_clean();
 		}
 
-		return BengaliShaper::reorder( $html );
+		return $for_pdf ? BengaliShaper::reorder( $html ) : $html;
 	}
 
 	/**
@@ -80,9 +88,10 @@ class TemplateEngine {
 	 * @param \WC_Order        $order           The original (parent) order.
 	 * @param \WC_Order_Refund $refund          The refund being documented.
 	 * @param string           $credit_note_number Already-assigned credit note number.
+	 * @param bool             $for_pdf            See render().
 	 * @return string Full HTML document, ready for Dompdf::loadHtml().
 	 */
-	public static function render_credit_note( \WC_Order $order, \WC_Order_Refund $refund, $credit_note_number ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter -- $refund and $credit_note_number are used by templates/credit-note.php via include() scope sharing, not referenced directly in this method.
+	public static function render_credit_note( \WC_Order $order, \WC_Order_Refund $refund, $credit_note_number, $for_pdf = true ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter -- $refund and $credit_note_number are used by templates/credit-note.php via include() scope sharing, not referenced directly in this method.
 		$company               = array(
 			'name'    => get_option( 'billio_company_name', get_bloginfo( 'name' ) ),
 			'address' => get_option( 'billio_company_address', '' ),
@@ -104,7 +113,7 @@ class TemplateEngine {
 			$html = ob_get_clean();
 		}
 
-		return BengaliShaper::reorder( $html );
+		return $for_pdf ? BengaliShaper::reorder( $html ) : $html;
 	}
 
 	/**
@@ -202,6 +211,10 @@ class TemplateEngine {
 			$tax_id = (string) $order->get_meta( '_billing_billio_tax_id' );
 		}
 		if ( '' === $tax_id ) {
+			// Block checkout stores the field under its own meta key.
+			$tax_id = sanitize_text_field( CheckoutTaxId::get_block_value( $order ) );
+		}
+		if ( '' === $tax_id ) {
 			$tax_id = (string) $order->get_meta( '_vat_number' );
 			if ( '' === $tax_id ) {
 				$tax_id = (string) $order->get_meta( 'vat_number' );
@@ -230,7 +243,7 @@ class TemplateEngine {
 			'invoice_number'        => $invoice_number,
 			'invoice_date'          => wp_date( get_option( 'date_format' ), $invoice_timestamp ? $invoice_timestamp : time() ),
 			'currency'              => $order->get_currency(),
-			'show_paid_watermark'   => (bool) get_option( 'billio_watermark_paid', false ),
+			'show_paid_watermark'   => (bool) get_option( 'billio_watermark_paid', false ) && self::is_paid_for_watermark( $order ),
 			'customer_tax_id'       => self::get_customer_tax_id( $order ),
 			'customer_tax_id_label' => $tax_id_label,
 			'company'               => array(
@@ -240,6 +253,31 @@ class TemplateEngine {
 				'logo'    => self::get_logo_data_uri(),
 			),
 		);
+	}
+
+	/**
+	 * Whether the order has really been paid, for the PAID watermark.
+	 *
+	 * WooCommerce's is_paid() is true for every "processing" order — but a
+	 * Cash on Delivery order moves to processing the moment it's placed,
+	 * long before any money changes hands, so stamping it PAID would be
+	 * wrong. COD only counts as paid once completed (delivered).
+	 *
+	 * @param \WC_Order $order Order being invoiced.
+	 * @return bool
+	 */
+	private static function is_paid_for_watermark( \WC_Order $order ) {
+		$is_paid = ( 'cod' === $order->get_payment_method() )
+			? $order->has_status( 'completed' )
+			: $order->is_paid();
+
+		/**
+		 * Filter whether an invoice gets the PAID watermark (when enabled).
+		 *
+		 * @param bool      $is_paid Whether the order counts as paid.
+		 * @param \WC_Order $order   The invoiced order.
+		 */
+		return (bool) apply_filters( 'billio_invoice_is_paid', $is_paid, $order );
 	}
 
 	/**

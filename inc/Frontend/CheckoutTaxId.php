@@ -11,11 +11,19 @@
 
 namespace Billio\Frontend;
 
+use Billio\Invoice\TemplateEngine;
+use Billio\Logger;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 class CheckoutTaxId {
+
+	/**
+	 * Block checkout additional-field id (namespace/name, as WooCommerce requires).
+	 */
+	const BLOCK_FIELD_ID = 'billio/tax-id';
 
 	public function __construct() {
 		// Checkout fields registration (Classic & Block).
@@ -25,6 +33,8 @@ class CheckoutTaxId {
 		// Save field to order meta on checkout submission.
 		add_action( 'woocommerce_checkout_create_order', array( $this, 'save_classic_checkout_field' ), 10, 2 );
 		add_action( 'woocommerce_checkout_order_created', array( $this, 'sync_order_tax_id' ) );
+		// Block (Store API) checkout never fires woocommerce_checkout_order_created.
+		add_action( 'woocommerce_store_api_checkout_order_processed', array( $this, 'sync_order_tax_id' ) );
 
 		// WooCommerce Admin Order edit screen.
 		add_action( 'woocommerce_admin_order_data_after_billing_address', array( $this, 'render_admin_order_tax_id' ) );
@@ -105,15 +115,36 @@ class CheckoutTaxId {
 			return;
 		}
 
-		woocommerce_register_additional_checkout_field(
-			array(
-				'id'       => 'billio/tax-id',
-				'label'    => self::get_label(),
-				'location' => 'address',
-				'required' => self::is_required(),
-				'type'     => 'text',
-			)
-		);
+		// Throws on a registration error (e.g. another plugin already took
+		// the id) — that must not fatal every request.
+		try {
+			woocommerce_register_additional_checkout_field(
+				array(
+					'id'       => self::BLOCK_FIELD_ID,
+					'label'    => self::get_label(),
+					'location' => 'address',
+					'required' => self::is_required(),
+					'type'     => 'text',
+				)
+			);
+		} catch ( \Exception $e ) {
+			Logger::error( sprintf( 'Could not register the Block checkout Tax ID field: %s', $e->getMessage() ) );
+		}
+	}
+
+	/**
+	 * Read the Block checkout's stored value for the Tax ID field.
+	 *
+	 * WooCommerce stores additional "address" fields per address group as
+	 * order meta "_wc_billing/{id}" (CheckoutFields::BILLING_FIELDS_PREFIX);
+	 * read straight from meta so this also works for orders placed before
+	 * sync_order_tax_id() copied the value into _billio_tax_id.
+	 *
+	 * @param \WC_Order $order Order to read.
+	 * @return string
+	 */
+	public static function get_block_value( \WC_Order $order ) {
+		return (string) $order->get_meta( '_wc_billing/' . self::BLOCK_FIELD_ID );
 	}
 
 	/**
@@ -154,16 +185,14 @@ class CheckoutTaxId {
 			return;
 		}
 
-		// Retrieve from Block Checkout additional field if available.
-		if ( function_exists( 'woocommerce_get_order_additional_field_value' ) ) {
-			$block_val = (string) woocommerce_get_order_additional_field_value( $order, 'billio/tax-id' );
-			if ( ! empty( $block_val ) ) {
-				$clean = sanitize_text_field( $block_val );
-				$order->update_meta_data( '_billio_tax_id', $clean );
-				$order->update_meta_data( '_billing_billio_tax_id', $clean );
-				$order->save();
-				return;
-			}
+		// Retrieve from the Block Checkout additional field.
+		$block_val = self::get_block_value( $order );
+		if ( '' !== $block_val ) {
+			$clean = sanitize_text_field( $block_val );
+			$order->update_meta_data( '_billio_tax_id', $clean );
+			$order->update_meta_data( '_billing_billio_tax_id', $clean );
+			$order->save();
+			return;
 		}
 
 		// Fallback check on billing_billio_tax_id.
@@ -185,10 +214,7 @@ class CheckoutTaxId {
 			return;
 		}
 
-		$tax_id = $order->get_meta( '_billio_tax_id' );
-		if ( '' === $tax_id ) {
-			$tax_id = $order->get_meta( '_billing_billio_tax_id' );
-		}
+		$tax_id = TemplateEngine::get_customer_tax_id( $order );
 
 		$label = self::get_label();
 		?>
@@ -255,10 +281,7 @@ class CheckoutTaxId {
 			return;
 		}
 
-		$tax_id = $order->get_meta( '_billio_tax_id' );
-		if ( '' === $tax_id ) {
-			$tax_id = $order->get_meta( '_billing_billio_tax_id' );
-		}
+		$tax_id = TemplateEngine::get_customer_tax_id( $order );
 
 		if ( empty( $tax_id ) ) {
 			return;

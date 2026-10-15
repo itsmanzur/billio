@@ -148,9 +148,22 @@ class OrderActions {
 	 * @return string
 	 */
 	public static function build_download_url( \WC_Order $order ) {
+		return self::build_download_url_for( $order->get_id() );
+	}
+
+	/**
+	 * Same as build_download_url(), from a plain order ID (for callers
+	 * that only hold cached row data, not an order object).
+	 *
+	 * @param int $order_id Order ID.
+	 * @return string HTML-escaped URL, as wp_nonce_url() returns it.
+	 */
+	public static function build_download_url_for( $order_id ) {
+		$order_id = (int) $order_id;
+
 		return wp_nonce_url(
-			admin_url( 'admin-post.php?action=billio_admin_download&order_id=' . $order->get_id() ),
-			self::NONCE_ACTION . '_' . $order->get_id()
+			admin_url( 'admin-post.php?action=billio_admin_download&order_id=' . $order_id ),
+			self::NONCE_ACTION . '_' . $order_id
 		);
 	}
 
@@ -295,7 +308,7 @@ class OrderActions {
 		$order_id = isset( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
 		$order    = $order_id ? wc_get_order( $order_id ) : false;
 
-		if ( ! $order ) {
+		if ( ! $order instanceof \WC_Order ) {
 			wp_send_json_error( array( 'message' => esc_html__( 'Order not found.', 'billio' ) ), 404 );
 		}
 
@@ -317,7 +330,7 @@ class OrderActions {
 		}
 
 		$order = $order_id ? wc_get_order( $order_id ) : false;
-		if ( ! $order ) {
+		if ( ! $order instanceof \WC_Order ) {
 			wp_die( esc_html__( 'Order not found.', 'billio' ), '', array( 'response' => 404 ) );
 		}
 

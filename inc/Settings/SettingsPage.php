@@ -178,8 +178,19 @@ class SettingsPage {
 				// that would reissue numbers that already exist for this
 				// year. Seed the new per-year counter from the current
 				// all-time count so numbering continues where it left off.
+				//
+				// The per-year counter may already exist from an earlier
+				// on→off cycle this same year — and the all-time counter has
+				// moved past it since — so never just keep it as-is
+				// (add_option() alone would): take the higher of the two, or
+				// re-enabling would reissue numbers given out while it was off.
 				$current_sequence = (int) get_option( $base_key, 0 );
-				add_option( $year_key, $current_sequence, '', false );
+				$year_sequence    = (int) get_option( $year_key, 0 );
+				if ( false === get_option( $year_key ) ) {
+					add_option( $year_key, $current_sequence, '', false );
+				} elseif ( $current_sequence > $year_sequence ) {
+					update_option( $year_key, $current_sequence, false );
+				}
 			} elseif ( $was_reset_yearly && ! $now_reset_yearly ) {
 				// Turning off resumes from the all-time counter, which was
 				// frozen the whole time yearly-reset was on. If the per-year
@@ -723,12 +734,13 @@ class SettingsPage {
 			// in the credit-note template something realistic to show.
 			$sample_order->update_meta_data( '_billio_invoice_number', NumberManager::preview_number() );
 			$sample_refund = SampleOrder::make_refund( $sample_order );
-			echo TemplateEngine::render_credit_note( $sample_order, $sample_refund, $sample_number ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo TemplateEngine::render_credit_note( $sample_order, $sample_refund, $sample_number, false ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		} elseif ( 'ps' === $doc ) {
-			echo TemplateEngine::render_packing_slip( $sample_order ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo TemplateEngine::render_packing_slip( $sample_order, false ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		} else {
 			$sample_number = NumberManager::preview_number();
-			echo TemplateEngine::render( $sample_order, $sample_number ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			// false: this is HTML for the browser, not Dompdf — see TemplateEngine::render().
+			echo TemplateEngine::render( $sample_order, $sample_number, false ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 
 		foreach ( $callbacks as $option => $callback ) {

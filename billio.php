@@ -3,7 +3,7 @@
  * Plugin Name:       Billio — PDF Invoices & Billing for WooCommerce
  * Plugin URI:        https://wordpress.org/plugins/billio
  * Description:       Automatically generate and attach branded PDF invoices to WooCommerce orders.
- * Version:           1.3.1
+ * Version:           1.3.2
  * Author:            getwpkit
  * Author URI:        https://profiles.wordpress.org/getwpkit/
  * License:           GPLv2 or later
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'BILLIO_VERSION', '1.3.1' );
+define( 'BILLIO_VERSION', '1.3.2' );
 define( 'BILLIO_FILE', __FILE__ );
 define( 'BILLIO_PATH', plugin_dir_path( __FILE__ ) );
 define( 'BILLIO_URL', plugin_dir_url( __FILE__ ) );

@@ -311,14 +311,14 @@
 	} );
 
 	document.getElementById( 'billio-drawer-copy' ).addEventListener( 'click', function () {
-		if ( activeDoc && activeDoc.downloadUrl ) {
+		if ( activeDoc && activeDoc.shareUrl ) {
 			if ( navigator.clipboard && navigator.clipboard.writeText ) {
-				navigator.clipboard.writeText( activeDoc.downloadUrl ).then( function () {
+				navigator.clipboard.writeText( activeDoc.shareUrl ).then( function () {
 					toast( t( 'linkCopied' ) );
 				} );
 			} else {
 				var tempInput = document.createElement( 'input' );
-				tempInput.value = activeDoc.downloadUrl;
+				tempInput.value = activeDoc.shareUrl;
 				document.body.appendChild( tempInput );
 				tempInput.select();
 				document.execCommand( 'copy' );
@@ -355,7 +355,12 @@
 			'<span class="billio-pill ' + statusPillClass( doc.orderStatus ) + '">' + escapeHtml( doc.orderStatusLabel ) + '</span> · ' +
 			'<span>' + escapeHtml( doc.dateDisplay ) + '</span>';
 
-		document.getElementById( 'billio-drawer-wa' ).href = doc.whatsappUrl || '#';
+		// Share actions only make sense with a customer-openable link —
+		// the sample preview has none (its URL is admin-only).
+		var waBtn = document.getElementById( 'billio-drawer-wa' );
+		waBtn.href = doc.whatsappUrl || '#';
+		waBtn.style.display = doc.shareUrl ? '' : 'none';
+		document.getElementById( 'billio-drawer-copy' ).style.display = doc.shareUrl ? '' : 'none';
 		resendDrawerBtn.style.display = 'inv' === doc.type ? 'inline-flex' : 'none';
 
 		drawerTabs.forEach( function ( b, i ) {
@@ -414,7 +419,8 @@
 			dateDisplay: t( 'today' ),
 			previewUrl: data.urls.sampleInvoicePreview,
 			downloadUrl: data.urls.sampleInvoicePreview,
-			whatsappUrl: 'https://api.whatsapp.com/send?text=' + encodeURIComponent( 'Invoice Preview: ' + data.urls.sampleInvoicePreview ),
+			shareUrl: '',
+			whatsappUrl: '',
 			customerName: 'Rahim Uddin',
 			customerEmail: 'rahim@example.com',
 			customerPhone: '+880 1711 000000',
