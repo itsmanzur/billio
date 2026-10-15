@@ -709,11 +709,25 @@ class SettingsPage {
 		$callbacks = array();
 		foreach ( Fields::get() as $field ) {
 			$option = $field['option'];
-			if ( 'media' === $field['type'] || ! isset( $_GET[ $option ] ) ) {
+			if ( ! isset( $_GET[ $option ] ) ) {
 				continue;
 			}
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized via Fields::sanitize() below.
-			$value                = Fields::sanitize( $field, wp_unslash( $_GET[ $option ] ) );
+			$value = Fields::sanitize( $field, wp_unslash( $_GET[ $option ] ) );
+
+			// The unsaved logo: only ever an image attachment (0 = removed) —
+			// never let an arbitrary attachment ID get base64-inlined.
+			if ( 'media' === $field['type'] && $value && ! wp_attachment_is_image( $value ) ) {
+				continue;
+			}
+
+			// A pre_option_* filter returning false means "no override" to
+			// WordPress, so an unchecked box would silently fall back to the
+			// saved (checked) value — return 0 instead, which reads as off.
+			if ( false === $value ) {
+				$value = 0;
+			}
+
 			$callback             = static function () use ( $value ) {
 				return $value;
 			};

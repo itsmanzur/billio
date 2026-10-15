@@ -1642,3 +1642,15 @@ msgstr "🎉 সেটআপের সকল ধাপ সম্পন্ন হ
 
 msgid "🎉 You're all set — every invoice is fully branded"
 msgstr "🎉 আপনি প্রস্তুত — প্রতিটি চালান এখন সম্পূর্ণ ব্র্যান্ডেড"
+
+msgid "%d invoice"
+msgstr "%d টি চালান"
+
+msgid "%d invoices"
+msgstr "%d টি চালান"
+
+msgid "%d credit note"
+msgstr "%d টি ক্রেডিট নোট"
+
+msgid "%d credit notes"
+msgstr "%d টি ক্রেডিট নোট"

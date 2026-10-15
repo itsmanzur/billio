@@ -216,6 +216,12 @@ class CheckoutTaxId {
 
 		$tax_id = TemplateEngine::get_customer_tax_id( $order );
 
+		// Stores not using the B2B feature shouldn't get an empty "Tax ID: —"
+		// row on every order — but an order that does carry one still shows it.
+		if ( ! self::is_enabled() && '' === $tax_id ) {
+			return;
+		}
+
 		$label = self::get_label();
 		?>
 		<div class="address">

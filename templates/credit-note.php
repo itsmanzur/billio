@@ -107,7 +107,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</tr>
 		</thead>
 		<tbody>
-			<?php $refund_items = $refund->get_items(); ?>
+			<?php
+			// Product lines plus refunded shipping and fees — otherwise a
+			// shipping-only refund would read as "flat amount" and the rows
+			// wouldn't add up to Total Refunded.
+			$refund_items = $refund->get_items( array( 'line_item', 'shipping', 'fee' ) );
+			?>
 			<?php if ( empty( $refund_items ) ) : ?>
 				<tr>
 					<td colspan="3"><?php esc_html_e( 'Refund issued as a flat amount (no item breakdown).', 'billio' ); ?></td>
@@ -116,7 +121,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php foreach ( $refund_items as $item ) : ?>
 					<tr>
 						<td><?php echo esc_html( $item->get_name() ); ?></td>
-						<td class="num"><?php echo esc_html( abs( $item->get_quantity() ) ); ?></td>
+						<td class="num"><?php echo $item->is_type( 'line_item' ) ? esc_html( abs( $item->get_quantity() ) ) : '&mdash;'; ?></td>
 						<td class="num"><?php echo esc_html( TemplateEngine::money( abs( (float) $item->get_total() ), $currency ) ); ?></td>
 					</tr>
 				<?php endforeach; ?>

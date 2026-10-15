@@ -59,7 +59,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="slip-title"><?php esc_html_e( 'PACKING SLIP', 'billio' ); ?></div>
 				<div class="slip-meta">
 					<strong><?php esc_html_e( 'Order:', 'billio' ); ?></strong> #<?php echo esc_html( $order->get_order_number() ); ?><br>
-					<strong><?php esc_html_e( 'Date:', 'billio' ); ?></strong> <?php echo esc_html( wp_date( get_option( 'date_format' ) ) ); ?>
+					<?php
+					// The order's date, not "today" — a slip reprinted next week
+					// must still match the order it belongs to.
+					$order_date = $order->get_date_created();
+					?>
+					<strong><?php esc_html_e( 'Date:', 'billio' ); ?></strong> <?php echo esc_html( wp_date( get_option( 'date_format' ), $order_date ? $order_date->getTimestamp() : null ) ); ?>
 				</div>
 			</td>
 		</tr>
@@ -98,6 +103,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<tbody>
 			<?php foreach ( $order->get_items() as $item ) : ?>
 				<?php
+				// Ship what's left after refunds (WooCommerce returns the
+				// refunded quantity as a negative number); a fully refunded
+				// line has nothing to pack. Unsaved orders (the settings
+				// preview) have no refunds to look up.
+				$ship_qty = (float) $item->get_quantity();
+				if ( $order->get_id() ) {
+					$ship_qty += (float) $order->get_qty_refunded_for_item( $item->get_id() );
+				}
+				if ( $ship_qty <= 0 ) {
+					continue;
+				}
 				$product   = $item->get_product();
 				$item_meta = TemplateEngine::item_meta( $item );
 				?>
@@ -109,7 +125,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<?php endif; ?>
 					</td>
 					<td><?php echo esc_html( $product ? $product->get_sku() : '' ); ?></td>
-					<td class="num"><?php echo esc_html( $item->get_quantity() ); ?></td>
+					<td class="num"><?php echo esc_html( wc_stock_amount( $ship_qty ) ); ?></td>
 				</tr>
 			<?php endforeach; ?>
 		</tbody>

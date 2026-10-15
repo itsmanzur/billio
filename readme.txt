@@ -71,6 +71,12 @@ Vowel signs (ি ে ৈ ো ৌ) are repositioned so names and addresses displa
 * Fix: A product name containing an invalid UTF-8 character no longer produces a blank PDF.
 * Fix: Backslashes in settings (e.g. the company address) are no longer stripped on save.
 * Hardening: Download links given a refund ID instead of an order ID now return "not found" instead of a PHP fatal error.
+* Fix: The Settings live preview now reflects unsaved template, paper size, logo and credit note prefix changes, and unchecking a box (e.g. PAID watermark) shows immediately.
+* Fix: Packing slips list the quantity still to ship after refunds (fully refunded lines are left out) and show the order date instead of today's date.
+* Fix: Credit notes now list refunded shipping and fee lines, not just products.
+* Fix: "Orders without invoice" also counts processing orders when invoices are sent at Processing, and updates right after "Generate missing" finishes.
+* Fix: Dashboard chart dates no longer shift by a day for sites west of UTC; chart tooltips are now translatable.
+* Polish: The order screen's Tax ID row is hidden when the Tax ID feature is off and the order has none.
 
 = 1.3.1 =
 * Polish: Full internationalization audit — 100% translatable interface strings across Dashboard, Settings, Quick Actions, and setup checklist with complete bundled Bengali (bn_BD) translation.

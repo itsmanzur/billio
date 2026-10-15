@@ -72,8 +72,21 @@
 		return new Date( tsSeconds * 1000 ).toLocaleDateString( undefined, { weekday: 'short', month: 'short', day: 'numeric' } );
 	}
 
+	// Chart buckets carry a site-local "Y-m-d" string. new Date( 'Y-m-d' )
+	// parses that as UTC midnight, which lands on the previous day in any
+	// timezone behind UTC — build a local-midnight date instead.
+	function dayTs( ymd ) {
+		var p = String( ymd ).split( '-' );
+		return Math.floor( new Date( +p[ 0 ], +p[ 1 ] - 1, +p[ 2 ] ).getTime() / 1000 );
+	}
+
 	function t( key ) {
 		return ( i18n && i18n[ key ] ) || key;
+	}
+
+	// Singular/plural pick for a localized "%d thing(s)" pair.
+	function tn( oneKey, manyKey, n ) {
+		return tf( 1 === n ? oneKey : manyKey, n );
 	}
 
 	function tf( key ) {
@@ -953,7 +966,7 @@
 			var labelX      = x + w / 2;
 			var tooCloseToToday = ! isToday && Math.abs( labelX - todayLabelX ) < minLabelGap;
 			if ( wantsLabel && ! tooCloseToToday ) {
-				var label = isToday ? t( 'today' ) : fmtDate( Math.floor( new Date( d.date ).getTime() / 1000 ) );
+				var label = isToday ? t( 'today' ) : fmtDate( dayTs( d.date ) );
 				svg += '<text x="' + labelX + '" y="' + ( H - 6 ) + '" text-anchor="middle" font-size="10.5" fill="#94a3b8">' + escapeHtml( label ) + '</text>';
 			}
 			svg += '<rect data-i="' + i + '" class="billio-hit" x="' + ( pl + i * bw ) + '" y="0" width="' + bw + '" height="' + ( H - pb ) + '" fill="transparent"/>';
@@ -972,9 +985,9 @@
 				box.querySelectorAll( '.billio-bar' ).forEach( function ( b ) {
 					b.style.opacity = b.dataset.i === hitEl.dataset.i ? 1 : 0.35;
 				} );
-				var ts = Math.floor( new Date( d.date ).getTime() / 1000 );
-				tip.innerHTML = '<b>' + ( chartState.metric === 'invoices' ? d.invoices + ' invoices' : fmtMoney( d.revenue ) ) + '</b>' +
-					escapeHtml( fmtDateFull( ts ) ) + ( d.creditNotes ? ' · ' + d.creditNotes + ' credit note' + ( d.creditNotes > 1 ? 's' : '' ) : '' );
+				var ts = dayTs( d.date );
+				tip.innerHTML = '<b>' + escapeHtml( chartState.metric === 'invoices' ? tn( 'invoiceCountOne', 'invoiceCountMany', d.invoices ) : fmtMoney( d.revenue ) ) + '</b>' +
+					escapeHtml( fmtDateFull( ts ) ) + ( d.creditNotes ? ' · ' + escapeHtml( tn( 'creditNoteCountOne', 'creditNoteCountMany', d.creditNotes ) ) : '' );
 				tip.style.left = ( +hitEl.getAttribute( 'x' ) + bw / 2 ) + 'px';
 				tip.style.top = Math.max( ( H - pb ) - ( H - pb ) * val( d ) / max, 30 ) + 'px';
 				tip.style.opacity = 1;
@@ -997,7 +1010,7 @@
 		} );
 		document.getElementById( 'billio-chart-tot' ).textContent = chartState.metric === 'invoices' ? tot : fmtMoney( tot );
 		document.getElementById( 'billio-chart-avg' ).textContent = chartState.metric === 'invoices' ? ( tot / days.length ).toFixed( 1 ) : fmtMoney( Math.round( tot / days.length ) );
-		document.getElementById( 'billio-chart-best' ).textContent = fmtDate( Math.floor( new Date( best.date ).getTime() / 1000 ) );
+		document.getElementById( 'billio-chart-best' ).textContent = fmtDate( dayTs( best.date ) );
 
 		var srTable = document.getElementById( 'billio-chart-table' );
 		var rows = '<tr><th>' + escapeHtml( t( 'colDate' ) ) + '</th><th>' + escapeHtml( t( 'filterInvoices' ) ) + '</th><th>' + escapeHtml( t( 'metricRevenue' ) ) + '</th><th>' + escapeHtml( t( 'filterCreditNotes' ) ) + '</th></tr>';

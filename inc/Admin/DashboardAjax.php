@@ -173,6 +173,12 @@ class DashboardAjax {
 			}
 		}
 
+		// bust_stats_cache() is debounced — after the first invoice of a
+		// batch the rest only schedule a deferred bust ~30s out, so a page
+		// reload right after "Generate missing" would still show the old
+		// counts. The batch is an explicit admin action: bust now.
+		Dashboard::deferred_bust_stats_cache();
+
 		wp_send_json_success( array( 'results' => $results ) );
 	}
 

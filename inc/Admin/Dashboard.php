@@ -101,6 +101,15 @@ class Dashboard {
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
+
+		// Which statuses count as "missing an invoice" follows the email
+		// triggers (see get_missing_order_ids()) — recount when they change.
+		add_action(
+			'update_option_billio_email_triggers',
+			static function () {
+				delete_transient( 'billio_dash_missing_order_ids' );
+			}
+		);
 	}
 
 	/**
@@ -416,6 +425,14 @@ class Dashboard {
 			'refundedThisMonth'        => __( '%s refunded this month', 'billio' ),
 			/* translators: %d: percentage complete. */
 			'percentComplete'          => __( '(%d%% complete)', 'billio' ),
+			/* translators: %d: number of invoices (always 1). */
+			'invoiceCountOne'          => __( '%d invoice', 'billio' ),
+			/* translators: %d: number of invoices. */
+			'invoiceCountMany'         => __( '%d invoices', 'billio' ),
+			/* translators: %d: number of credit notes (always 1). */
+			'creditNoteCountOne'       => __( '%d credit note', 'billio' ),
+			/* translators: %d: number of credit notes. */
+			'creditNoteCountMany'      => __( '%d credit notes', 'billio' ),
 		);
 	}
 
@@ -1000,9 +1017,17 @@ class Dashboard {
 		$cutoff = $this->site_now()->modify( '-' . self::ACTION_NEEDED_CUTOFF_DAYS . ' days' )->getTimestamp();
 		$limit  = (int) apply_filters( 'billio_dashboard_missing_orders_limit', 500 );
 
+		// Completed orders always count; processing ones too when invoices
+		// are configured to go out at processing (Settings → "Send invoice
+		// when order is") — those orders are expected to have one by now.
+		$statuses = array( 'completed' );
+		if ( in_array( 'customer_processing_order', (array) get_option( 'billio_email_triggers', array( 'customer_completed_order' ) ), true ) ) {
+			$statuses[] = 'processing';
+		}
+
 		$ids = wc_get_orders(
 			array(
-				'status'       => 'completed',
+				'status'       => $statuses,
 				'limit'        => $limit,
 				'orderby'      => 'date',
 				'order'        => 'ASC',

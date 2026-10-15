@@ -574,7 +574,9 @@
 		'billio_company_name',
 		'billio_company_address',
 		'billio_company_vat',
+		'billio_company_logo_id',
 		'billio_number_prefix',
+		'billio_credit_note_prefix',
 		'billio_number_format',
 		'billio_number_padding',
 		'billio_template',
@@ -598,6 +600,13 @@
 			if ( field ) {
 				var val = ( 'checkbox' === field.type ) ? ( field.checked ? '1' : '' ) : field.value;
 				url.searchParams.set( name, val );
+				return;
+			}
+			// Radio groups (template, paper size) have no element with the
+			// option's id — read the checked radio by name instead.
+			var checkedRadio = form.querySelector( 'input[type="radio"][name="' + name + '"]:checked' );
+			if ( checkedRadio ) {
+				url.searchParams.set( name, checkedRadio.value );
 			}
 		} );
 		frame.src = url.toString();
