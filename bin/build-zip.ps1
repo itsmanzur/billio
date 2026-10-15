@@ -16,6 +16,7 @@ New-Item -ItemType Directory -Path $buildDir -Force | Out-Null
 
 $copyItems = @(
     "assets",
+    "fonts",
     "inc",
     "languages",
     "templates",
