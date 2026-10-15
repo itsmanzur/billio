@@ -67,5 +67,11 @@ foreach ( $billio_transients as $billio_transient ) {
 // Clear any remaining deferred cron hook (Dashboard::DEFERRED_BUST_HOOK).
 wp_clear_scheduled_hook( 'billio_dashboard_deferred_bust' );
 
+// Leftover per-order lock rows (Billio\Invoice\OrderLock::PREFIX) — short-
+// lived mutexes, not records; only left behind if a request died mid-lock.
+global $wpdb;
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-time uninstall cleanup of rows only Billio writes.
+$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( 'billio_lock_order_' ) . '%' ) );
+
 // Delete per-user dismiss flags.
 delete_metadata( 'user', 0, 'billio_dashboard_setup_dismissed', '', true );

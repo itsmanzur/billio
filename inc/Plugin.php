@@ -57,9 +57,13 @@ class Plugin {
 		// Fallback for bundled translation files before translate.wordpress.org packs exist.
 		add_filter( 'load_textdomain_mofile', array( $this, 'fallback_bundled_mofile' ), 10, 2 );
 
-		if ( is_admin() ) {
-			Upgrader::maybe_upgrade();
+		// On every request, not just admin ones: after an auto-update the
+		// first request is often a frontend checkout or a payment webhook,
+		// and migrations must have run before any invoice is generated.
+		// A single option read when already up to date.
+		Upgrader::maybe_upgrade();
 
+		if ( is_admin() ) {
 			$order_actions = new OrderActions();
 			$dashboard     = new Dashboard();
 			new MetaBox( $order_actions );

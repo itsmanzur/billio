@@ -32,14 +32,29 @@ class DashboardOrderRecord {
 	private $timestamp;
 
 	/**
+	 * @var string Order currency code ('' if unknown — e.g. a record
+	 *             cached by a pre-1.3.2 version, before this existed).
+	 */
+	private $currency = '';
+
+	/**
 	 * @param string $status    Order status.
 	 * @param float  $total     Order total.
 	 * @param int    $timestamp Invoice issue timestamp.
+	 * @param string $currency  Order currency code.
 	 */
-	public function __construct( $status, $total, $timestamp ) {
+	public function __construct( $status, $total, $timestamp, $currency = '' ) {
 		$this->status    = (string) $status;
 		$this->total     = (float) $total;
 		$this->timestamp = (int) $timestamp;
+		$this->currency  = (string) $currency;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function get_currency() {
+		return (string) $this->currency;
 	}
 
 	/**

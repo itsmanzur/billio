@@ -556,7 +556,7 @@ class Dashboard {
 
 		$revenue = 0.0;
 		foreach ( $orders as $order ) {
-			if ( ! in_array( $order->get_status(), self::REVENUE_EXCLUDED_STATUSES, true ) ) {
+			if ( $this->counts_toward_revenue( $order ) ) {
 				$revenue += (float) $order->get_total();
 			}
 		}
@@ -604,7 +604,7 @@ class Dashboard {
 
 		$revenue = 0.0;
 		foreach ( $orders as $order ) {
-			if ( ! in_array( $order->get_status(), self::REVENUE_EXCLUDED_STATUSES, true ) ) {
+			if ( $this->counts_toward_revenue( $order ) ) {
 				$revenue += (float) $order->get_total();
 			}
 		}
@@ -620,28 +620,84 @@ class Dashboard {
 	}
 
 	/**
-	 * Every invoiced order whose *resolved issue date* falls within a
-	 * timestamp window — split into two bounded queries instead of loading
-	 * every invoiced order ever and filtering in PHP:
+	 * Whether an invoiced order's total counts toward the revenue figures.
 	 *
-	 * 1. The common path: a direct meta_query BETWEEN on _billio_invoice_date
-	 *    (set at number-assignment time for every order invoiced since the
-	 *    meta existed) — this is virtually every real invoice, fetched as a
-	 *    single bounded, indexed-by-meta query.
-	 * 2. A legacy-fallback path, only for orders that somehow never got that
-	 *    meta at all (pre-existing installs from before it existed) — a
-	 *    small, memoized, EXISTS/NOT-EXISTS-scoped query, with
-	 *    invoice_issue_timestamp()'s paid/completed/created fallback chain
-	 *    still applied, but only to this normally-empty-or-tiny subset
-	 *    rather than on every request.
+	 * Cancelled/refunded orders don't represent money kept. Orders in a
+	 * different currency than the store's (multi-currency plugins) are
+	 * left out too: adding e.g. USD and BDT totals into one number would
+	 * be meaningless, and there's no exchange rate to convert with. They
+	 * still count toward invoice *counts*.
+	 *
+	 * @param DashboardOrderRecord|\WC_Order $order Invoiced order.
+	 * @return bool
+	 */
+	private function counts_toward_revenue( $order ) {
+		if ( in_array( $order->get_status(), self::REVENUE_EXCLUDED_STATUSES, true ) ) {
+			return false;
+		}
+
+		$currency = (string) $order->get_currency();
+
+		return '' === $currency || get_woocommerce_currency() === $currency;
+	}
+
 	/**
-	 * Batch-convert order IDs to lightweight stat items in chunks to
-	 * prevent PHP memory exhaustion on stores with high volume.
+	 * Lightweight stat records for invoiced orders that carry
+	 * _billio_invoice_date — read in bulk (OrderStatsQuery), never by
+	 * hydrating a full \WC_Order per row.
+	 *
+	 * @param int[] $order_ids Order IDs (all with _billio_invoice_date).
+	 * @return DashboardOrderRecord[]
+	 */
+	private function ids_to_stat_orders( array $order_ids ) {
+		$fields  = OrderStatsQuery::order_fields( $order_ids );
+		$dates   = OrderStatsQuery::meta_map( array_keys( $fields ), '_billio_invoice_date' );
+		$results = array();
+
+		foreach ( $fields as $id => $row ) {
+			$results[] = new DashboardOrderRecord(
+				$row['status'],
+				$row['total'],
+				isset( $dates[ $id ] ) ? (int) $dates[ $id ] : 0,
+				$row['currency']
+			);
+		}
+
+		return $results;
+	}
+
+	/**
+	 * Lightweight stat records for credit-noted refunds that carry
+	 * _billio_credit_note_date — bulk reads, same as ids_to_stat_orders().
+	 *
+	 * @param int[] $refund_ids Refund IDs (all with _billio_credit_note_date).
+	 * @return DashboardRefundRecord[]
+	 */
+	private function ids_to_stat_refunds( array $refund_ids ) {
+		$amounts = OrderStatsQuery::meta_map( $refund_ids, '_refund_amount' );
+		$dates   = OrderStatsQuery::meta_map( $refund_ids, '_billio_credit_note_date' );
+		$results = array();
+
+		foreach ( $dates as $id => $date ) {
+			$results[] = new DashboardRefundRecord(
+				isset( $amounts[ $id ] ) ? (float) $amounts[ $id ] : 0.0,
+				(int) $date
+			);
+		}
+
+		return $results;
+	}
+
+	/**
+	 * Batch-convert order IDs to stat records by hydrating each order —
+	 * only for the legacy path (orders invoiced before _billio_invoice_date
+	 * existed), which needs invoice_issue_timestamp()'s paid/completed/
+	 * created fallback chain and is normally empty or tiny.
 	 *
 	 * @param int[] $order_ids Order IDs.
 	 * @return DashboardOrderRecord[]
 	 */
-	private function ids_to_stat_orders( array $order_ids ) {
+	private function ids_to_stat_orders_hydrated( array $order_ids ) {
 		if ( empty( $order_ids ) ) {
 			return array();
 		}
@@ -662,7 +718,8 @@ class Dashboard {
 				$results[] = new DashboardOrderRecord(
 					$order->get_status(),
 					(float) $order->get_total(),
-					$this->invoice_issue_timestamp( $order )
+					$this->invoice_issue_timestamp( $order ),
+					$order->get_currency()
 				);
 			}
 		}
@@ -676,7 +733,7 @@ class Dashboard {
 	 * @param int[] $refund_ids Refund IDs.
 	 * @return DashboardRefundRecord[]
 	 */
-	private function ids_to_stat_refunds( array $refund_ids ) {
+	private function ids_to_stat_refunds_hydrated( array $refund_ids ) {
 		if ( empty( $refund_ids ) ) {
 			return array();
 		}
@@ -815,7 +872,7 @@ class Dashboard {
 				)
 			);
 
-			self::$invoiced_orders_cache = $this->ids_to_stat_orders( $ids );
+			self::$invoiced_orders_cache = $this->ids_to_stat_orders_hydrated( $ids );
 			set_transient( 'billio_dash_legacy_orders', self::$invoiced_orders_cache, DAY_IN_SECONDS );
 		}
 
@@ -855,7 +912,7 @@ class Dashboard {
 				)
 			);
 
-			self::$credit_noted_refunds_cache = $this->ids_to_stat_refunds( $ids );
+			self::$credit_noted_refunds_cache = $this->ids_to_stat_refunds_hydrated( $ids );
 			set_transient( 'billio_dash_legacy_refunds', self::$credit_noted_refunds_cache, DAY_IN_SECONDS );
 		}
 
@@ -949,34 +1006,38 @@ class Dashboard {
 		$orders  = $this->orders_issued_between( $start, $now );
 		$refunds = $this->credit_notes_issued_between( $start, $now );
 
+		// Buckets are keyed by the site-local calendar date, stepping one
+		// calendar day at a time — not "$start + $i * DAY_IN_SECONDS", which
+		// drifts by an hour across a DST change and files invoices issued
+		// near midnight under the wrong day.
 		$buckets = array();
+		$day     = ( new \DateTimeImmutable( '@' . $start ) )->setTimezone( wp_timezone() );
 		for ( $i = 0; $i < $days; $i++ ) {
-			$timestamp     = $start + ( $i * DAY_IN_SECONDS );
-			$buckets[ $i ] = array(
-				'date'        => wp_date( 'Y-m-d', $timestamp ),
+			$key             = $day->format( 'Y-m-d' );
+			$buckets[ $key ] = array(
+				'date'        => $key,
 				'invoices'    => 0,
 				'revenue'     => 0.0,
 				'creditNotes' => 0,
 			);
+			$day             = $day->modify( '+1 day' );
 		}
 
 		foreach ( $orders as $order ) {
-			$timestamp = $this->invoice_issue_timestamp( $order );
-			$index     = (int) floor( ( $timestamp - $start ) / DAY_IN_SECONDS );
-			if ( ! isset( $buckets[ $index ] ) ) {
+			$key = wp_date( 'Y-m-d', $this->invoice_issue_timestamp( $order ) );
+			if ( ! isset( $buckets[ $key ] ) ) {
 				continue;
 			}
-			++$buckets[ $index ]['invoices'];
-			if ( ! in_array( $order->get_status(), self::REVENUE_EXCLUDED_STATUSES, true ) ) {
-				$buckets[ $index ]['revenue'] += (float) $order->get_total();
+			++$buckets[ $key ]['invoices'];
+			if ( $this->counts_toward_revenue( $order ) ) {
+				$buckets[ $key ]['revenue'] += (float) $order->get_total();
 			}
 		}
 
 		foreach ( $refunds as $refund ) {
-			$timestamp = $this->credit_note_issue_timestamp( $refund );
-			$index     = (int) floor( ( $timestamp - $start ) / DAY_IN_SECONDS );
-			if ( isset( $buckets[ $index ] ) ) {
-				++$buckets[ $index ]['creditNotes'];
+			$key = wp_date( 'Y-m-d', $this->credit_note_issue_timestamp( $refund ) );
+			if ( isset( $buckets[ $key ] ) ) {
+				++$buckets[ $key ]['creditNotes'];
 			}
 		}
 
@@ -1145,10 +1206,12 @@ class Dashboard {
 	 * Search invoices/credit notes server-side (not just the localized
 	 * top-10), paginated. Backs the Dashboard table's search box.
 	 *
-	 * Works entirely over ID lists — never hydrates a full \WC_Order
-	 * object except for the current page's items — so the reported total
-	 * and page count are correct for the store's entire invoice/credit-note
-	 * history, not just whatever fit under an arbitrary per-query cap.
+	 * Works over ID lists plus one bulk date read per document type
+	 * (OrderStatsQuery::meta_map()) — the only full \WC_Order objects ever
+	 * loaded are the current page's rows, so the cost of a broad search no
+	 * longer grows with how many documents match. The reported total and
+	 * page count are correct for everything under SEARCH_HARD_LIMIT per
+	 * sub-query; past it the response is flagged `truncated`.
 	 *
 	 * @param string $q        Search text (invoice/CN number, order number, or customer name).
 	 * @param string $type     'all', 'inv', or 'cn'.
@@ -1161,44 +1224,37 @@ class Dashboard {
 		$per_page = min( 20, max( 1, (int) $per_page ) );
 		$offset   = ( $page - 1 ) * $per_page;
 
-		$invoice_result = ( 'cn' === $type )
-			? array(
-				'ids'       => array(),
-				'truncated' => false,
-			)
-			: $this->find_invoice_candidate_ids( $q );
+		$none = array(
+			'refs'      => array(),
+			'truncated' => false,
+		);
 
-		$credit_note_result = ( 'inv' === $type )
-			? array(
-				'ids'       => array(),
-				'truncated' => false,
-			)
-			: $this->find_credit_note_candidate_ids( $q );
+		$invoice_result     = ( 'cn' === $type ) ? $none : $this->find_candidates( 'inv', $q );
+		$credit_note_result = ( 'inv' === $type ) ? $none : $this->find_candidates( 'cn', $q );
 
-		$invoice_ids     = $invoice_result['ids'];
-		$credit_note_ids = $credit_note_result['ids'];
-		$total           = count( $invoice_ids ) + count( $credit_note_ids );
+		$refs = array_merge( $invoice_result['refs'], $credit_note_result['refs'] );
+		usort( $refs, array( __CLASS__, 'compare_candidate_refs' ) );
 
 		$items = array();
-		foreach ( $this->merge_candidate_page( $invoice_ids, $credit_note_ids, $offset, $per_page ) as $ref ) {
+		foreach ( array_slice( $refs, $offset, $per_page ) as $ref ) {
 			if ( 'inv' === $ref['type'] ) {
 				$order = wc_get_order( $ref['id'] );
-				if ( $order ) {
+				if ( $order instanceof \WC_Order ) {
 					$items[] = $this->format_invoice_document( $order );
 				}
 				continue;
 			}
 
 			$refund       = wc_get_order( $ref['id'] );
-			$parent_order = $refund ? wc_get_order( $refund->get_parent_id() ) : false;
-			if ( $refund && $parent_order ) {
+			$parent_order = $refund instanceof \WC_Order_Refund ? wc_get_order( $refund->get_parent_id() ) : false;
+			if ( $parent_order instanceof \WC_Order ) {
 				$items[] = $this->format_credit_note_document( $refund, $parent_order );
 			}
 		}
 
 		return array(
 			'items'     => array_map( array( $this, 'add_document_urls' ), $items ),
-			'total'     => $total,
+			'total'     => count( $refs ),
 			'page'      => $page,
 			'perPage'   => $per_page,
 			'truncated' => $invoice_result['truncated'] || $credit_note_result['truncated'],
@@ -1206,314 +1262,146 @@ class Dashboard {
 	}
 
 	/**
-	 * Candidate invoiced order IDs for a search term, deduped and sorted
-	 * descending by invoice date — two bounded ID-only queries (number
-	 * match, general WooCommerce order search for customer name/email/
-	 * numeric order id) merged, rather than one "OR across a meta LIKE and
-	 * the general search" query (WooCommerce's query API doesn't expose
-	 * that combination in a single call). Both are always scoped to
-	 * _billio_invoice_number EXISTS — never a full orders-table scan — and
-	 * each capped at SEARCH_HARD_LIMIT so a very broad term can't balloon
-	 * into an unbounded fetch.
+	 * usort() comparator: newest issue date first, then highest ID (so
+	 * same-second documents keep a stable, sensible order).
 	 *
-	 * @param string $q Search text; empty string browses the most recent instead.
-	 * @return array{ids: int[], truncated: bool}
+	 * @param array{type: string, id: int, date: int} $a First ref.
+	 * @param array{type: string, id: int, date: int} $b Second ref.
+	 * @return int
 	 */
-	private function find_invoice_candidate_ids( $q ) {
-		$date_args = array(
+	private static function compare_candidate_refs( array $a, array $b ) {
+		if ( $a['date'] !== $b['date'] ) {
+			return $b['date'] < $a['date'] ? -1 : 1;
+		}
+
+		return $b['id'] - $a['id'];
+	}
+
+	/**
+	 * Candidate {type, id, date} refs for one document type matching a
+	 * search term — every query here is ID-only and capped at
+	 * SEARCH_HARD_LIMIT, scoped to documents that actually have a Billio
+	 * number:
+	 *
+	 * - number match: LIKE on the invoice / credit note number meta;
+	 * - customer match: orders matching the term (name, email, address,
+	 *   order number — see customer_search_order_ids()), then those orders
+	 *   themselves (invoices) or their refunds (credit notes, via
+	 *   post_parent__in, supported by both HPOS and legacy storage).
+	 *
+	 * An empty term browses the most recent documents instead.
+	 *
+	 * @param string $type 'inv' or 'cn'.
+	 * @param string $q    Search text.
+	 * @return array{refs: array[], truncated: bool}
+	 */
+	private function find_candidates( $type, $q ) {
+		$is_invoice = 'inv' === $type;
+		$number_key = $is_invoice ? '_billio_invoice_number' : '_billio_credit_note_number';
+		$date_key   = $is_invoice ? '_billio_invoice_date' : '_billio_credit_note_date';
+
+		$base = array(
+			'limit'    => self::SEARCH_HARD_LIMIT,
+			'return'   => 'ids',
 			'orderby'  => 'meta_value_num',
-			'meta_key' => '_billio_invoice_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_key' => $date_key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'order'    => 'DESC',
 		);
+		if ( ! $is_invoice ) {
+			$base['type'] = 'shop_order_refund';
+		}
+
+		$has_number = array(
+			'key'     => $number_key,
+			'compare' => 'EXISTS',
+		);
+
+		$id_lists  = array();
+		$truncated = false;
 
 		if ( '' === $q ) {
-			$ids = wc_get_orders(
-				$date_args + array(
-					'limit'      => self::SEARCH_HARD_LIMIT,
-					'return'     => 'ids',
+			$id_lists[] = wc_get_orders( $base + array( 'meta_query' => array( $has_number ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+		} else {
+			$id_lists[] = wc_get_orders(
+				$base + array(
 					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						'relation' => 'AND',
+						$has_number,
 						array(
-							'key'     => '_billio_invoice_number',
-							'compare' => 'EXISTS',
+							'key'     => $number_key,
+							'value'   => $q,
+							'compare' => 'LIKE',
 						),
 					),
 				)
 			);
 
-			return array(
-				'ids'       => $ids,
-				'truncated' => count( $ids ) === self::SEARCH_HARD_LIMIT,
-			);
-		}
+			$customer_order_ids = $this->customer_search_order_ids( $q );
+			$truncated          = count( $customer_order_ids ) >= self::SEARCH_HARD_LIMIT;
 
-		$by_number = wc_get_orders(
-			$date_args + array(
-				'limit'      => self::SEARCH_HARD_LIMIT,
-				'return'     => 'ids',
-				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-					'relation' => 'AND',
-					array(
-						'key'     => '_billio_invoice_number',
-						'compare' => 'EXISTS',
-					),
-					array(
-						'key'     => '_billio_invoice_number',
-						'value'   => $q,
-						'compare' => 'LIKE',
-					),
-				),
-			)
-		);
-
-		$by_customer = wc_get_orders(
-			$date_args + array(
-				'limit'      => self::SEARCH_HARD_LIMIT,
-				'return'     => 'ids',
-				's'          => $q,
-				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-					array(
-						'key'     => '_billio_invoice_number',
-						'compare' => 'EXISTS',
-					),
-				),
-			)
-		);
-
-		// Both sub-queries are already SQL-sorted desc by invoice date;
-		// merging (and de-duping, since a number match can also match the
-		// customer search) this way keeps that order instead of flattening
-		// it into two concatenated runs the way array_merge() would.
-		$merged = array_unique(
-			$this->lazy_merge_by_date(
-				$by_number,
-				$by_customer,
-				array( $this, 'invoice_date_for_id' ),
-				count( $by_number ) + count( $by_customer )
-			)
-		);
-
-		return array(
-			'ids'       => array_values( $merged ),
-			'truncated' => count( $by_number ) === self::SEARCH_HARD_LIMIT || count( $by_customer ) === self::SEARCH_HARD_LIMIT,
-		);
-	}
-
-	/**
-	 * Candidate credit-noted refund IDs for a search term — same bounded,
-	 * ID-only, merge-and-dedupe shape as find_invoice_candidate_ids(), with
-	 * one difference: a refund carries no billing data of its own, so
-	 * matching a customer name/email/order number has to go through the
-	 * parent order first (a bounded 's' search for matching parent order
-	 * IDs), then back to whichever of those parents have a credit-noted
-	 * refund (via post_parent__in — a WooCommerce-core-supported query var
-	 * for both HPOS and the legacy post-based order store, so this never
-	 * drops to a direct wp_posts/wp_postmeta query).
-	 *
-	 * @param string $q Search text; empty string browses the most recent instead.
-	 * @return array{ids: int[], truncated: bool}
-	 */
-	private function find_credit_note_candidate_ids( $q ) {
-		$date_args = array(
-			'type'     => 'shop_order_refund',
-			'orderby'  => 'meta_value_num',
-			'meta_key' => '_billio_credit_note_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-			'order'    => 'DESC',
-		);
-
-		if ( '' === $q ) {
-			$ids = wc_get_orders(
-				$date_args + array(
-					'limit'      => self::SEARCH_HARD_LIMIT,
-					'return'     => 'ids',
-					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-						array(
-							'key'     => '_billio_credit_note_number',
-							'compare' => 'EXISTS',
-						),
-					),
-				)
-			);
-
-			return array(
-				'ids'       => $ids,
-				'truncated' => count( $ids ) === self::SEARCH_HARD_LIMIT,
-			);
-		}
-
-		$by_number = wc_get_orders(
-			$date_args + array(
-				'limit'      => self::SEARCH_HARD_LIMIT,
-				'return'     => 'ids',
-				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-					'relation' => 'AND',
-					array(
-						'key'     => '_billio_credit_note_number',
-						'compare' => 'EXISTS',
-					),
-					array(
-						'key'     => '_billio_credit_note_number',
-						'value'   => $q,
-						'compare' => 'LIKE',
-					),
-				),
-			)
-		);
-
-		$matching_parent_ids = wc_get_orders(
-			array(
-				'limit'  => self::SEARCH_HARD_LIMIT,
-				'return' => 'ids',
-				's'      => $q,
-			)
-		);
-
-		$by_customer = empty( $matching_parent_ids ) ? array() : wc_get_orders(
-			$date_args + array(
-				'limit'           => self::SEARCH_HARD_LIMIT,
-				'return'          => 'ids',
-				'post_parent__in' => $matching_parent_ids,
-				'meta_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-					array(
-						'key'     => '_billio_credit_note_number',
-						'compare' => 'EXISTS',
-					),
-				),
-			)
-		);
-
-		$merged = array_unique(
-			$this->lazy_merge_by_date(
-				$by_number,
-				$by_customer,
-				array( $this, 'credit_note_date_for_id' ),
-				count( $by_number ) + count( $by_customer )
-			)
-		);
-
-		return array(
-			'ids'       => array_values( $merged ),
-			'truncated' => count( $by_number ) === self::SEARCH_HARD_LIMIT
-				|| count( $by_customer ) === self::SEARCH_HARD_LIMIT
-				|| count( $matching_parent_ids ) === self::SEARCH_HARD_LIMIT,
-		);
-	}
-
-	/**
-	 * Merge two ID lists — each already sorted descending by whatever date
-	 * $resolve(...) computes for its elements — into one descending-by-date
-	 * list. $resolve is only called for elements actually visited while
-	 * producing the first $needed results, so cost scales with how deep
-	 * the caller actually reads rather than with either input list's size;
-	 * callers that need every element (full dedupe passes) simply pass
-	 * $needed = count( $a ) + count( $b ).
-	 *
-	 * @param array    $a      First sorted list.
-	 * @param array    $b      Second sorted list.
-	 * @param callable $resolve function( $element ): int timestamp.
-	 * @param int      $needed Max number of merged elements to produce.
-	 * @return array
-	 */
-	private function lazy_merge_by_date( array $a, array $b, callable $resolve, $needed ) {
-		$merged       = array();
-		$i            = 0;
-		$j            = 0;
-		$a_count      = count( $a );
-		$b_count      = count( $b );
-		$merged_count = 0;
-
-		while ( $merged_count < $needed && ( $i < $a_count || $j < $b_count ) ) {
-			if ( $i >= $a_count ) {
-				$merged[] = $b[ $j++ ];
-				++$merged_count;
-				continue;
-			}
-			if ( $j >= $b_count ) {
-				$merged[] = $a[ $i++ ];
-				++$merged_count;
-				continue;
-			}
-			if ( $resolve( $a[ $i ] ) >= $resolve( $b[ $j ] ) ) {
-				$merged[] = $a[ $i++ ];
-			} else {
-				$merged[] = $b[ $j++ ];
-			}
-			++$merged_count;
-		}
-
-		return $merged;
-	}
-
-	/**
-	 * Resolve one invoiced order ID's issue timestamp — the per-element
-	 * date resolver lazy_merge_by_date() calls for invoice candidates.
-	 *
-	 * @param int $order_id Order ID.
-	 * @return int Unix timestamp.
-	 */
-	private function invoice_date_for_id( $order_id ) {
-		$order = wc_get_order( $order_id );
-		return $order ? $this->invoice_issue_timestamp( $order ) : 0;
-	}
-
-	/**
-	 * Resolve one credit-noted refund ID's issue timestamp — the
-	 * per-element date resolver lazy_merge_by_date() calls for credit-note
-	 * candidates.
-	 *
-	 * @param int $refund_id Refund ID.
-	 * @return int Unix timestamp.
-	 */
-	private function credit_note_date_for_id( $refund_id ) {
-		$refund = wc_get_order( $refund_id );
-		return $refund ? $this->credit_note_issue_timestamp( $refund ) : 0;
-	}
-
-	/**
-	 * The current page's (type, id) pairs across both candidate ID lists,
-	 * in descending-date order — a second application of
-	 * lazy_merge_by_date(), this time across document types rather than
-	 * within one, bounded to $offset + $per_page (never the full candidate
-	 * pool) since invoice and credit-note IDs can't collide with each
-	 * other.
-	 *
-	 * @param int[] $invoice_ids     Invoice candidate IDs (sorted desc by date).
-	 * @param int[] $credit_note_ids Credit-note candidate IDs (sorted desc by date).
-	 * @param int   $offset          Zero-based offset into the merged list.
-	 * @param int   $per_page        Page size.
-	 * @return array{type: string, id: int}[]
-	 */
-	private function merge_candidate_page( array $invoice_ids, array $credit_note_ids, $offset, $per_page ) {
-		$tag = static function ( $type ) {
-			return static function ( $id ) use ( $type ) {
-				return array(
-					'type' => $type,
-					'id'   => $id,
+			if ( ! empty( $customer_order_ids ) ) {
+				$id_lists[] = wc_get_orders(
+					$base + array(
+						( $is_invoice ? 'include' : 'post_parent__in' ) => $customer_order_ids,
+						'meta_query' => array( $has_number ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					)
 				);
-			};
-		};
+			}
+		}
 
-		$merged = $this->lazy_merge_by_date(
-			array_map( $tag( 'inv' ), $invoice_ids ),
-			array_map( $tag( 'cn' ), $credit_note_ids ),
-			array( $this, 'candidate_ref_date' ),
-			$offset + $per_page
+		$ids = array();
+		foreach ( $id_lists as $list ) {
+			if ( count( $list ) >= self::SEARCH_HARD_LIMIT ) {
+				$truncated = true;
+			}
+			foreach ( $list as $id ) {
+				$ids[ (int) $id ] = true;
+			}
+		}
+
+		$dates = OrderStatsQuery::meta_map( array_keys( $ids ), $date_key );
+		$refs  = array();
+		foreach ( array_keys( $ids ) as $id ) {
+			$refs[] = array(
+				'type' => $type,
+				'id'   => $id,
+				'date' => isset( $dates[ $id ] ) ? (int) $dates[ $id ] : 0,
+			);
+		}
+
+		return array(
+			'refs'      => $refs,
+			'truncated' => $truncated,
 		);
-
-		return array_slice( $merged, $offset, $per_page );
 	}
 
 	/**
-	 * Date resolver for a {type, id} pair, as produced by
-	 * merge_candidate_page() — dispatches to the matching per-type
-	 * resolver.
+	 * Order IDs whose customer details / order number match a search term.
 	 *
-	 * @param array{type: string, id: int} $ref Candidate reference.
-	 * @return int Unix timestamp.
+	 * HPOS supports wc_get_orders( 's' ) directly. The legacy posts-based
+	 * store does not — there 's' becomes a WP_Query post title/content
+	 * search, which never matches billing names — so it goes through
+	 * WooCommerce's own order search (wc_order_search(), the same lookup
+	 * the Orders screen's search box uses) instead.
+	 *
+	 * @param string $q Search text.
+	 * @return int[] At most SEARCH_HARD_LIMIT IDs.
 	 */
-	private function candidate_ref_date( array $ref ) {
-		return 'inv' === $ref['type']
-			? $this->invoice_date_for_id( $ref['id'] )
-			: $this->credit_note_date_for_id( $ref['id'] );
+	private function customer_search_order_ids( $q ) {
+		if ( OrderStatsQuery::uses_hpos() ) {
+			return array_map(
+				'intval',
+				wc_get_orders(
+					array(
+						'limit'  => self::SEARCH_HARD_LIMIT,
+						'return' => 'ids',
+						's'      => $q,
+					)
+				)
+			);
+		}
+
+		return array_slice( array_map( 'intval', (array) wc_order_search( $q ) ), 0, self::SEARCH_HARD_LIMIT );
 	}
 
 	/**

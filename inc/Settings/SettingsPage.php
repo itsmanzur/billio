@@ -639,7 +639,7 @@ class SettingsPage {
 								<summary><?php esc_html_e( 'Override templates from your theme', 'billio' ); ?></summary>
 								<p class="billio-advanced-note"><?php esc_html_e( 'Copy any file into your theme and Billio will use it instead of the bundled one:', 'billio' ); ?></p>
 								<div class="billio-code">
-									<?php foreach ( array( 'default', 'modern', 'packing-slip', 'credit-note' ) as $slug ) : ?>
+									<?php foreach ( array( 'default', 'modern', 'packing-slip', 'credit-note', 'partials/invoice-lines' ) as $slug ) : ?>
 										<?php $overridden = (bool) locate_template( array( 'billio/' . $slug . '.php' ) ); ?>
 										yourtheme/<span>billio/</span><?php echo esc_html( $slug ); ?>.php
 										<?php

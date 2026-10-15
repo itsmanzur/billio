@@ -22,7 +22,65 @@ class ReviewNotice {
 
 	public function __construct() {
 		add_action( 'admin_notices', array( $this, 'maybe_render' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'maybe_enqueue' ) );
 		add_action( 'wp_ajax_billio_dismiss_review_notice', array( $this, 'ajax_dismiss' ) );
+	}
+
+	/**
+	 * Whether the notice should show on the current screen.
+	 *
+	 * Only on WooCommerce / Billio screens (where the store owner is
+	 * already working with orders) — not on every wp-admin page. And not
+	 * on the Billio Dashboard itself, which renders its own inline version
+	 * of this same notice (same threshold/dismiss logic).
+	 *
+	 * @return bool
+	 */
+	private function is_eligible() {
+		if ( ! current_user_can( 'manage_woocommerce' ) || get_option( self::OPTION_DISMISS ) ) {
+			return false;
+		}
+
+		if ( (int) get_option( NumberManager::OPTION_TOTAL_COUNT, 0 ) < self::THRESHOLD ) {
+			return false;
+		}
+
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen || Dashboard::SCREEN_ID === $screen->id ) {
+			return false;
+		}
+
+		$screen_ids = function_exists( 'wc_get_screen_ids' ) ? wc_get_screen_ids() : array();
+
+		return in_array( $screen->id, $screen_ids, true ) || false !== strpos( $screen->id, 'billio' );
+	}
+
+	/**
+	 * Enqueue the tiny dismiss handler (as a registered inline script, not
+	 * a raw <script> tag in the notice markup) only where the notice shows.
+	 *
+	 * @return void
+	 */
+	public function maybe_enqueue() {
+		if ( ! $this->is_eligible() ) {
+			return;
+		}
+
+		wp_register_script( 'billio-review-notice', false, array(), BILLIO_VERSION, true );
+		wp_enqueue_script( 'billio-review-notice' );
+		wp_add_inline_script(
+			'billio-review-notice',
+			"document.addEventListener( 'click', function ( event ) {
+				var notice = event.target.closest( '.billio-review-notice' );
+				if ( ! notice || ! event.target.classList.contains( 'notice-dismiss' ) ) {
+					return;
+				}
+				var body = new URLSearchParams();
+				body.set( 'action', 'billio_dismiss_review_notice' );
+				body.set( 'nonce', notice.dataset.nonce );
+				fetch( ajaxurl, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body.toString() } );
+			} );"
+		);
 	}
 
 	/**
@@ -31,28 +89,11 @@ class ReviewNotice {
 	 * @return void
 	 */
 	public function maybe_render() {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! $this->is_eligible() ) {
 			return;
 		}
 
-		if ( get_option( self::OPTION_DISMISS ) ) {
-			return;
-		}
-
-		// The Billio Dashboard renders its own inline version of this same
-		// notice (same threshold/dismiss logic, just restyled to match the
-		// rest of that page) — showing the generic admin_notices one too
-		// would duplicate it right above.
-		$screen = get_current_screen();
-		if ( $screen && Dashboard::SCREEN_ID === $screen->id ) {
-			return;
-		}
-
-		$total = (int) get_option( NumberManager::OPTION_TOTAL_COUNT, 0 );
-		if ( $total < self::THRESHOLD ) {
-			return;
-		}
-
+		$total      = (int) get_option( NumberManager::OPTION_TOTAL_COUNT, 0 );
 		$review_url = 'https://wordpress.org/support/plugin/billio/reviews/#new-post';
 		$nonce      = wp_create_nonce( self::NONCE_ACTION );
 		?>
@@ -68,18 +109,6 @@ class ReviewNotice {
 				<a href="<?php echo esc_url( $review_url ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Leave a review', 'billio' ); ?></a>
 			</p>
 		</div>
-		<script>
-		document.addEventListener( 'click', function ( event ) {
-			var notice = event.target.closest( '.billio-review-notice' );
-			if ( ! notice || ! event.target.classList.contains( 'notice-dismiss' ) ) {
-				return;
-			}
-			var body = new URLSearchParams();
-			body.set( 'action', 'billio_dismiss_review_notice' );
-			body.set( 'nonce', notice.dataset.nonce );
-			fetch( ajaxurl, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body.toString() } );
-		} );
-		</script>
 		<?php
 	}
 

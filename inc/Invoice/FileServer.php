@@ -68,9 +68,18 @@ class FileServer {
 			ob_end_clean();
 		}
 
+		$filename = sanitize_file_name( $download_name );
+
 		nocache_headers();
 		header( 'Content-Type: application/pdf' );
-		header( 'Content-Disposition: ' . ( 'inline' === $disposition ? 'inline' : 'attachment' ) . '; filename="' . sanitize_file_name( $download_name ) . '"' );
+		header( 'X-Content-Type-Options: nosniff' );
+		// Plain filename= for old clients, plus RFC 5987 filename*= so a
+		// non-ASCII number prefix (e.g. Bengali) survives intact.
+		header(
+			'Content-Disposition: ' . ( 'inline' === $disposition ? 'inline' : 'attachment' )
+			. '; filename="' . str_replace( '"', '', $filename ) . '"'
+			. "; filename*=UTF-8''" . rawurlencode( $filename )
+		);
 		header( 'Content-Length: ' . $length );
 	}
 }

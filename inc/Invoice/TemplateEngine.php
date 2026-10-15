@@ -197,6 +197,25 @@ class TemplateEngine {
 	}
 
 	/**
+	 * Resolve a shared template partial (templates/partials/{name}.php),
+	 * theme override first — yourtheme/billio/partials/{name}.php — same
+	 * lookup order as the full templates. For templates to include().
+	 *
+	 * @param string $name Partial name, e.g. "invoice-lines".
+	 * @return string Absolute path.
+	 */
+	public static function partial_path( $name ) {
+		$name = sanitize_file_name( $name );
+
+		$theme_override = \locate_template( array( 'billio/partials/' . $name . '.php' ) );
+		if ( $theme_override ) {
+			return $theme_override;
+		}
+
+		return BILLIO_PATH . 'templates/partials/' . $name . '.php';
+	}
+
+	/**
 	 * Retrieve the customer's tax ID from the order.
 	 *
 	 * Checks _billio_tax_id first, falling back to _billing_billio_tax_id,
@@ -306,7 +325,7 @@ class TemplateEngine {
 			return '';
 		}
 
-		$path = get_attached_file( $attachment_id );
+		$path = self::logo_file_path( $attachment_id );
 
 		if ( ! $path || ! is_readable( $path ) ) {
 			self::$logo_data_uri_cache = '';
@@ -315,6 +334,11 @@ class TemplateEngine {
 
 		$filetype = wp_check_filetype( $path );
 		$mime     = ! empty( $filetype['type'] ) ? $filetype['type'] : 'image/png';
+		// SVG is often not in the site's allowed upload types, so
+		// wp_check_filetype() can't name it — don't mislabel it as PNG.
+		if ( 'svg' === strtolower( pathinfo( $path, PATHINFO_EXTENSION ) ) ) {
+			$mime = 'image/svg+xml';
+		}
 
 		$contents = file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
@@ -326,6 +350,44 @@ class TemplateEngine {
 		self::$logo_data_uri_cache = 'data:' . $mime . ';base64,' . base64_encode( $contents ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
 
 		return self::$logo_data_uri_cache;
+	}
+
+	/**
+	 * The logo file to embed: a resized copy when WordPress generated one
+	 * that's still large enough to print sharply, otherwise the original.
+	 *
+	 * The logo is base64-inlined into every PDF (and so every invoice
+	 * email) — a 4000px, multi-MB camera upload would bloat each one for no
+	 * visible gain, since templates draw it at most ~220px wide.
+	 *
+	 * @param int $attachment_id Logo attachment ID.
+	 * @return string Absolute path, or '' if the attachment has no file.
+	 */
+	private static function logo_file_path( $attachment_id ) {
+		$original = get_attached_file( $attachment_id );
+		if ( ! $original ) {
+			return '';
+		}
+
+		/**
+		 * Minimum pixel width for a resized logo copy to be used instead of
+		 * the original (~2x the largest template display width).
+		 *
+		 * @param int $min_width Minimum width in pixels.
+		 */
+		$min_width = (int) apply_filters( 'billio_logo_min_width', 440 );
+
+		foreach ( array( 'medium_large', 'large' ) as $size ) {
+			$resized = image_get_intermediate_size( $attachment_id, $size );
+			if ( $resized && ! empty( $resized['file'] ) && (int) $resized['width'] >= $min_width ) {
+				$candidate = path_join( dirname( $original ), wp_basename( $resized['file'] ) );
+				if ( is_readable( $candidate ) ) {
+					return $candidate;
+				}
+			}
+		}
+
+		return $original;
 	}
 
 	/**

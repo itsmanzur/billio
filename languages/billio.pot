@@ -361,7 +361,7 @@ msgstr ""
 msgid "Billio has created %d invoices for you. Enjoying it?"
 msgstr ""
 
-#: inc/Admin/ReviewNotice.php:64
+#: inc/Admin/ReviewNotice.php:105
 msgid "Billio has generated %d invoices for you. If it's working well, a quick review helps other store owners find it."
 msgstr ""
 
@@ -645,7 +645,7 @@ msgstr ""
 
 #: inc/Admin/Dashboard.php:378
 #: inc/Admin/Dashboard.php:414
-#: inc/Admin/Dashboard.php:1616
+#: inc/Admin/Dashboard.php:1504
 msgid "Customer"
 msgstr ""
 
@@ -737,8 +737,7 @@ msgstr ""
 msgid "Discard"
 msgstr ""
 
-#: templates/default.php:174
-#: templates/modern.php:184
+#: templates/partials/invoice-lines.php:89
 msgid "Discount"
 msgstr ""
 
@@ -880,8 +879,7 @@ msgstr ""
 msgid "Features & Overview"
 msgstr ""
 
-#: templates/default.php:162
-#: templates/modern.php:172
+#: templates/partials/invoice-lines.php:77
 msgid "Fees"
 msgstr ""
 
@@ -1005,11 +1003,11 @@ msgstr ""
 msgid "Hands-free delivery on order completion"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:1608
+#: inc/Admin/Dashboard.php:1496
 msgid "Hello %1$s, here is your credit note %2$s: %3$s"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:1613
+#: inc/Admin/Dashboard.php:1501
 msgid "Hello %1$s, here is your invoice %2$s: %3$s"
 msgstr ""
 
@@ -1187,9 +1185,8 @@ msgid "Invoices, packing slips, credit notes"
 msgstr ""
 
 #: templates/credit-note.php:104
-#: templates/default.php:110
-#: templates/modern.php:120
 #: templates/packing-slip.php:98
+#: templates/partials/invoice-lines.php:25
 msgid "Item"
 msgstr ""
 
@@ -1202,7 +1199,7 @@ msgid "Label displayed on the checkout page, order details, and PDF invoice."
 msgstr ""
 
 #: inc/Admin/Dashboard.php:390
-#: inc/Admin/ReviewNotice.php:68
+#: inc/Admin/ReviewNotice.php:109
 msgid "Leave a review"
 msgstr ""
 
@@ -1689,9 +1686,8 @@ msgid "Protected with Auto-Raise"
 msgstr ""
 
 #: templates/credit-note.php:105
-#: templates/default.php:111
-#: templates/modern.php:121
 #: templates/packing-slip.php:100
+#: templates/partials/invoice-lines.php:26
 msgid "Qty"
 msgstr ""
 
@@ -1740,13 +1736,12 @@ msgstr ""
 msgid "Refund issued as a flat amount (no item breakdown)."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:1579
+#: inc/Admin/Dashboard.php:1467
 #: templates/credit-note.php:106
 msgid "Refunded"
 msgstr ""
 
-#: templates/default.php:189
-#: templates/modern.php:199
+#: templates/partials/invoice-lines.php:104
 msgid "Refunded: %s (see your refund receipt for details)"
 msgstr ""
 
@@ -1915,8 +1910,7 @@ msgstr ""
 msgid "Ship to"
 msgstr ""
 
-#: templates/default.php:150
-#: templates/modern.php:160
+#: templates/partials/invoice-lines.php:65
 msgid "Shipping"
 msgstr ""
 
@@ -1991,8 +1985,7 @@ msgstr ""
 msgid "Streamlined shipping slips for order fulfillment without displaying product prices. Generated on demand without keeping temporary files."
 msgstr ""
 
-#: templates/default.php:145
-#: templates/modern.php:155
+#: templates/partials/invoice-lines.php:60
 msgid "Subtotal"
 msgstr ""
 
@@ -2028,8 +2021,8 @@ msgstr ""
 msgid "Thank You page download"
 msgstr ""
 
-#: templates/default.php:197
-#: templates/modern.php:207
+#: templates/default.php:110
+#: templates/modern.php:120
 #: templates/packing-slip.php:142
 msgid "Thank you for your business."
 msgstr ""
@@ -2085,10 +2078,8 @@ msgstr ""
 
 #: inc/Admin/Dashboard.php:381
 #: inc/Admin/Dashboard.php:415
-#: templates/default.php:113
-#: templates/default.php:179
-#: templates/modern.php:123
-#: templates/modern.php:189
+#: templates/partials/invoice-lines.php:28
+#: templates/partials/invoice-lines.php:94
 msgid "Total"
 msgstr ""
 
@@ -2104,8 +2095,7 @@ msgstr ""
 msgid "Turning this on mid-year starts a new sequence immediately. Existing numbers are never reissued."
 msgstr ""
 
-#: templates/default.php:112
-#: templates/modern.php:122
+#: templates/partials/invoice-lines.php:27
 msgid "Unit Price"
 msgstr ""
 
@@ -2135,7 +2125,7 @@ msgstr ""
 
 #: inc/Frontend/CheckoutTaxId.php:56
 #: inc/Invoice/TemplateEngine.php:104
-#: inc/Invoice/TemplateEngine.php:236
+#: inc/Invoice/TemplateEngine.php:255
 #: inc/Settings/Fields.php:149
 #: inc/Settings/SettingsPage.php:343
 msgid "VAT / Tax / BIN Number"
@@ -2143,7 +2133,7 @@ msgstr ""
 
 #: inc/Frontend/CheckoutTaxId.php:57
 #: inc/Invoice/TemplateEngine.php:106
-#: inc/Invoice/TemplateEngine.php:238
+#: inc/Invoice/TemplateEngine.php:257
 msgid "VAT / Tax ID"
 msgstr ""
 

@@ -77,6 +77,16 @@ Vowel signs (ি ে ৈ ো ৌ) are repositioned so names and addresses displa
 * Fix: "Orders without invoice" also counts processing orders when invoices are sent at Processing, and updates right after "Generate missing" finishes.
 * Fix: Dashboard chart dates no longer shift by a day for sites west of UTC; chart tooltips are now translatable.
 * Polish: The order screen's Tax ID row is hidden when the Tax ID feature is off and the order has none.
+* Performance: Dashboard stats, chart and search read order fields in bulk instead of loading every order — much faster on large stores.
+* Fix: Dashboard search by customer name now works on stores using the legacy (non-HPOS) order storage.
+* Fix: Revenue figures only add up orders in the store currency, instead of mixing currencies on multi-currency stores.
+* Fix: Dashboard chart days stay correct across daylight-saving changes.
+* Performance: The company logo is embedded from a resized copy when available, keeping PDFs and emails small; SVG logos are labelled correctly.
+* Fix: Plugin updates now finish their upgrade steps on the first request, not only after an admin page visit.
+* Polish: The review request only appears on WooCommerce / Billio screens, and its script is properly enqueued.
+* Polish: Invoice line items and totals moved to a shared template partial (`billio/partials/invoice-lines.php`, overridable from a theme).
+* Hardening: PDF downloads send `X-Content-Type-Options: nosniff` and a UTF-8 filename; uninstall removes leftover lock rows.
+* Dev: Production build installs Composer dependencies with `--no-dev` and writes the zip with forward-slash paths; added `tests/run.php` (unit) and `tests/integration.php` (read-only, WP-CLI).
 
 = 1.3.1 =
 * Polish: Full internationalization audit — 100% translatable interface strings across Dashboard, Settings, Quick Actions, and setup checklist with complete bundled Bengali (bn_BD) translation.
