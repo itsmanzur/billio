@@ -29,4 +29,17 @@ class Logger {
 
 		wc_get_logger()->error( $message, array_merge( array( 'source' => self::SOURCE ), $context ) );
 	}
+
+	/**
+	 * @param string $message Log message.
+	 * @param array  $context Extra context (merged with the 'source' key WC expects).
+	 * @return void
+	 */
+	public static function info( $message, array $context = array() ) {
+		if ( ! function_exists( 'wc_get_logger' ) ) {
+			return;
+		}
+
+		wc_get_logger()->info( $message, array_merge( array( 'source' => self::SOURCE ), $context ) );
+	}
 }

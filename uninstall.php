@@ -36,6 +36,8 @@ $billio_options = array(
 	'billio_enable_tax_id',
 	'billio_tax_id_label',
 	'billio_tax_id_required',
+	'billio_customer_link_validity_days',
+	'billio_customer_ondemand_generate',
 	'billio_version',
 	'billio_review_notice_dismissed',
 );
@@ -52,10 +54,7 @@ $billio_transients = array(
 	'billio_dash_chart_30',
 	'billio_dash_chart_90',
 	'billio_dash_recent_documents',
-	'billio_dash_recent_docs_v2',
 	'billio_dash_missing_order_ids',
-	'billio_dash_legacy_orders',
-	'billio_dash_legacy_refunds',
 	'billio_dash_bust_lock',
 	'billio_activation_redirect',
 );

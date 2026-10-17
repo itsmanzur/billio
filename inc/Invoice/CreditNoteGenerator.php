@@ -11,6 +11,8 @@
 
 namespace Billio\Invoice;
 
+use Billio\Logger;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -36,28 +38,48 @@ class CreditNoteGenerator {
 			return $relative_path;
 		}
 
-		$html = TemplateEngine::render_credit_note( $parent_order, $refund, $number );
+		// Locked the same way as Generator::render_and_save_locked() — two
+		// concurrent requests for the same missing/not-yet-rendered credit
+		// note (e.g. a refund email webhook racing a manual download)
+		// would otherwise each write their own orphaned PDF file.
+		$pre_lock_path = $relative_path;
 
-		$dompdf = Generator::make_dompdf();
-		$dompdf->loadHtml( $html );
-		$dompdf->setPaper( Generator::paper_size() );
-		$dompdf->render();
+		return Generator::with_order_lock(
+			$refund->get_id(),
+			function () use ( $refund, $parent_order, $number, $pre_lock_path ) {
+				$fresh      = wc_get_order( $refund->get_id() );
+				$fresh_path = $fresh ? $fresh->get_meta( '_billio_credit_note_pdf_path' ) : '';
 
-		$relative_path = self::save( $dompdf->output(), $parent_order, $refund );
+				if ( $fresh_path && $fresh_path !== $pre_lock_path && Generator::pdf_exists( Generator::get_absolute_path( $fresh_path ) ) ) {
+					$refund->update_meta_data( '_billio_credit_note_pdf_path', $fresh_path );
+					return $fresh_path;
+				}
 
-		$refund->update_meta_data( '_billio_credit_note_pdf_path', $relative_path );
-		$refund->save_meta_data();
+				$html = TemplateEngine::render_credit_note( $parent_order, $refund, $number );
 
-		/**
-		 * Fires after a credit note PDF is freshly rendered and saved (not
-		 * when an already-cached file is reused) — the Dashboard uses this
-		 * to bust its cached stats/chart transients.
-		 *
-		 * @param \WC_Order_Refund $refund The documented refund.
-		 */
-		do_action( 'billio_credit_note_generated', $refund );
+				$dompdf = Generator::make_dompdf();
+				$dompdf->loadHtml( $html );
+				$dompdf->setPaper( Generator::paper_size() );
+				$dompdf->render();
 
-		return $relative_path;
+				$new_relative_path = self::save( $dompdf->output(), $parent_order, $refund );
+
+				$refund->update_meta_data( '_billio_credit_note_pdf_path', $new_relative_path );
+				$refund->save_meta_data();
+
+				/**
+				 * Fires after a credit note PDF is freshly rendered and saved
+				 * (not when an already-cached file is reused) — the
+				 * Dashboard uses this to bust its cached stats/chart
+				 * transients.
+				 *
+				 * @param \WC_Order_Refund $refund The documented refund.
+				 */
+				do_action( 'billio_credit_note_generated', $refund );
+
+				return $new_relative_path;
+			}
+		);
 	}
 
 	/**
@@ -72,10 +94,10 @@ class CreditNoteGenerator {
 	 * @return string The assigned (or already-existing) credit note number.
 	 */
 	private static function assign_number_locked( \WC_Order_Refund $refund ) {
-		$locked   = OrderLock::acquire( $refund->get_id() );
-		$attempts = 0;
+		$lock_token = OrderLock::acquire( $refund->get_id() );
+		$attempts   = 0;
 
-		while ( ! $locked && $attempts < 20 ) {
+		while ( ! $lock_token && $attempts < 20 ) {
 			usleep( 150000 );
 			++$attempts;
 
@@ -84,7 +106,15 @@ class CreditNoteGenerator {
 				return self::adopt_existing_number( $refund, $existing );
 			}
 
-			$locked = OrderLock::acquire( $refund->get_id() );
+			$lock_token = OrderLock::acquire( $refund->get_id() );
+		}
+
+		if ( ! $lock_token ) {
+			// Same reasoning as Generator::assign_number_locked(): fail
+			// loudly rather than mint a number without the lock's
+			// protection. Callers already catch \Throwable.
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- never echoed/rendered as HTML; only logged by the caller's catch( \Throwable ) block.
+			throw new \RuntimeException( sprintf( 'Billio: could not acquire credit note number lock for refund #%d.', $refund->get_id() ) );
 		}
 
 		try {
@@ -100,11 +130,19 @@ class CreditNoteGenerator {
 			// a render failure afterward must not be able to orphan the number.
 			$refund->save_meta_data();
 
+			// Same reasoning as Generator::assign_number_locked(): verify
+			// the write actually landed, since save_meta_data() returns
+			// void either way, and log for manual reconciliation if not.
+			$saved = wc_get_order( $refund->get_id() );
+			if ( ! $saved || (string) $saved->get_meta( '_billio_credit_note_number' ) !== (string) $number ) {
+				Logger::error(
+					sprintf( 'Billio: credit note number %s was assigned to refund #%d but the save did not stick — reconcile manually.', $number, $refund->get_id() )
+				);
+			}
+
 			return $number;
 		} finally {
-			if ( $locked ) {
-				OrderLock::release( $refund->get_id() );
-			}
+			OrderLock::release( $refund->get_id(), $lock_token );
 		}
 	}
 

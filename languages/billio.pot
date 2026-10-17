@@ -2,18 +2,18 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Billio 1.3.2\n"
+"Project-Id-Version: Billio 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: bin/make-pot.php\n"
 
-#: inc/Admin/Dashboard.php:367
+#: inc/Admin/Dashboard.php:346
 msgid "%1$d of %2$d complete"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:322
+#: inc/Admin/Dashboard.php:301
 msgid "%1$d of %2$d · %3$s"
 msgstr ""
 
@@ -21,23 +21,23 @@ msgstr ""
 msgid "%1$d → %2$s"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:433
+#: inc/Admin/Dashboard.php:412
 msgid "%d credit note"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:435
+#: inc/Admin/Dashboard.php:414
 msgid "%d credit notes"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:429
+#: inc/Admin/Dashboard.php:408
 msgid "%d invoice"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:431
+#: inc/Admin/Dashboard.php:410
 msgid "%d invoices"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:324
+#: inc/Admin/Dashboard.php:303
 msgid "%d invoices generated"
 msgstr ""
 
@@ -53,15 +53,15 @@ msgstr ""
 msgid "%d%% complete"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:425
+#: inc/Admin/Dashboard.php:404
 msgid "%s refunded this month"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:316
+#: inc/Admin/Dashboard.php:295
 msgid "%s regenerated"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:427
+#: inc/Admin/Dashboard.php:406
 msgid "(%d%% complete)"
 msgstr ""
 
@@ -101,7 +101,7 @@ msgstr ""
 msgid "2. Invoice Numbering Format"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:566
+#: inc/Settings/SettingsPage.php:568
 msgid "210×297"
 msgstr ""
 
@@ -137,7 +137,7 @@ msgstr ""
 msgid "A clean packing slip opens in your browser, ready to print without showing item prices."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:387
+#: inc/Admin/Dashboard.php:366
 msgid "A few quick steps make every invoice fully branded, sequential, and tax compliant."
 msgstr ""
 
@@ -145,7 +145,7 @@ msgstr ""
 msgid "A prominent \"Download Invoice (PDF)\" button appears directly on the checkout Order Received screen right after purchase."
 msgstr ""
 
-#: inc/Settings/Fields.php:94
+#: inc/Settings/Fields.php:101
 msgid "A4"
 msgstr ""
 
@@ -153,11 +153,11 @@ msgstr ""
 msgid "A4 & Letter"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:608
+#: inc/Settings/SettingsPage.php:626
 msgid "Accent color"
 msgstr ""
 
-#: inc/Settings/Fields.php:120
+#: inc/Settings/Fields.php:127
 msgid "Accent color (Modern template)"
 msgstr ""
 
@@ -165,7 +165,7 @@ msgstr ""
 msgid "Accounting & Compliance"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:382
+#: inc/Admin/Dashboard.php:361
 msgid "Actions"
 msgstr ""
 
@@ -179,16 +179,16 @@ msgid "Add your company address"
 msgstr ""
 
 #: inc/Settings/SettingsPage.php:281
-#: inc/Settings/SettingsPage.php:529
+#: inc/Settings/SettingsPage.php:531
 msgid "Add {YEAR} to the format, otherwise numbers will repeat each year."
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:448
+#: inc/Settings/SettingsPage.php:450
 msgid "Adds a Tax ID input field to WooCommerce checkout"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:383
-#: inc/Settings/SettingsPage.php:636
+#: inc/Settings/SettingsPage.php:385
+#: inc/Settings/SettingsPage.php:654
 msgid "Advanced"
 msgstr ""
 
@@ -196,24 +196,24 @@ msgstr ""
 msgid "After activating the plugin, you can set up professional invoicing for your store in just 3 minutes without writing any code:"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:372
+#: inc/Admin/Dashboard.php:351
 #: inc/Admin/DocsPage.php:139
 msgid "All"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:307
+#: inc/Admin/Dashboard.php:286
 msgid "All caught up"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:304
+#: inc/Admin/Dashboard.php:283
 msgid "All orders invoiced"
 msgstr ""
 
-#: inc/Settings/Fields.php:143
+#: inc/Settings/Fields.php:150
 msgid "Allow B2B customers to enter their VAT / Tax / BIN number during checkout."
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:575
+#: inc/Settings/SettingsPage.php:577
 msgid "Allows buyers to immediately download their invoice on the order received page"
 msgstr ""
 
@@ -237,11 +237,11 @@ msgstr ""
 msgid "Atomic Lock"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:547
+#: inc/Settings/SettingsPage.php:549
 msgid "Attach invoice when order is"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:401
+#: inc/Admin/Dashboard.php:380
 msgid "Attach to email"
 msgstr ""
 
@@ -277,11 +277,11 @@ msgstr ""
 msgid "B2B & B2C Stores:"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:404
+#: inc/Admin/Dashboard.php:383
 msgid "B2B / Tax"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:379
+#: inc/Settings/SettingsPage.php:381
 msgid "B2B / Tax ID"
 msgstr ""
 
@@ -289,8 +289,8 @@ msgstr ""
 msgid "B2B Checkout"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:482
-#: inc/Settings/SettingsPage.php:444
+#: inc/Admin/Dashboard.php:461
+#: inc/Settings/SettingsPage.php:446
 msgid "B2B Customer Tax ID"
 msgstr ""
 
@@ -314,7 +314,7 @@ msgstr ""
 msgid "Bengali (Bangla) Script Support"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:396
+#: inc/Admin/Dashboard.php:375
 msgid "Best day"
 msgstr ""
 
@@ -324,16 +324,16 @@ msgstr ""
 msgid "Billed to"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:350
+#: inc/Admin/Dashboard.php:329
 msgid "Billing Address"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:193
-#: inc/Admin/Dashboard.php:194
+#: inc/Admin/Dashboard.php:172
+#: inc/Admin/Dashboard.php:173
 msgid "Billio"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:447
+#: inc/Admin/Dashboard.php:426
 msgid "Billio Dashboard"
 msgstr ""
 
@@ -357,7 +357,7 @@ msgstr ""
 msgid "Billio automatically registers the input field on modern WooCommerce Block Checkout as well as Classic shortcode checkout without requiring extra add-ons."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:389
+#: inc/Admin/Dashboard.php:368
 msgid "Billio has created %d invoices for you. Enjoying it?"
 msgstr ""
 
@@ -371,6 +371,10 @@ msgstr ""
 
 #: billio.php:109
 msgid "Billio requires WooCommerce to be installed and active."
+msgstr ""
+
+#: inc/Installer.php:35
+msgid "Billio requires WooCommerce to be installed and active. The plugin has been deactivated."
 msgstr ""
 
 #: inc/Admin/DocsPage.php:102
@@ -413,11 +417,11 @@ msgstr ""
 msgid "Can I send invoices to customers via WhatsApp?"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:313
+#: inc/Admin/Dashboard.php:292
 msgid "Cancel"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:360
+#: inc/Settings/SettingsPage.php:362
 msgid "Changes show in the live preview instantly. Nothing is saved until you click Save."
 msgstr ""
 
@@ -433,11 +437,11 @@ msgstr ""
 msgid "Checkout UX"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:572
+#: inc/Settings/SettingsPage.php:574
 msgid "Checkout confirmation"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:448
+#: inc/Settings/SettingsPage.php:450
 msgid "Checkout field"
 msgstr ""
 
@@ -445,7 +449,7 @@ msgstr ""
 msgid "Choose a logo"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:587
+#: inc/Settings/SettingsPage.php:605
 msgid "Choose a template and match it to your brand."
 msgstr ""
 
@@ -453,7 +457,7 @@ msgstr ""
 msgid "Choose between clean Default and sleek Modern layouts. Customize brand accent color, upload company logo, and set paper size (A4 / Letter)."
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:597
+#: inc/Settings/SettingsPage.php:615
 msgid "Clean, black & white"
 msgstr ""
 
@@ -473,7 +477,7 @@ msgstr ""
 msgid "Click the preview icon on any order in the Recent Documents table, or click \"Live Invoice Preview\" in the Quick Actions bar. The drawer slides open smoothly without refreshing the page."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:343
+#: inc/Admin/Dashboard.php:322
 msgid "Close preview (Esc)"
 msgstr ""
 
@@ -481,38 +485,38 @@ msgstr ""
 msgid "Collect customer VAT, BIN, TRN, or GSTIN numbers during checkout with full Classic and Block Checkout support, editable from the admin order screen."
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:444
+#: inc/Settings/SettingsPage.php:446
 msgid "Collect customer VAT, Tax, BIN, TRN, or GSTIN numbers at checkout and print on invoices."
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:603
+#: inc/Settings/SettingsPage.php:621
 msgid "Color header band"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:376
+#: inc/Settings/SettingsPage.php:378
 msgid "Company"
 msgstr ""
 
-#: inc/Settings/Fields.php:42
-#: inc/Settings/SettingsPage.php:425
+#: inc/Settings/Fields.php:49
+#: inc/Settings/SettingsPage.php:427
 msgid "Company address"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:398
+#: inc/Settings/SettingsPage.php:400
 msgid "Company details"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:464
+#: inc/Admin/Dashboard.php:443
 msgid "Company details & logo"
 msgstr ""
 
-#: inc/Settings/Fields.php:36
-#: inc/Settings/SettingsPage.php:406
+#: inc/Settings/Fields.php:43
+#: inc/Settings/SettingsPage.php:408
 msgid "Company logo"
 msgstr ""
 
-#: inc/Settings/Fields.php:30
-#: inc/Settings/SettingsPage.php:402
+#: inc/Settings/Fields.php:37
+#: inc/Settings/SettingsPage.php:404
 msgid "Company name"
 msgstr ""
 
@@ -524,16 +528,16 @@ msgstr ""
 msgid "Complete"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:555
 #: inc/Settings/SettingsPage.php:557
+#: inc/Settings/SettingsPage.php:559
 msgid "Completed"
 msgstr ""
 
-#: inc/Settings/Fields.php:105
+#: inc/Settings/Fields.php:112
 msgid "Completed (order fulfilled)"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:403
+#: inc/Admin/Dashboard.php:382
 msgid "Completed order"
 msgstr ""
 
@@ -541,20 +545,20 @@ msgstr ""
 msgid "Configure Billio Settings"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:464
+#: inc/Settings/SettingsPage.php:466
 msgid "Control whether buyers are required to fill this field"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:345
+#: inc/Admin/Dashboard.php:324
 #: inc/Admin/DocsPage.php:389
 msgid "Copy Link"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:640
+#: inc/Settings/SettingsPage.php:658
 msgid "Copy any file into your theme and Billio will use it instead of the bundled one:"
 msgstr ""
 
-#: inc/Admin/OrderActions.php:252
+#: inc/Admin/OrderActions.php:253
 msgid "Could not find the email to resend."
 msgstr ""
 
@@ -562,16 +566,16 @@ msgstr ""
 msgid "Could not generate the credit note."
 msgstr ""
 
-#: inc/Frontend/MyAccount.php:303
+#: inc/Frontend/MyAccount.php:479
 msgid "Could not generate the credit note. Please contact us for help."
 msgstr ""
 
-#: inc/Admin/OrderActions.php:217
-#: inc/Admin/OrderActions.php:347
+#: inc/Admin/OrderActions.php:218
+#: inc/Admin/OrderActions.php:348
 msgid "Could not generate the invoice."
 msgstr ""
 
-#: inc/Frontend/MyAccount.php:253
+#: inc/Frontend/MyAccount.php:415
 msgid "Could not generate the invoice. Please contact us for help."
 msgstr ""
 
@@ -579,11 +583,11 @@ msgstr ""
 msgid "Could not generate the packing slip."
 msgstr ""
 
-#: inc/Admin/OrderActions.php:277
+#: inc/Admin/OrderActions.php:278
 msgid "Could not regenerate the invoice."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:335
+#: inc/Admin/Dashboard.php:314
 msgid "Could not save — please try again."
 msgstr ""
 
@@ -600,34 +604,34 @@ msgstr ""
 msgid "Credit Notes"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:490
-#: inc/Settings/SettingsPage.php:663
+#: inc/Settings/SettingsPage.php:492
+#: inc/Settings/SettingsPage.php:681
 msgid "Credit note"
 msgstr ""
 
 #: inc/Admin/MetaBox.php:210
 #: inc/Admin/MetaBox.php:214
-#: inc/Frontend/MyAccount.php:276
+#: inc/Frontend/MyAccount.php:449
 msgid "Credit note not found."
 msgstr ""
 
-#: inc/Settings/Fields.php:60
+#: inc/Settings/Fields.php:67
 msgid "Credit note prefix"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:374
+#: inc/Admin/Dashboard.php:353
 msgid "Credit notes"
 msgstr ""
 
-#: inc/Settings/Fields.php:63
+#: inc/Settings/Fields.php:70
 msgid "Credit notes have their own number sequence, separate from invoices."
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:490
+#: inc/Settings/SettingsPage.php:492
 msgid "Credit notes have their own sequence"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:385
+#: inc/Admin/Dashboard.php:364
 msgid "Credit notes this month"
 msgstr ""
 
@@ -643,9 +647,9 @@ msgstr ""
 msgid "Custom Tokens"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:378
-#: inc/Admin/Dashboard.php:414
-#: inc/Admin/Dashboard.php:1504
+#: inc/Admin/Dashboard.php:357
+#: inc/Admin/Dashboard.php:393
+#: inc/Admin/Dashboard.php:1315
 msgid "Customer"
 msgstr ""
 
@@ -653,29 +657,42 @@ msgstr ""
 msgid "Customer Experience"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:359
-#: inc/Settings/Fields.php:140
+#: inc/Admin/Dashboard.php:338
+#: inc/Settings/Fields.php:147
 msgid "Customer Tax ID at checkout"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:361
+#: inc/Admin/Dashboard.php:340
 msgid "Customer Tax ID disabled at checkout"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:360
+#: inc/Admin/Dashboard.php:339
 msgid "Customer Tax ID enabled at checkout"
 msgstr ""
 
-#: inc/Settings/Fields.php:147
+#: inc/Settings/Fields.php:154
 msgid "Customer Tax ID label"
 msgstr ""
 
-#: inc/Frontend/CheckoutTaxId.php:318
+#: inc/Frontend/CheckoutTaxId.php:334
 msgid "Customer VAT / Tax / BIN Number"
 msgstr ""
 
 #: inc/Invoice/SampleOrder.php:70
 msgid "Customer changed their mind"
+msgstr ""
+
+#: inc/Settings/Fields.php:177
+msgid "Customer download generates invoice on demand"
+msgstr ""
+
+#: inc/Settings/Fields.php:168
+#: inc/Settings/SettingsPage.php:584
+msgid "Customer link validity"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:590
+msgid "Customer-facing downloads"
 msgstr ""
 
 #: inc/Admin/DocsPage.php:540
@@ -690,17 +707,17 @@ msgstr ""
 msgid "Customizing Invoice Numbers"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:395
+#: inc/Admin/Dashboard.php:374
 msgid "Daily average"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:204
-#: inc/Admin/Dashboard.php:205
-#: inc/Settings/SettingsPage.php:364
+#: inc/Admin/Dashboard.php:183
+#: inc/Admin/Dashboard.php:184
+#: inc/Settings/SettingsPage.php:366
 msgid "Dashboard"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:380
+#: inc/Admin/Dashboard.php:359
 msgid "Date"
 msgstr ""
 
@@ -710,22 +727,26 @@ msgstr ""
 msgid "Date:"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:516
+#: inc/Settings/SettingsPage.php:584
+msgid "Days before a My Account / Thank You / share link expires. 0 = never."
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:518
 msgid "Decrease"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:408
-#: inc/Settings/Fields.php:114
-#: inc/Settings/SettingsPage.php:596
+#: inc/Admin/Dashboard.php:387
+#: inc/Settings/Fields.php:121
+#: inc/Settings/SettingsPage.php:614
 msgid "Default"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:382
-#: inc/Settings/SettingsPage.php:587
+#: inc/Settings/SettingsPage.php:384
+#: inc/Settings/SettingsPage.php:605
 msgid "Design"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:513
+#: inc/Settings/SettingsPage.php:515
 msgid "Digits in {NUMBER}"
 msgstr ""
 
@@ -733,7 +754,7 @@ msgstr ""
 msgid "Direct 1-click download after checkout"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:680
+#: inc/Settings/SettingsPage.php:698
 msgid "Discard"
 msgstr ""
 
@@ -741,25 +762,25 @@ msgstr ""
 msgid "Discount"
 msgstr ""
 
-#: inc/Settings/Fields.php:129
+#: inc/Settings/Fields.php:136
 msgid "Display a subtle, angled PAID stamp on paid and completed order invoices."
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:624
+#: inc/Settings/SettingsPage.php:642
 msgid "Display an angled, semi-transparent PAID watermark across the invoice"
 msgstr ""
 
 #: inc/Admin/DocsPage.php:44
 #: inc/Admin/DocsPage.php:77
-#: inc/Settings/SettingsPage.php:363
+#: inc/Settings/SettingsPage.php:365
 msgid "Docs & Features"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:420
+#: inc/Admin/Dashboard.php:399
 msgid "Docs & Guide"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:376
+#: inc/Admin/Dashboard.php:355
 msgid "Document"
 msgstr ""
 
@@ -771,20 +792,20 @@ msgstr ""
 msgid "Does Billio support both WooCommerce Block Checkout and Classic Checkout for Tax ID?"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:411
-#: inc/Admin/OrderActions.php:121
+#: inc/Admin/Dashboard.php:390
+#: inc/Admin/OrderActions.php:122
 msgid "Download"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:410
+#: inc/Admin/Dashboard.php:389
 msgid "Download PDF"
 msgstr ""
 
-#: inc/Frontend/MyAccount.php:131
+#: inc/Frontend/MyAccount.php:135
 msgid "Download a PDF copy of your official order invoice."
 msgstr ""
 
-#: inc/Frontend/MyAccount.php:76
+#: inc/Frontend/MyAccount.php:84
 msgid "Download credit note"
 msgstr ""
 
@@ -792,12 +813,12 @@ msgstr ""
 msgid "Download dozens of invoices in a single ZIP archive or merge selected invoices into a single multi-page PDF for instant batch warehouse printing."
 msgstr ""
 
-#: inc/Frontend/MyAccount.php:48
-#: inc/Frontend/MyAccount.php:66
+#: inc/Frontend/MyAccount.php:56
+#: inc/Frontend/MyAccount.php:74
 msgid "Download invoice"
 msgstr ""
 
-#: inc/Frontend/MyAccount.php:133
+#: inc/Frontend/MyAccount.php:137
 msgid "Download invoice (PDF)"
 msgstr ""
 
@@ -805,7 +826,7 @@ msgstr ""
 msgid "Download or print multiple orders at once"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:309
+#: inc/Admin/Dashboard.php:288
 msgid "Downloading…"
 msgstr ""
 
@@ -813,7 +834,7 @@ msgstr ""
 msgid "Drag and drop your company logo into the Company Logo box. It will be positioned automatically at the top of your invoices."
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:415
+#: inc/Settings/SettingsPage.php:417
 msgid "Drop a new image here or"
 msgstr ""
 
@@ -829,20 +850,20 @@ msgstr ""
 msgid "Easy Steps"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:400
+#: inc/Admin/Dashboard.php:379
 msgid "Edit format"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:352
+#: inc/Admin/Dashboard.php:331
 msgid "Email"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:381
-#: inc/Settings/SettingsPage.php:543
+#: inc/Settings/SettingsPage.php:383
+#: inc/Settings/SettingsPage.php:545
 msgid "Email & paper"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:476
+#: inc/Admin/Dashboard.php:455
 msgid "Email attachment triggers"
 msgstr ""
 
@@ -850,8 +871,8 @@ msgstr ""
 msgid "Embed payment QR codes (bKash, Nagad, UPI) and explore electronic invoicing formats (including planned ZATCA e-invoicing support)."
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:451
 #: inc/Settings/SettingsPage.php:453
+#: inc/Settings/SettingsPage.php:455
 msgid "Enable Tax ID at checkout"
 msgstr ""
 
@@ -883,15 +904,15 @@ msgstr ""
 msgid "Fees"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:458
+#: inc/Settings/SettingsPage.php:460
 msgid "Field label"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:464
+#: inc/Settings/SettingsPage.php:466
 msgid "Field requirement"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:488
+#: inc/Admin/Dashboard.php:467
 msgid "First invoice generated"
 msgstr ""
 
@@ -903,7 +924,7 @@ msgstr ""
 msgid "For Invoice #:"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:636
+#: inc/Settings/SettingsPage.php:654
 msgid "For developers and theme authors."
 msgstr ""
 
@@ -939,23 +960,28 @@ msgstr ""
 msgid "Gapless Sequential Numbering"
 msgstr ""
 
-#: inc/Admin/OrderActions.php:134
+#: inc/Admin/OrderActions.php:135
 msgid "Generate"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:418
+#: inc/Admin/Dashboard.php:397
 msgid "Generate Missing"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:306
+#: inc/Admin/Dashboard.php:285
 msgid "Generate missing (%d)"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:317
+#: inc/Admin/Dashboard.php:296
 msgid "Generate missing invoices"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:308
+#: inc/Settings/SettingsPage.php:593
+#: inc/Settings/SettingsPage.php:595
+msgid "Generate on demand"
+msgstr ""
+
+#: inc/Admin/Dashboard.php:287
 msgid "Generate them now →"
 msgstr ""
 
@@ -1003,19 +1029,19 @@ msgstr ""
 msgid "Hands-free delivery on order completion"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:1496
+#: inc/Admin/Dashboard.php:1307
 msgid "Hello %1$s, here is your credit note %2$s: %3$s"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:1501
+#: inc/Admin/Dashboard.php:1312
 msgid "Hello %1$s, here is your invoice %2$s: %3$s"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:423
+#: inc/Admin/Dashboard.php:402
 msgid "Hide"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:369
+#: inc/Admin/Dashboard.php:348
 msgid "Hide checklist"
 msgstr ""
 
@@ -1027,13 +1053,21 @@ msgstr ""
 msgid "How do I display a \"PAID\" watermark stamp on the invoice?"
 msgstr ""
 
-#: inc/Settings/Fields.php:79
+#: inc/Settings/Fields.php:173
+msgid "How many days a customer invoice/credit-note download link (My Account, Thank You page, Dashboard share links) stays valid before expiring. 0 = never expires."
+msgstr ""
+
+#: inc/Settings/Fields.php:86
 msgid "How many digits the {NUMBER} placeholder is padded to, e.g. 4 → 0001."
 msgstr ""
 
 #: templates/default.php:78
 #: templates/modern.php:71
 msgid "INVOICE"
+msgstr ""
+
+#: inc/Settings/Fields.php:180
+msgid "If a customer requests an invoice before one exists yet (e.g. right after checkout), generate it on demand instead of only serving one already issued by the email trigger or an admin. Turning this off is a policy choice: a customer download link then only ever works once an invoice has actually been generated."
 msgstr ""
 
 #: inc/Admin/DocsPage.php:578
@@ -1064,11 +1098,11 @@ msgstr ""
 msgid "Includes bundled Noto Sans Bengali font and vowel-sign reordering (such as split vowels o-kar and ou-kar). Complex consonant conjuncts have known font rendering limitations (see FAQ)."
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:518
+#: inc/Settings/SettingsPage.php:520
 msgid "Increase"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:500
+#: inc/Settings/SettingsPage.php:502
 msgid "Insert:"
 msgstr ""
 
@@ -1089,10 +1123,10 @@ msgstr ""
 msgid "Instant Toggles"
 msgstr ""
 
-#: inc/Admin/OrderActions.php:68
-#: inc/Admin/OrderActions.php:74
-#: inc/Settings/SettingsPage.php:486
-#: inc/Settings/SettingsPage.php:662
+#: inc/Admin/OrderActions.php:69
+#: inc/Admin/OrderActions.php:75
+#: inc/Settings/SettingsPage.php:488
+#: inc/Settings/SettingsPage.php:680
 msgid "Invoice"
 msgstr ""
 
@@ -1100,87 +1134,88 @@ msgstr ""
 msgid "Invoice #:"
 msgstr ""
 
-#: inc/Admin/OrderActions.php:286
+#: inc/Admin/OrderActions.php:287
 msgid "Invoice PDF regenerated by %s."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:422
+#: inc/Admin/Dashboard.php:401
 msgid "Invoice activity"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:397
+#: inc/Admin/Dashboard.php:376
 msgid "Invoice activity, by day"
 msgstr ""
 
-#: inc/Admin/OrderActions.php:197
-#: inc/Admin/OrderActions.php:257
+#: inc/Admin/OrderActions.php:198
+#: inc/Admin/OrderActions.php:258
 msgid "Invoice email sent."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:310
+#: inc/Admin/Dashboard.php:289
 msgid "Invoice emailed to customer"
 msgstr ""
 
 #: inc/Invoice/FileServer.php:27
+#: inc/Invoice/FileServer.php:38
 msgid "Invoice not found."
 msgstr ""
 
-#: inc/Settings/Fields.php:54
+#: inc/Settings/Fields.php:61
 msgid "Invoice number prefix"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:479
+#: inc/Settings/SettingsPage.php:481
 msgid "Invoice numbering"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:470
+#: inc/Admin/Dashboard.php:449
 msgid "Invoice numbering format"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:386
+#: inc/Settings/SettingsPage.php:388
 msgid "Invoice profile"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:398
+#: inc/Admin/Dashboard.php:377
 msgid "Invoice setup at a glance"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:407
-#: inc/Settings/Fields.php:110
-#: inc/Settings/SettingsPage.php:592
+#: inc/Admin/Dashboard.php:386
+#: inc/Settings/Fields.php:117
+#: inc/Settings/SettingsPage.php:610
 msgid "Invoice template"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:332
+#: inc/Admin/Dashboard.php:311
 msgid "Invoice template updated"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:333
+#: inc/Admin/Dashboard.php:312
 msgid "Invoice will be attached to this email"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:334
+#: inc/Admin/Dashboard.php:313
 msgid "Invoice will no longer be attached to this email"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:373
-#: inc/Admin/Dashboard.php:392
+#: inc/Admin/Dashboard.php:352
+#: inc/Admin/Dashboard.php:371
 msgid "Invoices"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:383
+#: inc/Admin/Dashboard.php:362
 msgid "Invoices this month"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:431
+#: inc/Settings/SettingsPage.php:433
 msgid "Invoices without an address may not be accepted as valid tax documents."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:421
+#: inc/Admin/Dashboard.php:400
 msgid "Invoices, credit notes & packing slips for your WooCommerce store"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:563
+#: inc/Settings/SettingsPage.php:565
 msgid "Invoices, packing slips, credit notes"
 msgstr ""
 
@@ -1190,37 +1225,41 @@ msgstr ""
 msgid "Item"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:351
+#: inc/Admin/Dashboard.php:330
 msgid "Items"
 msgstr ""
 
-#: inc/Settings/Fields.php:150
+#: inc/Settings/Fields.php:157
 msgid "Label displayed on the checkout page, order details, and PDF invoice."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:390
+#: inc/Admin/Dashboard.php:369
 #: inc/Admin/ReviewNotice.php:109
 msgid "Leave a review"
 msgstr ""
 
-#: inc/Settings/Fields.php:95
-#: inc/Settings/SettingsPage.php:567
+#: inc/Settings/SettingsPage.php:593
+msgid "Let a customer's first download request create the invoice (e.g. right after checkout) instead of only serving one already generated by the email trigger or an admin"
+msgstr ""
+
+#: inc/Settings/Fields.php:102
+#: inc/Settings/SettingsPage.php:569
 msgid "Letter"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:346
+#: inc/Admin/Dashboard.php:325
 msgid "Link copied to clipboard!"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:358
+#: inc/Admin/Dashboard.php:337
 msgid "Live Invoice Preview"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:668
+#: inc/Settings/SettingsPage.php:686
 msgid "Live invoice preview"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:659
+#: inc/Settings/SettingsPage.php:677
 msgid "Live preview"
 msgstr ""
 
@@ -1240,7 +1279,7 @@ msgstr ""
 msgid "Logo uploaded"
 msgstr ""
 
-#: inc/Settings/Fields.php:157
+#: inc/Settings/Fields.php:164
 msgid "Make entering a Tax ID mandatory for customers during checkout."
 msgstr ""
 
@@ -1249,9 +1288,9 @@ msgstr ""
 msgid "Missing"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:409
-#: inc/Settings/Fields.php:115
-#: inc/Settings/SettingsPage.php:602
+#: inc/Admin/Dashboard.php:388
+#: inc/Settings/Fields.php:122
+#: inc/Settings/SettingsPage.php:620
 msgid "Modern"
 msgstr ""
 
@@ -1259,7 +1298,7 @@ msgstr ""
 msgid "Modern & Default Templates"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:608
+#: inc/Settings/SettingsPage.php:626
 msgid "Modern template only"
 msgstr ""
 
@@ -1279,23 +1318,23 @@ msgstr ""
 msgid "Need Additional Help or Have Questions?"
 msgstr ""
 
-#: inc/Frontend/MyAccount.php:130
+#: inc/Frontend/MyAccount.php:134
 msgid "Need your invoice?"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:508
+#: inc/Settings/SettingsPage.php:510
 msgid "Next credit note"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:507
+#: inc/Settings/SettingsPage.php:509
 msgid "Next invoice"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:399
+#: inc/Admin/Dashboard.php:378
 msgid "Next invoice number"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:417
+#: inc/Admin/Dashboard.php:396
 msgid "Next page"
 msgstr ""
 
@@ -1303,15 +1342,15 @@ msgstr ""
 msgid "No Gaps"
 msgstr ""
 
-#: inc/Frontend/MyAccount.php:294
+#: inc/Frontend/MyAccount.php:470
 msgid "No credit note is available for this refund yet."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:340
+#: inc/Admin/Dashboard.php:319
 msgid "No credit notes yet"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:327
+#: inc/Admin/Dashboard.php:306
 msgid "No documents match \"%s\""
 msgstr ""
 
@@ -1319,28 +1358,28 @@ msgstr ""
 msgid "No email status selected — customers won't receive invoices automatically. Save anyway?"
 msgstr ""
 
-#: inc/Frontend/MyAccount.php:241
+#: inc/Frontend/MyAccount.php:401
 msgid "No invoice is available for this order yet."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:325
+#: inc/Admin/Dashboard.php:304
 msgid "No invoices generated yet — they appear here as soon as an order is invoiced."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:339
+#: inc/Admin/Dashboard.php:318
 msgid "No invoices yet"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:414
+#: inc/Settings/SettingsPage.php:416
 msgid "No logo uploaded"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:338
+#: inc/Admin/Dashboard.php:317
 msgid "No refunds this month"
 msgstr ""
 
 #: inc/Settings/SettingsPage.php:282
-#: inc/Settings/SettingsPage.php:559
+#: inc/Settings/SettingsPage.php:561
 msgid "No status selected — customers won't receive invoices by email."
 msgstr ""
 
@@ -1348,7 +1387,7 @@ msgstr ""
 msgid "Non-Tech User Guide"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:391
+#: inc/Admin/Dashboard.php:370
 msgid "Not now"
 msgstr ""
 
@@ -1360,8 +1399,8 @@ msgstr ""
 msgid "Noto Sans Bengali with vowel sign positioning"
 msgstr ""
 
-#: inc/Settings/Fields.php:67
-#: inc/Settings/SettingsPage.php:496
+#: inc/Settings/Fields.php:74
+#: inc/Settings/SettingsPage.php:498
 msgid "Number format"
 msgstr ""
 
@@ -1369,16 +1408,16 @@ msgstr ""
 msgid "Number format must include {NUMBER} — your previous format was kept."
 msgstr ""
 
-#: inc/Settings/Fields.php:74
-#: inc/Settings/SettingsPage.php:513
+#: inc/Settings/Fields.php:81
+#: inc/Settings/SettingsPage.php:515
 msgid "Number padding"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:380
+#: inc/Settings/SettingsPage.php:382
 msgid "Numbering"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:479
+#: inc/Settings/SettingsPage.php:481
 msgid "Numbers are assigned atomically — no duplicates, no gaps."
 msgstr ""
 
@@ -1386,11 +1425,15 @@ msgstr ""
 msgid "Official Documentation & Feature Tour"
 msgstr ""
 
+#: inc/Settings/SettingsPage.php:590
+msgid "On-demand generation"
+msgstr ""
+
 #: inc/Admin/DocsPage.php:408
 msgid "Onboarding Checklist"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:427
+#: inc/Settings/SettingsPage.php:429
 msgid "One line per row — shown exactly as typed"
 msgstr ""
 
@@ -1398,7 +1441,7 @@ msgstr ""
 msgid "Open Settings Page"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:354
+#: inc/Admin/Dashboard.php:333
 msgid "Open in WooCommerce →"
 msgstr ""
 
@@ -1414,7 +1457,7 @@ msgstr ""
 msgid "Optimized Queries"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:435
+#: inc/Settings/SettingsPage.php:437
 msgid "Optional"
 msgstr ""
 
@@ -1422,11 +1465,11 @@ msgstr ""
 msgid "Optionally display a modern, angled \"PAID\" stamp across fulfilled invoices. Easily toggleable with live preview in the settings page."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:377
+#: inc/Admin/Dashboard.php:356
 msgid "Order"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:348
+#: inc/Admin/Dashboard.php:327
 msgid "Order Details"
 msgstr ""
 
@@ -1434,15 +1477,15 @@ msgstr ""
 msgid "Order Edit Action"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:555
+#: inc/Settings/SettingsPage.php:557
 msgid "Order fulfilled — invoice arrives with the shipping email"
 msgstr ""
 
 #: inc/Admin/MetaBox.php:67
 #: inc/Admin/MetaBox.php:142
-#: inc/Admin/OrderActions.php:312
-#: inc/Admin/OrderActions.php:334
-#: inc/Frontend/MyAccount.php:216
+#: inc/Admin/OrderActions.php:313
+#: inc/Admin/OrderActions.php:335
+#: inc/Frontend/MyAccount.php:376
 msgid "Order not found."
 msgstr ""
 
@@ -1454,7 +1497,7 @@ msgstr ""
 msgid "Order refund compliance"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:379
+#: inc/Admin/Dashboard.php:358
 msgid "Order status"
 msgstr ""
 
@@ -1464,15 +1507,15 @@ msgstr ""
 msgid "Order:"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:467
+#: inc/Settings/SettingsPage.php:469
 msgid "Orders cannot be placed without entering a Tax ID"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:318
+#: inc/Admin/Dashboard.php:297
 msgid "Orders will be processed oldest-first so numbering stays chronological."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:386
+#: inc/Admin/Dashboard.php:365
 msgid "Orders without invoice"
 msgstr ""
 
@@ -1480,11 +1523,11 @@ msgstr ""
 msgid "Our support team is ready to assist with any questions or configuration needs. Visit the settings page or view the official documentation."
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:648
+#: inc/Settings/SettingsPage.php:666
 msgid "Overridden by theme"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:639
+#: inc/Settings/SettingsPage.php:657
 msgid "Override templates from your theme"
 msgstr ""
 
@@ -1501,24 +1544,24 @@ msgstr ""
 msgid "PAID Watermark Stamp"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:624
-#: inc/Settings/SettingsPage.php:626
+#: inc/Settings/SettingsPage.php:642
+#: inc/Settings/SettingsPage.php:644
 msgid "PAID stamp"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:364
+#: inc/Admin/Dashboard.php:343
 msgid "PAID stamp disabled"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:363
+#: inc/Admin/Dashboard.php:342
 msgid "PAID stamp enabled on paid invoices"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:362
+#: inc/Admin/Dashboard.php:341
 msgid "PAID stamp watermark"
 msgstr ""
 
-#: inc/Settings/Fields.php:126
+#: inc/Settings/Fields.php:133
 msgid "PAID watermark"
 msgstr ""
 
@@ -1526,7 +1569,7 @@ msgstr ""
 msgid "PDF Attachment"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:406
+#: inc/Settings/SettingsPage.php:408
 msgid "PNG or JPG, at least 300px wide"
 msgstr ""
 
@@ -1534,7 +1577,7 @@ msgstr ""
 msgid "Packing Slip"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:664
+#: inc/Settings/SettingsPage.php:682
 msgid "Packing slip"
 msgstr ""
 
@@ -1542,7 +1585,7 @@ msgstr ""
 msgid "Packing slips simplify order fulfillment by providing a clean list of items for warehouse staff and couriers:"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:517
+#: inc/Settings/SettingsPage.php:519
 msgid "Padding"
 msgstr ""
 
@@ -1550,22 +1593,22 @@ msgstr ""
 msgid "Paid Stamp"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:621
+#: inc/Settings/SettingsPage.php:639
 msgid "Paid orders only"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:406
-#: inc/Settings/Fields.php:90
-#: inc/Settings/SettingsPage.php:563
+#: inc/Admin/Dashboard.php:385
+#: inc/Settings/Fields.php:97
 #: inc/Settings/SettingsPage.php:565
+#: inc/Settings/SettingsPage.php:567
 msgid "Paper size"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:331
+#: inc/Admin/Dashboard.php:310
 msgid "Paper size updated"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:349
+#: inc/Admin/Dashboard.php:328
 msgid "Payment Method"
 msgstr ""
 
@@ -1577,24 +1620,24 @@ msgstr ""
 msgid "Payment and tax authority QR codes"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:550
+#: inc/Settings/SettingsPage.php:552
 msgid "Payment received — customer gets the invoice right away"
 msgstr ""
 
 #: inc/Admin/DashboardAjax.php:62
 #: inc/Admin/MetaBox.php:137
 #: inc/Admin/MetaBox.php:203
-#: inc/Admin/OrderActions.php:305
-#: inc/Admin/OrderActions.php:329
-#: inc/Settings/SettingsPage.php:700
+#: inc/Admin/OrderActions.php:306
+#: inc/Admin/OrderActions.php:330
+#: inc/Settings/SettingsPage.php:718
 msgid "Permission denied."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:353
+#: inc/Admin/Dashboard.php:332
 msgid "Phone"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:547
+#: inc/Settings/SettingsPage.php:549
 msgid "Pick at least one"
 msgstr ""
 
@@ -1606,27 +1649,31 @@ msgstr ""
 msgid "Please drop an image file (PNG or JPG)."
 msgstr ""
 
-#: inc/Frontend/MyAccount.php:288
+#: inc/Frontend/MyAccount.php:464
 msgid "Please log in to download your credit note."
 msgstr ""
 
-#: inc/Frontend/MyAccount.php:228
+#: inc/Frontend/MyAccount.php:391
 msgid "Please log in to download your invoice."
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:483
+#: inc/Installer.php:36
+msgid "Plugin activation error"
+msgstr ""
+
+#: inc/Settings/SettingsPage.php:485
 msgid "Prefixes"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:678
+#: inc/Settings/SettingsPage.php:696
 msgid "Press"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:342
+#: inc/Admin/Dashboard.php:321
 msgid "Preview Document"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:661
+#: inc/Settings/SettingsPage.php:679
 msgid "Preview document type"
 msgstr ""
 
@@ -1634,7 +1681,7 @@ msgstr ""
 msgid "Preview live invoice PDFs directly from the dashboard or orders list in an elegant slide-over drawer. Share invoices to customers via WhatsApp in 1 click, print directly, copy download link, or resend invoice emails."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:416
+#: inc/Admin/Dashboard.php:395
 msgid "Previous page"
 msgstr ""
 
@@ -1642,11 +1689,11 @@ msgstr ""
 msgid "Price Free"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:344
+#: inc/Admin/Dashboard.php:323
 msgid "Print"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:398
+#: inc/Settings/SettingsPage.php:400
 msgid "Printed in the \"From\" block of every invoice, credit note and packing slip."
 msgstr ""
 
@@ -1660,16 +1707,16 @@ msgstr ""
 msgid "Pro Tip:"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:550
 #: inc/Settings/SettingsPage.php:552
+#: inc/Settings/SettingsPage.php:554
 msgid "Processing"
 msgstr ""
 
-#: inc/Settings/Fields.php:104
+#: inc/Settings/Fields.php:111
 msgid "Processing (payment received)"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:402
+#: inc/Admin/Dashboard.php:381
 msgid "Processing order"
 msgstr ""
 
@@ -1691,7 +1738,7 @@ msgstr ""
 msgid "Qty"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:357
+#: inc/Admin/Dashboard.php:336
 #: inc/Admin/DocsPage.php:409
 msgid "Quick Actions"
 msgstr ""
@@ -1704,7 +1751,7 @@ msgstr ""
 msgid "Radial Progress"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:320
+#: inc/Admin/Dashboard.php:299
 msgid "Ready"
 msgstr ""
 
@@ -1716,7 +1763,7 @@ msgstr ""
 msgid "Reason:"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:371
+#: inc/Admin/Dashboard.php:350
 msgid "Recent documents"
 msgstr ""
 
@@ -1736,7 +1783,7 @@ msgstr ""
 msgid "Refund issued as a flat amount (no item breakdown)."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:1467
+#: inc/Admin/Dashboard.php:1281
 #: templates/credit-note.php:106
 msgid "Refunded"
 msgstr ""
@@ -1749,16 +1796,16 @@ msgstr ""
 msgid "Refunds & Credit Notes"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:314
-#: inc/Admin/OrderActions.php:129
+#: inc/Admin/Dashboard.php:293
+#: inc/Admin/OrderActions.php:130
 msgid "Regenerate"
 msgstr ""
 
-#: inc/Admin/OrderActions.php:198
+#: inc/Admin/OrderActions.php:199
 msgid "Regenerate this invoice's PDF? This replaces the existing file (same number) with freshly rendered content."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:311
+#: inc/Admin/Dashboard.php:290
 msgid "Regenerate this invoice?"
 msgstr ""
 
@@ -1770,30 +1817,30 @@ msgstr ""
 msgid "Registered users can download invoices from their My Account orders list. Guest buyers can securely download using the order key."
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:419
+#: inc/Settings/SettingsPage.php:421
 msgid "Remove"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:355
+#: inc/Admin/Dashboard.php:334
 msgid "Rendering live PDF preview…"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:418
+#: inc/Settings/SettingsPage.php:420
 msgid "Replace"
 msgstr ""
 
-#: inc/Settings/Fields.php:154
-#: inc/Settings/SettingsPage.php:467
+#: inc/Settings/Fields.php:161
 #: inc/Settings/SettingsPage.php:469
+#: inc/Settings/SettingsPage.php:471
 msgid "Require Tax ID at checkout"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:426
+#: inc/Settings/SettingsPage.php:428
 msgid "Required"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:413
-#: inc/Admin/OrderActions.php:125
+#: inc/Admin/Dashboard.php:392
+#: inc/Admin/OrderActions.php:126
 msgid "Resend"
 msgstr ""
 
@@ -1801,11 +1848,11 @@ msgstr ""
 msgid "Resend Invoice Email:"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:412
+#: inc/Admin/Dashboard.php:391
 msgid "Resend email"
 msgstr ""
 
-#: inc/Settings/Fields.php:83
+#: inc/Settings/Fields.php:90
 msgid "Reset numbering each year"
 msgstr ""
 
@@ -1817,11 +1864,11 @@ msgstr ""
 msgid "Result: INV-2026-0001"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:341
+#: inc/Admin/Dashboard.php:320
 msgid "Results limited — search for something more specific."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:393
+#: inc/Admin/Dashboard.php:372
 msgid "Revenue"
 msgstr ""
 
@@ -1829,7 +1876,7 @@ msgstr ""
 msgid "Revenue KPIs and recent activity"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:384
+#: inc/Admin/Dashboard.php:363
 msgid "Revenue invoiced this month"
 msgstr ""
 
@@ -1837,7 +1884,7 @@ msgstr ""
 msgid "SKU"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:370
+#: inc/Admin/Dashboard.php:349
 msgid "Sample Invoice Preview"
 msgstr ""
 
@@ -1854,8 +1901,8 @@ msgstr ""
 msgid "Save Changes:"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:365
-#: inc/Settings/SettingsPage.php:681
+#: inc/Settings/SettingsPage.php:367
+#: inc/Settings/SettingsPage.php:699
 msgid "Save changes"
 msgstr ""
 
@@ -1863,7 +1910,7 @@ msgstr ""
 msgid "Seamless checkout field & invoice display"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:375
+#: inc/Admin/Dashboard.php:354
 msgid "Search by number, order or customer…"
 msgstr ""
 
@@ -1879,7 +1926,7 @@ msgstr ""
 msgid "Secure downloads for members and guests"
 msgstr ""
 
-#: inc/Settings/Fields.php:100
+#: inc/Settings/Fields.php:107
 msgid "Send invoice when order is"
 msgstr ""
 
@@ -1895,10 +1942,10 @@ msgstr ""
 msgid "Set your custom field label (e.g., \"VAT / BIN Number\" or \"TRN / GSTIN\") and choose whether this field is Optional or Required for your customers."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:419
+#: inc/Admin/Dashboard.php:398
 #: inc/Settings/SettingsPage.php:53
 #: inc/Settings/SettingsPage.php:70
-#: inc/Settings/SettingsPage.php:359
+#: inc/Settings/SettingsPage.php:361
 msgid "Settings"
 msgstr ""
 
@@ -1914,28 +1961,28 @@ msgstr ""
 msgid "Shipping"
 msgstr ""
 
-#: inc/Settings/Fields.php:136
+#: inc/Settings/Fields.php:143
 msgid "Show a prominent PDF download button on the checkout order received screen."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:368
+#: inc/Admin/Dashboard.php:347
 msgid "Show checklist"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:575
 #: inc/Settings/SettingsPage.php:577
+#: inc/Settings/SettingsPage.php:579
 msgid "Show download button"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:329
+#: inc/Admin/Dashboard.php:308
 msgid "Showing %1$d of %2$d"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:458
+#: inc/Settings/SettingsPage.php:460
 msgid "Shown on checkout, order details, and PDF invoices"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:435
+#: inc/Settings/SettingsPage.php:437
 msgid "Shown under your company name"
 msgstr ""
 
@@ -1951,7 +1998,7 @@ msgstr ""
 msgid "Slide-Over Preview Drawer & Instant Actions"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:356
+#: inc/Admin/Dashboard.php:335
 msgid "Smart Setup Checklist"
 msgstr ""
 
@@ -1959,21 +2006,21 @@ msgstr ""
 msgid "Smart Setup Checklist & Quick Actions Hub"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:303
-#: inc/Admin/OrderActions.php:196
+#: inc/Admin/Dashboard.php:282
+#: inc/Admin/OrderActions.php:197
 msgid "Something went wrong. Please try again."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:319
+#: inc/Admin/Dashboard.php:298
 msgid "Start"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:528
-#: inc/Settings/SettingsPage.php:532
+#: inc/Settings/SettingsPage.php:530
+#: inc/Settings/SettingsPage.php:534
 msgid "Start a fresh sequence every January"
 msgstr ""
 
-#: inc/Settings/Fields.php:86
+#: inc/Settings/Fields.php:93
 msgid "Starts a fresh sequence (1, 2, 3…) every January instead of counting up forever. Changing this mid-year starts a new sequence immediately."
 msgstr ""
 
@@ -1997,7 +2044,7 @@ msgstr ""
 msgid "Tax ID on PDF"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:591
+#: inc/Settings/SettingsPage.php:609
 msgid "Template"
 msgstr ""
 
@@ -2013,11 +2060,11 @@ msgstr ""
 msgid "Thank You Page Download:"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:572
+#: inc/Settings/SettingsPage.php:574
 msgid "Thank You page"
 msgstr ""
 
-#: inc/Settings/Fields.php:133
+#: inc/Settings/Fields.php:140
 msgid "Thank You page download"
 msgstr ""
 
@@ -2035,7 +2082,7 @@ msgstr ""
 msgid "The Credit Note PDF is attached automatically to the customer refund email."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:312
+#: inc/Admin/Dashboard.php:291
 msgid "The PDF will be rebuilt with your current settings and template. The invoice number stays the same."
 msgstr ""
 
@@ -2048,7 +2095,7 @@ msgid "The current calendar year (e.g. 2026)."
 msgstr ""
 
 #: inc/Settings/SettingsPage.php:279
-#: inc/Settings/SettingsPage.php:505
+#: inc/Settings/SettingsPage.php:507
 msgid "The format must include {NUMBER}, otherwise every invoice gets the same number."
 msgstr ""
 
@@ -2060,7 +2107,7 @@ msgstr ""
 msgid "The sequential order counter padded with zeroes (e.g. 0001)."
 msgstr ""
 
-#: inc/Admin/OrderActions.php:237
+#: inc/Admin/OrderActions.php:238
 msgid "There's no invoice email for this order's current status."
 msgstr ""
 
@@ -2068,16 +2115,21 @@ msgstr ""
 msgid "This credit note documents a refund against the order above."
 msgstr ""
 
-#: inc/Admin/OrderActions.php:244
+#: inc/Frontend/MyAccount.php:388
+#: inc/Frontend/MyAccount.php:461
+msgid "This link has expired. Please log in or contact us."
+msgstr ""
+
+#: inc/Admin/OrderActions.php:245
 msgid "This order's status isn't enabled for invoice emails in Billio → Settings."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:337
+#: inc/Admin/Dashboard.php:316
 msgid "Today"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:381
-#: inc/Admin/Dashboard.php:415
+#: inc/Admin/Dashboard.php:360
+#: inc/Admin/Dashboard.php:394
 #: templates/partials/invoice-lines.php:28
 #: templates/partials/invoice-lines.php:94
 msgid "Total"
@@ -2087,11 +2139,11 @@ msgstr ""
 msgid "Total Refunded"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:394
+#: inc/Admin/Dashboard.php:373
 msgid "Total in range"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:534
+#: inc/Settings/SettingsPage.php:536
 msgid "Turning this on mid-year starts a new sequence immediately. Existing numbers are never reissued."
 msgstr ""
 
@@ -2111,11 +2163,11 @@ msgstr ""
 msgid "Use this logo"
 msgstr ""
 
-#: inc/Settings/Fields.php:70
+#: inc/Settings/Fields.php:77
 msgid "Used for both invoices and credit notes. Placeholders: {PREFIX}, {YEAR}, {NUMBER}."
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:496
+#: inc/Settings/SettingsPage.php:498
 msgid "Used for invoices and credit notes"
 msgstr ""
 
@@ -2126,7 +2178,7 @@ msgstr ""
 #: inc/Frontend/CheckoutTaxId.php:56
 #: inc/Invoice/TemplateEngine.php:104
 #: inc/Invoice/TemplateEngine.php:255
-#: inc/Settings/Fields.php:149
+#: inc/Settings/Fields.php:156
 #: inc/Settings/SettingsPage.php:343
 msgid "VAT / Tax / BIN Number"
 msgstr ""
@@ -2137,8 +2189,8 @@ msgstr ""
 msgid "VAT / Tax ID"
 msgstr ""
 
-#: inc/Settings/Fields.php:48
-#: inc/Settings/SettingsPage.php:435
+#: inc/Settings/Fields.php:55
+#: inc/Settings/SettingsPage.php:437
 msgid "VAT / Tax number"
 msgstr ""
 
@@ -2156,7 +2208,7 @@ msgstr ""
 msgid "View WooCommerce Orders"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:330
+#: inc/Admin/Dashboard.php:309
 msgid "View all in Orders →"
 msgstr ""
 
@@ -2173,9 +2225,9 @@ msgstr ""
 msgid "Warehouse Ready"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:405
+#: inc/Admin/Dashboard.php:384
 #: inc/Admin/DocsPage.php:246
-#: inc/Settings/SettingsPage.php:621
+#: inc/Settings/SettingsPage.php:639
 msgid "Watermark"
 msgstr ""
 
@@ -2183,7 +2235,7 @@ msgstr ""
 msgid "What does the Smart Setup Checklist on the Dashboard do?"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:347
+#: inc/Admin/Dashboard.php:326
 msgid "WhatsApp"
 msgstr ""
 
@@ -2207,7 +2259,7 @@ msgstr ""
 msgid "When entered by the buyer, their Tax ID is automatically printed under the customer billing address on PDF Invoices and Packing Slips, and can be viewed or edited in the WooCommerce Order Edit screen."
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:543
+#: inc/Settings/SettingsPage.php:545
 msgid "When the PDF is attached, and what size it prints on."
 msgstr ""
 
@@ -2223,7 +2275,7 @@ msgstr ""
 msgid "WooCommerce Emails"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:451
+#: inc/Settings/SettingsPage.php:453
 msgid "Works seamlessly with Classic shortcode checkout and Block checkout"
 msgstr ""
 
@@ -2231,7 +2283,7 @@ msgstr ""
 msgid "Writable (.htaccess secured)"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:524
+#: inc/Settings/SettingsPage.php:526
 msgid "Yearly reset"
 msgstr ""
 
@@ -2251,16 +2303,16 @@ msgstr ""
 msgid "Yes. In the Billio Dashboard, look for the \"Action Needed\" banner. You can generate invoices for past orders in safe background batches with a single click."
 msgstr ""
 
-#: inc/Frontend/MyAccount.php:290
+#: inc/Frontend/MyAccount.php:466
 msgid "You do not have permission to access this credit note."
 msgstr ""
 
-#: inc/Frontend/MyAccount.php:230
+#: inc/Frontend/MyAccount.php:393
 msgid "You do not have permission to access this invoice."
 msgstr ""
 
 #: inc/Settings/SettingsPage.php:280
-#: inc/Settings/SettingsPage.php:529
+#: inc/Settings/SettingsPage.php:531
 msgid "Your format includes {YEAR}, so numbers stay unique."
 msgstr ""
 
@@ -2292,15 +2344,15 @@ msgstr ""
 msgid "Zero-Reload Slide-Over Drawer:"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:436
+#: inc/Settings/SettingsPage.php:438
 msgid "e.g. BIN 000123456-0101"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:460
+#: inc/Settings/SettingsPage.php:462
 msgid "e.g. VAT / Tax / BIN Number"
 msgstr ""
 
-#: inc/Settings/SettingsPage.php:678
+#: inc/Settings/SettingsPage.php:696
 msgid "to save"
 msgstr ""
 
@@ -2308,11 +2360,11 @@ msgstr ""
 msgid "✓ Settings saved"
 msgstr ""
 
-#: inc/Admin/Dashboard.php:365
+#: inc/Admin/Dashboard.php:344
 msgid "🎉 All setup steps completed! Your store is fully branded."
 msgstr ""
 
-#: inc/Admin/Dashboard.php:336
+#: inc/Admin/Dashboard.php:315
 msgid "🎉 You're all set — every invoice is fully branded"
 msgstr ""
 

@@ -49,11 +49,4 @@ class DashboardRefundRecord {
 	public function get_meta( $key ) {
 		return '_billio_credit_note_date' === $key ? $this->timestamp : '';
 	}
-
-	/**
-	 * @return null
-	 */
-	public function get_date_created() {
-		return null;
-	}
 }

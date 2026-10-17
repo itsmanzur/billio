@@ -8,6 +8,7 @@
 
 namespace Billio\Invoice;
 
+use Billio\Logger;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
@@ -43,7 +44,10 @@ class Generator {
 			return $relative_path;
 		}
 
-		return self::render_and_save( $order, $invoice_number );
+		// Self-healing a missing file is itself a render; lock it like any
+		// other render so two concurrent requests hitting the same missing
+		// file can't each write their own orphaned copy (see regenerate()).
+		return self::render_and_save_locked( $order, $invoice_number );
 	}
 
 	/**
@@ -62,7 +66,7 @@ class Generator {
 			$invoice_number = self::assign_number_locked( $order );
 		}
 
-		return self::render_and_save( $order, $invoice_number );
+		return self::render_and_save_locked( $order, $invoice_number );
 	}
 
 	/**
@@ -78,13 +82,12 @@ class Generator {
 	 *                request that finished first) invoice number.
 	 */
 	private static function assign_number_locked( \WC_Order $order ) {
-		$locked   = OrderLock::acquire( $order->get_id() );
-		$attempts = 0;
+		$lock_token = OrderLock::acquire( $order->get_id() );
+		$attempts   = 0;
 
 		// Someone else is already assigning this order a number — wait for
-		// them rather than risk a double-assignment (bounded: ~3s, then
-		// fail open so a stuck lock can never permanently block invoicing).
-		while ( ! $locked && $attempts < 20 ) {
+		// them rather than risk a double-assignment.
+		while ( ! $lock_token && $attempts < 20 ) {
 			usleep( 150000 );
 			++$attempts;
 
@@ -93,7 +96,19 @@ class Generator {
 				return self::adopt_existing_number( $order, $existing );
 			}
 
-			$locked = OrderLock::acquire( $order->get_id() );
+			$lock_token = OrderLock::acquire( $order->get_id() );
+		}
+
+		if ( ! $lock_token ) {
+			// Still no lock and no number ever appeared from the other
+			// holder — they're taking unusually long. Fail loudly instead
+			// of minting a number without the lock's protection, which
+			// would risk a duplicate/gap (the exact bug this lock exists
+			// to prevent). Every caller of generate()/regenerate() already
+			// catches \Throwable, so this surfaces as a normal "couldn't
+			// generate invoice" failure, not a fatal error.
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- never echoed/rendered as HTML; only logged by the caller's catch( \Throwable ) block.
+			throw new \RuntimeException( sprintf( 'Billio: could not acquire invoice number lock for order #%d.', $order->get_id() ) );
 		}
 
 		try {
@@ -107,11 +122,26 @@ class Generator {
 			$order->update_meta_data( '_billio_invoice_date', time() );
 			$order->save_meta_data();
 
+			// save_meta_data() itself returns void — the only way to know
+			// the write actually landed is to re-read a fresh copy. The
+			// number is already irreversibly consumed from the sequence at
+			// this point (by design: get_next_number() runs before any of
+			// this, specifically so a render failure afterward can never
+			// cause a gap). If the save didn't stick — a crash or DB
+			// failure in this exact narrow window — the number is simply
+			// unlinked from any order rather than duplicated (the lock
+			// still did its job), but it needs a human to notice and
+			// reconcile it, since nothing will retry this automatically.
+			$saved = wc_get_order( $order->get_id() );
+			if ( ! $saved || (string) $saved->get_meta( '_billio_invoice_number' ) !== (string) $invoice_number ) {
+				Logger::error(
+					sprintf( 'Billio: invoice number %s was assigned to order #%d but the save did not stick — reconcile manually.', $invoice_number, $order->get_id() )
+				);
+			}
+
 			return $invoice_number;
 		} finally {
-			if ( $locked ) {
-				OrderLock::release( $order->get_id() );
-			}
+			OrderLock::release( $order->get_id(), $lock_token );
 		}
 	}
 
@@ -150,6 +180,75 @@ class Generator {
 		}
 
 		return $existing;
+	}
+
+	/**
+	 * Run render_and_save() under the order's lock, so two near-simultaneous
+	 * callers (a self-heal re-render triggered by two concurrent downloads,
+	 * or two clicks on the admin "Regenerate" button) can't each write their
+	 * own PDF file and leave one of them permanently orphaned on disk.
+	 *
+	 * The pre-lock path is captured *before* acquiring the lock so a caller
+	 * that had to wait can tell the difference between "nothing changed,
+	 * I still need to render" (regenerate()'s normal, non-concurrent case —
+	 * the old file is still the one on record) and "the winner already
+	 * rendered a newer file while I waited" (adopt it instead of rendering
+	 * a redundant duplicate).
+	 *
+	 * @param \WC_Order $order          Order to invoice.
+	 * @param string    $invoice_number Already-assigned invoice number.
+	 * @return string Relative path (from the uploads basedir) to the saved PDF.
+	 */
+	private static function render_and_save_locked( \WC_Order $order, $invoice_number ) {
+		$pre_lock_path = $order->get_meta( '_billio_invoice_pdf_path' );
+
+		return self::with_order_lock(
+			$order->get_id(),
+			function () use ( $order, $invoice_number, $pre_lock_path ) {
+				$fresh      = wc_get_order( $order->get_id() );
+				$fresh_path = $fresh ? $fresh->get_meta( '_billio_invoice_pdf_path' ) : '';
+
+				if ( $fresh_path && $fresh_path !== $pre_lock_path && self::pdf_exists( self::get_absolute_path( $fresh_path ) ) ) {
+					$order->update_meta_data( '_billio_invoice_pdf_path', $fresh_path );
+					return $fresh_path;
+				}
+
+				return self::render_and_save( $order, $invoice_number );
+			}
+		);
+	}
+
+	/**
+	 * Acquire the order's lock (waiting briefly for a concurrent holder to
+	 * finish, same bound as assign_number_locked()), run the callback, then
+	 * always release — and fail loudly instead of proceeding unlocked if
+	 * the lock can't be obtained in that window.
+	 *
+	 * @param int      $order_id Order to lock.
+	 * @param callable $callback Work to run while holding the lock.
+	 * @return mixed Whatever $callback returns.
+	 * @throws \RuntimeException If the lock can't be acquired.
+	 */
+	public static function with_order_lock( $order_id, callable $callback ) {
+		$lock_token = OrderLock::acquire( $order_id );
+		$attempts   = 0;
+
+		while ( ! $lock_token && $attempts < 20 ) {
+			usleep( 150000 );
+			++$attempts;
+			$lock_token = OrderLock::acquire( $order_id );
+		}
+
+		if ( ! $lock_token ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- never echoed/rendered as HTML; only logged by the caller's catch( \Throwable ) block.
+			throw new \RuntimeException( sprintf( 'Billio: could not acquire lock for order #%d.', $order_id ) );
+		}
+
+		try {
+			return $callback();
+		} finally {
+			OrderLock::release( $order_id, $lock_token );
+		}
 	}
 
 	/**

@@ -23,6 +23,21 @@ class Installer {
 	 * @return void
 	 */
 	public static function activate() {
+		// The plugin header's "Requires Plugins: woocommerce" declaration
+		// (enforced by WP core since 6.5) is the normal gate, but it's a
+		// no-op on an older WP core or some non-standard activation paths
+		// (e.g. certain multisite network-activate flows) — this is the
+		// explicit fallback so options never get seeded for a site that
+		// isn't actually running WooCommerce.
+		if ( ! class_exists( 'WooCommerce' ) ) {
+			deactivate_plugins( BILLIO_BASENAME );
+			wp_die(
+				esc_html__( 'Billio requires WooCommerce to be installed and active. The plugin has been deactivated.', 'billio' ),
+				esc_html__( 'Plugin activation error', 'billio' ),
+				array( 'back_link' => true )
+			);
+		}
+
 		self::create_upload_dir();
 		self::seed_invoice_sequence();
 		self::seed_default_options();

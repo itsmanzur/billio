@@ -1,0 +1,42 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+  schedule:
+    # Catches a newly-disclosed CVE in a pinned dependency (e.g. dompdf)
+    # even on a week nobody pushes any code.
+    - cron: '0 6 * * 1'
+
+jobs:
+  test:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['7.4', '8.2']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress
+
+      - name: Lint PHP syntax
+        run: find . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Coding standards
+        run: vendor/bin/phpcs
+
+      - name: Unit tests (zero-dependency pure logic)
+        run: php tests/run.php
+
+      - name: Dependency vulnerability audit
+        run: composer audit

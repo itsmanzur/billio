@@ -162,11 +162,27 @@ class CheckoutTaxId {
 		// Nonce verification is performed upstream by WooCommerce checkout process.
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		if ( isset( $_POST['billing_billio_tax_id'] ) ) {
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$tax_id = sanitize_text_field( wp_unslash( $_POST['billing_billio_tax_id'] ) );
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_tax_id() calls sanitize_text_field() internally; the sniff can't see through the wrapper.
+			$tax_id = self::sanitize_tax_id( wp_unslash( $_POST['billing_billio_tax_id'] ) );
 			$order->update_meta_data( '_billio_tax_id', $tax_id );
 			$order->update_meta_data( '_billing_billio_tax_id', $tax_id );
 		}
+	}
+
+	/**
+	 * Sanitize a submitted Tax ID value.
+	 *
+	 * Deliberately format-agnostic — VAT/BIN/TRN/GSTIN formats vary too
+	 * widely by country to validate against one pattern — but still trims
+	 * stray whitespace and caps length, so a wildly oversized paste can't
+	 * break the invoice PDF's address block layout. 40 chars comfortably
+	 * covers every real-world VAT/GSTIN/TRN/BIN format in use.
+	 *
+	 * @param string $raw Raw submitted value.
+	 * @return string
+	 */
+	private static function sanitize_tax_id( $raw ) {
+		return mb_substr( trim( sanitize_text_field( $raw ) ), 0, 40 );
 	}
 
 	/**
@@ -188,7 +204,7 @@ class CheckoutTaxId {
 		// Retrieve from the Block Checkout additional field.
 		$block_val = self::get_block_value( $order );
 		if ( '' !== $block_val ) {
-			$clean = sanitize_text_field( $block_val );
+			$clean = self::sanitize_tax_id( $block_val );
 			$order->update_meta_data( '_billio_tax_id', $clean );
 			$order->update_meta_data( '_billing_billio_tax_id', $clean );
 			$order->save();
@@ -198,7 +214,7 @@ class CheckoutTaxId {
 		// Fallback check on billing_billio_tax_id.
 		$billing_tax_id = $order->get_meta( '_billing_billio_tax_id' );
 		if ( ! empty( $billing_tax_id ) ) {
-			$order->update_meta_data( '_billio_tax_id', sanitize_text_field( $billing_tax_id ) );
+			$order->update_meta_data( '_billio_tax_id', self::sanitize_tax_id( $billing_tax_id ) );
 			$order->save();
 		}
 	}
@@ -269,8 +285,8 @@ class CheckoutTaxId {
 			return;
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$tax_id = sanitize_text_field( wp_unslash( $_POST['_billio_tax_id'] ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_tax_id() calls sanitize_text_field() internally; the sniff can't see through the wrapper.
+		$tax_id = self::sanitize_tax_id( wp_unslash( $_POST['_billio_tax_id'] ) );
 		$order->update_meta_data( '_billio_tax_id', $tax_id );
 		$order->update_meta_data( '_billing_billio_tax_id', $tax_id );
 		$order->save();

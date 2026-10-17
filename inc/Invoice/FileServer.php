@@ -27,9 +27,20 @@ class FileServer {
 			wp_die( esc_html__( 'Invoice not found.', 'billio' ), '', array( 'response' => 404 ) );
 		}
 
+		// Re-check immediately before reading size: a concurrent
+		// regenerate() on another request can delete this exact file (its
+		// old-file cleanup, see Generator::render_and_save()) in the gap
+		// between the exists check above and here. filesize() on a
+		// since-deleted path returns false, which would otherwise go
+		// straight into a malformed "Content-Length: " header.
+		$length = @filesize( $absolute_path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- false (deleted mid-request) is handled explicitly below; a warning here would just duplicate that.
+		if ( false === $length ) {
+			wp_die( esc_html__( 'Invoice not found.', 'billio' ), '', array( 'response' => 404 ) );
+		}
+
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- disposition preference; authorization and nonce verified by caller endpoint.
 		$disposition = ! empty( $_GET['preview'] ) ? 'inline' : 'attachment';
-		self::send_headers( $download_name, filesize( $absolute_path ), $disposition );
+		self::send_headers( $download_name, $length, $disposition );
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile -- streaming a download; WP_Filesystem has no direct-output equivalent and would require loading the whole PDF into memory.
 		readfile( $absolute_path );

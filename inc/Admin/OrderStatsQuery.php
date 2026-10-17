@@ -63,6 +63,13 @@ class OrderStatsQuery {
 			$id_col = 'post_id';
 		}
 
+		// Both are always one of the small set of fixed internal identifiers
+		// above, never user input — esc_sql() here is defense in depth, and
+		// satisfies automated scanners that flag any variable reaching raw
+		// SQL regardless of its actual provenance.
+		$table  = esc_sql( $table );
+		$id_col = esc_sql( $id_col );
+
 		$map = array();
 		foreach ( array_chunk( $ids, self::CHUNK_SIZE ) as $chunk ) {
 			$placeholders = implode( ',', array_fill( 0, count( $chunk ), '%d' ) );
@@ -100,7 +107,9 @@ class OrderStatsQuery {
 		$fields = array();
 
 		if ( self::uses_hpos() ) {
-			$table = OrdersTableDataStore::get_orders_table_name();
+			// Always the one fixed HPOS orders table name, never user input
+			// — esc_sql() here is defense in depth (see meta_map()).
+			$table = esc_sql( OrdersTableDataStore::get_orders_table_name() );
 			foreach ( array_chunk( $ids, self::CHUNK_SIZE ) as $chunk ) {
 				$placeholders = implode( ',', array_fill( 0, count( $chunk ), '%d' ) );
 				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- see meta_map().

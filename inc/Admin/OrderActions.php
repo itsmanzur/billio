@@ -11,6 +11,7 @@ namespace Billio\Admin;
 use Billio\Invoice\FileServer;
 use Billio\Invoice\Generator;
 use Billio\Logger;
+use Billio\Settings\Fields;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -238,7 +239,7 @@ class OrderActions {
 			);
 		}
 
-		$eligible_email_ids = get_option( 'billio_email_triggers', array( 'customer_completed_order' ) );
+		$eligible_email_ids = Fields::email_triggers();
 		if ( ! in_array( $email_id, $eligible_email_ids, true ) ) {
 			wp_send_json_error(
 				array( 'message' => esc_html__( "This order's status isn't enabled for invoice emails in Billio → Settings.", 'billio' ) )

@@ -19,6 +19,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class MyAccount {
 
+	/**
+	 * token_status() outcomes — see that method's docblock.
+	 */
+	const TOKEN_ABSENT  = 'absent';
+	const TOKEN_INVALID = 'invalid';
+	const TOKEN_EXPIRED = 'expired';
+	const TOKEN_VALID   = 'valid';
+
 	public function __construct() {
 		add_filter( 'woocommerce_my_account_my_orders_actions', array( $this, 'add_order_list_action' ), 10, 2 );
 		add_action( 'woocommerce_order_details_after_order_table', array( $this, 'render_view_order_link' ) );
@@ -114,11 +122,7 @@ class MyAccount {
 			return;
 		}
 
-		$is_eligible = (bool) $order->get_meta( '_billio_invoice_number' )
-			|| $order->is_paid()
-			|| $order->has_status( array( 'processing', 'completed' ) );
-
-		if ( ! $is_eligible ) {
+		if ( ! self::customer_download_eligible( $order ) ) {
 			return;
 		}
 
@@ -135,58 +139,72 @@ class MyAccount {
 	}
 
 	/**
-	 * Build the download URL for an order.
+	 * Whether a customer-facing invoice download for this order may
+	 * proceed: either one's already been issued, or — if the "Customer
+	 * download generates invoice on demand" setting is on (the default,
+	 * matching Billio's original behavior) — the order is paid/processing/
+	 * completed, so generating one now on the customer's request is
+	 * reasonable. Shared by handle_download() (the actual gate before
+	 * minting a number) and render_thankyou_button() (so a button that
+	 * would just 404 is never shown in the first place).
 	 *
-	 * Includes order_key so both logged-in customers and guests (on the
-	 * thank you / view order screen) can securely access their invoice.
+	 * The admin-side generate/regenerate actions (OrderActions, Dashboard)
+	 * are intentionally not gated by this setting at all — it's a policy
+	 * choice about on-demand generation from a customer's own download
+	 * request specifically, not a general restriction on when invoices
+	 * can be created.
+	 *
+	 * Public so this can be unit-tested directly (see tests/run.php).
+	 *
+	 * @param \WC_Order $order Order to check.
+	 * @return bool
+	 */
+	public static function customer_download_eligible( \WC_Order $order ) {
+		if ( $order->get_meta( '_billio_invoice_number' ) ) {
+			return true;
+		}
+
+		if ( ! (bool) get_option( 'billio_customer_ondemand_generate', true ) ) {
+			return false;
+		}
+
+		return $order->is_paid() || $order->has_status( array( 'processing', 'completed' ) );
+	}
+
+	/**
+	 * Build the download URL for an order.
 	 *
 	 * @param \WC_Order $order Order to link to.
 	 * @return string
 	 */
 	private function download_url( \WC_Order $order ) {
-		return self::invoice_url_for( $order->get_id(), $order->get_order_key() );
+		return self::invoice_url_for( $order->get_id() );
 	}
 
 	/**
-	 * Customer-facing invoice URL from plain IDs — authorized by order_key,
-	 * so it works for the customer (logged in or guest) it's shared with.
-	 * Public/static so the Dashboard's share links (WhatsApp, Copy link)
-	 * can hand customers a URL they can actually open, unlike the
-	 * admin-only, per-admin-nonce download URL.
+	 * Customer-facing invoice URL from a plain order ID — authorized by a
+	 * signed, expiring token (see make_token()), so it works for the
+	 * customer (logged in or guest) it's shared with, without carrying the
+	 * order's real order_key. Public/static so the Dashboard's share links
+	 * (WhatsApp, Copy link) can hand customers a URL they can actually
+	 * open, unlike the admin-only, per-admin-nonce download URL.
 	 *
-	 * @param int    $order_id  Order ID.
-	 * @param string $order_key Order key.
+	 * @param int $order_id Order ID.
 	 * @return string Raw (not HTML-escaped) URL.
 	 */
-	public static function invoice_url_for( $order_id, $order_key ) {
-		return add_query_arg(
-			array(
-				'action'    => 'billio_download',
-				'order_id'  => (int) $order_id,
-				'order_key' => rawurlencode( (string) $order_key ),
-			),
-			admin_url( 'admin-post.php' )
-		);
+	public static function invoice_url_for( $order_id ) {
+		return self::signed_url( 'billio_download', (int) $order_id, 0 );
 	}
 
 	/**
 	 * Customer-facing credit note URL from plain IDs — see invoice_url_for().
 	 *
-	 * @param int    $order_id  Parent order ID.
-	 * @param int    $refund_id Refund ID.
-	 * @param string $order_key Parent order key.
+	 * @param int $order_id  Parent order ID.
+	 * @param int $refund_id Refund ID.
 	 * @return string Raw (not HTML-escaped) URL.
 	 */
-	public static function credit_note_url_for( $order_id, $refund_id, $order_key ) {
-		return add_query_arg(
-			array(
-				'action'    => 'billio_customer_credit_note',
-				'order_id'  => (int) $order_id,
-				'refund_id' => (int) $refund_id,
-				'order_key' => rawurlencode( (string) $order_key ),
-			),
-			admin_url( 'admin-post.php' )
-		);
+	public static function credit_note_url_for( $order_id, $refund_id ) {
+		return self::signed_url( 'billio_customer_credit_note', (int) $order_id, (int) $refund_id );
 	}
 
 	/**
@@ -197,7 +215,149 @@ class MyAccount {
 	 * @return string
 	 */
 	private function credit_note_download_url( \WC_Order $order, \WC_Order_Refund $refund ) {
-		return self::credit_note_url_for( $order->get_id(), $refund->get_id(), $order->get_order_key() );
+		return self::credit_note_url_for( $order->get_id(), $refund->get_id() );
+	}
+
+	/**
+	 * Build a token-authorized admin-post URL for an order/refund pair.
+	 *
+	 * @param string $action    admin-post action name.
+	 * @param int    $order_id  Order ID.
+	 * @param int    $refund_id Refund ID, or 0 for an invoice (no refund).
+	 * @return string Raw (not HTML-escaped) URL.
+	 */
+	private static function signed_url( $action, $order_id, $refund_id ) {
+		$expires = self::compute_expiry();
+
+		$args = array(
+			'action'   => $action,
+			'order_id' => $order_id,
+			'token'    => self::make_token( $order_id, $refund_id, $expires ),
+			'expires'  => $expires,
+		);
+
+		if ( $refund_id ) {
+			$args['refund_id'] = $refund_id;
+		}
+
+		return add_query_arg( $args, admin_url( 'admin-post.php' ) );
+	}
+
+	/**
+	 * The expiry timestamp to sign a newly-generated link with, per the
+	 * "Customer link validity" setting (days; 0 = never expires, encoded
+	 * here as the sentinel timestamp 0 rather than a far-future date, so
+	 * token_status() has one unambiguous way to recognize "no expiry").
+	 *
+	 * @return int Unix timestamp, or 0 for no expiry.
+	 */
+	private static function compute_expiry() {
+		$days = (int) get_option( 'billio_customer_link_validity_days', 30 );
+
+		return $days > 0 ? time() + ( $days * DAY_IN_SECONDS ) : 0;
+	}
+
+	/**
+	 * Sign an order id + refund id + expiry with an HMAC keyed on this
+	 * site's own auth salt — unguessable without server-side knowledge,
+	 * and (unlike the WooCommerce order_key this replaces) never reused
+	 * for anything else WooCommerce itself authorizes with that key, so a
+	 * leaked Billio download link can't be used against anything beyond
+	 * Billio's own documents for that exact order/refund/expiry.
+	 *
+	 * Public (alongside token_status()) so tests can construct a token
+	 * with a deliberately-past $expires — the only way to exercise the
+	 * "expired" path without actually waiting for a real one to expire.
+	 *
+	 * @param int $order_id  Order ID.
+	 * @param int $refund_id Refund ID, or 0 for an invoice.
+	 * @param int $expires   Unix timestamp, or 0 for no expiry.
+	 * @return string Hex-encoded HMAC-SHA256.
+	 */
+	public static function make_token( $order_id, $refund_id, $expires ) {
+		return hash_hmac( 'sha256', $order_id . '|' . $refund_id . '|' . $expires, wp_salt( 'auth' ) );
+	}
+
+	/**
+	 * Classify a submitted token: absent (no token param at all — the
+	 * caller should fall back to the legacy order_key check), invalid
+	 * (present but doesn't match, or matches a different order/refund/
+	 * expiry than claimed), expired (signature checks out, but its expiry
+	 * has passed), or valid.
+	 *
+	 * Public so this can be unit-tested directly (see tests/run.php)
+	 * without needing a real HTTP request.
+	 *
+	 * @param int    $order_id  Order ID being accessed.
+	 * @param int    $refund_id Refund ID being accessed, or 0 for an invoice.
+	 * @param string $token     Submitted token, unvalidated.
+	 * @param mixed  $expires   Submitted expires value, unvalidated.
+	 * @return string One of self::TOKEN_ABSENT, self::TOKEN_INVALID, self::TOKEN_EXPIRED, self::TOKEN_VALID.
+	 */
+	public static function token_status( $order_id, $refund_id, $token, $expires ) {
+		if ( '' === (string) $token ) {
+			return self::TOKEN_ABSENT;
+		}
+
+		$expires  = (int) $expires;
+		$expected = self::make_token( (int) $order_id, (int) $refund_id, $expires );
+
+		if ( ! hash_equals( $expected, (string) $token ) ) {
+			return self::TOKEN_INVALID;
+		}
+
+		if ( 0 !== $expires && time() > $expires ) {
+			return self::TOKEN_EXPIRED;
+		}
+
+		return self::TOKEN_VALID;
+	}
+
+	/**
+	 * Whether the current request is authorized to access an order's (or
+	 * one of its refund's) documents: the logged-in customer who placed
+	 * it, a store admin, a valid signed token, or — for links generated
+	 * before this token scheme existed — the order's own legacy order_key
+	 * (disable via the `billio_allow_legacy_order_key` filter).
+	 *
+	 * Pure / side-effect-free on purpose — unlike the handle_*() methods
+	 * below, which wp_die() (terminating the request) on failure, this
+	 * just returns a bool, so the actual ownership-check logic can be
+	 * exercised directly in tests without needing to simulate a real
+	 * terminated HTTP request.
+	 *
+	 * @param \WC_Order $order     Order being accessed.
+	 * @param int       $refund_id Refund ID being accessed, or 0 for an invoice.
+	 * @param string    $token     Submitted token, unvalidated.
+	 * @param mixed     $expires   Submitted expires value, unvalidated.
+	 * @param string    $order_key Submitted legacy order_key, unvalidated.
+	 * @return bool
+	 */
+	public static function is_authorized_for_order( \WC_Order $order, $refund_id, $token, $expires, $order_key ) {
+		$is_owner = is_user_logged_in() && (int) $order->get_customer_id() === get_current_user_id();
+		$is_admin = current_user_can( 'manage_woocommerce' );
+
+		if ( $is_owner || $is_admin ) {
+			return true;
+		}
+
+		if ( self::TOKEN_VALID === self::token_status( $order->get_id(), $refund_id, $token, $expires ) ) {
+			return true;
+		}
+
+		/**
+		 * Whether a pre-token-scheme link (authorized by the raw WooCommerce
+		 * order_key) still works. Default true for backward compatibility —
+		 * links already sent out in old emails/pages must keep working.
+		 * Set to false to require every link to carry a valid signed token.
+		 *
+		 * @param bool $allow Whether to accept a valid legacy order_key.
+		 */
+		if ( ! apply_filters( 'billio_allow_legacy_order_key', true ) ) {
+			return false;
+		}
+
+		return ! empty( $order_key ) && hash_equals( (string) $order->get_order_key(), (string) $order_key );
 	}
 
 	/**
@@ -217,29 +377,31 @@ class MyAccount {
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$token = isset( $_GET['token'] ) ? sanitize_text_field( wp_unslash( $_GET['token'] ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$expires = isset( $_GET['expires'] ) ? sanitize_text_field( wp_unslash( $_GET['expires'] ) ) : 0;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- legacy pre-token links only; validated by hash_equals() against the real order_key below.
 		$order_key = isset( $_GET['order_key'] ) ? sanitize_text_field( wp_unslash( $_GET['order_key'] ) ) : '';
 
-		$is_owner      = is_user_logged_in() && (int) $order->get_customer_id() === get_current_user_id();
-		$is_admin      = current_user_can( 'manage_woocommerce' );
-		$has_valid_key = ! empty( $order_key ) && hash_equals( (string) $order->get_order_key(), (string) $order_key );
-
-		if ( ! $is_owner && ! $is_admin && ! $has_valid_key ) {
+		if ( ! self::is_authorized_for_order( $order, 0, $token, $expires, $order_key ) ) {
+			if ( self::TOKEN_EXPIRED === self::token_status( $order->get_id(), 0, $token, $expires ) ) {
+				wp_die( esc_html__( 'This link has expired. Please log in or contact us.', 'billio' ), '', array( 'response' => 403 ) );
+			}
 			if ( ! is_user_logged_in() ) {
 				wp_die( esc_html__( 'Please log in to download your invoice.', 'billio' ), '', array( 'response' => 403 ) );
 			}
 			wp_die( esc_html__( 'You do not have permission to access this invoice.', 'billio' ), '', array( 'response' => 403 ) );
 		}
 
-		// Only serve an existing invoice, or generate one on demand if the order
-		// is paid / processing / completed. Never mint an invoice for
+		// Only serve an existing invoice, or (if the "Customer download
+		// generates invoice on demand" setting allows it) generate one for
+		// a paid/processing/completed order. Never mint an invoice for
 		// pending/failed/cancelled orders from the customer path.
-		$is_eligible = (bool) $order->get_meta( '_billio_invoice_number' )
-			|| $order->is_paid()
-			|| $order->has_status( array( 'processing', 'completed' ) );
-
-		if ( ! $is_eligible ) {
+		if ( ! self::customer_download_eligible( $order ) ) {
 			wp_die( esc_html__( 'No invoice is available for this order yet.', 'billio' ), '', array( 'response' => 404 ) );
 		}
+
+		$billio_had_number = (bool) $order->get_meta( '_billio_invoice_number' );
 
 		try {
 			// Generator::generate() reuses the cached file when present, and
@@ -251,6 +413,17 @@ class MyAccount {
 				sprintf( 'Customer invoice download generation failed for order #%d: %s', $order->get_id(), $e->getMessage() )
 			);
 			wp_die( esc_html__( 'Could not generate the invoice. Please contact us for help.', 'billio' ), '', array( 'response' => 500 ) );
+		}
+
+		// Only true the first time: an invoice number didn't exist before
+		// this request but does now — i.e. this exact request is what
+		// triggered the on-demand mint. Logged so an admin can audit how
+		// many invoices are being generated by customer requests rather
+		// than the usual email trigger.
+		if ( ! $billio_had_number ) {
+			Logger::info(
+				sprintf( 'Billio: invoice generated on demand by a customer download request for order #%d.', $order->get_id() )
+			);
 		}
 
 		FileServer::stream(
@@ -277,13 +450,16 @@ class MyAccount {
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$token = isset( $_GET['token'] ) ? sanitize_text_field( wp_unslash( $_GET['token'] ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$expires = isset( $_GET['expires'] ) ? sanitize_text_field( wp_unslash( $_GET['expires'] ) ) : 0;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- legacy pre-token links only; validated by hash_equals() against the real order_key below.
 		$order_key = isset( $_GET['order_key'] ) ? sanitize_text_field( wp_unslash( $_GET['order_key'] ) ) : '';
 
-		$is_owner      = is_user_logged_in() && (int) $order->get_customer_id() === get_current_user_id();
-		$is_admin      = current_user_can( 'manage_woocommerce' );
-		$has_valid_key = ! empty( $order_key ) && hash_equals( (string) $order->get_order_key(), (string) $order_key );
-
-		if ( ! $is_owner && ! $is_admin && ! $has_valid_key ) {
+		if ( ! self::is_authorized_for_order( $order, $refund->get_id(), $token, $expires, $order_key ) ) {
+			if ( self::TOKEN_EXPIRED === self::token_status( $order->get_id(), $refund->get_id(), $token, $expires ) ) {
+				wp_die( esc_html__( 'This link has expired. Please log in or contact us.', 'billio' ), '', array( 'response' => 403 ) );
+			}
 			if ( ! is_user_logged_in() ) {
 				wp_die( esc_html__( 'Please log in to download your credit note.', 'billio' ), '', array( 'response' => 403 ) );
 			}

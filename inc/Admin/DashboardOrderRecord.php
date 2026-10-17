@@ -32,8 +32,7 @@ class DashboardOrderRecord {
 	private $timestamp;
 
 	/**
-	 * @var string Order currency code ('' if unknown — e.g. a record
-	 *             cached by a pre-1.3.2 version, before this existed).
+	 * @var string Order currency code ('' if unknown).
 	 */
 	private $currency = '';
 
@@ -77,26 +76,5 @@ class DashboardOrderRecord {
 	 */
 	public function get_meta( $key ) {
 		return '_billio_invoice_date' === $key ? $this->timestamp : '';
-	}
-
-	/**
-	 * @return null
-	 */
-	public function get_date_paid() {
-		return null;
-	}
-
-	/**
-	 * @return null
-	 */
-	public function get_date_completed() {
-		return null;
-	}
-
-	/**
-	 * @return null
-	 */
-	public function get_date_created() {
-		return null;
 	}
 }

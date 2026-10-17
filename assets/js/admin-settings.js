@@ -435,6 +435,21 @@
 		} );
 	}
 
+	var linkValidityField = document.getElementById( 'billio_customer_link_validity_days' );
+	if ( linkValidityField ) {
+		linkValidityField.addEventListener( 'input', function () {
+			markDirty( 'link_validity' );
+		} );
+	}
+
+	var ondemandRow = document.getElementById( 'billio-sw-ondemand' );
+	if ( ondemandRow ) {
+		wireSwitch( ondemandRow, 'billio_customer_ondemand_generate' );
+		ondemandRow.addEventListener( 'click', function () {
+			markDirty( 'ondemand_generate' );
+		} );
+	}
+
 	var watermarkRow = document.getElementById( 'billio-sw-watermark' );
 	if ( watermarkRow ) {
 		wireSwitch( watermarkRow, 'billio_watermark_paid', function () {

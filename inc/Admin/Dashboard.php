@@ -11,6 +11,7 @@ namespace Billio\Admin;
 
 use Billio\Frontend\MyAccount;
 use Billio\Invoice\NumberManager;
+use Billio\Settings\Fields;
 use Billio\Settings\SettingsPage;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -39,13 +40,6 @@ class Dashboard {
 	 * activity anyway.
 	 */
 	const STATS_CACHE_TTL = 15 * MINUTE_IN_SECONDS;
-
-	/**
-	 * Order statuses that don't represent money actually owed/kept, so
-	 * they're excluded from revenue sums (they still count toward invoice
-	 * *counts*, which just track how many invoices were generated).
-	 */
-	const REVENUE_EXCLUDED_STATUSES = array( 'cancelled', 'refunded' );
 
 	/**
 	 * Per-user meta flag: this admin dismissed the setup banner once all
@@ -77,26 +71,16 @@ class Dashboard {
 	const DEFERRED_BUST_HOOK = 'billio_dashboard_deferred_bust';
 
 	/**
-	 * Recent-documents cache. "v2" since 1.3.2: rows no longer carry
-	 * per-admin URLs (see add_document_urls()), so pre-1.3.2 rows under the
-	 * old "billio_dash_recent_documents" key must never be read back.
+	 * Recent-documents cache — rows carry no per-admin URLs (see
+	 * add_document_urls()), only plain ids/metadata; URLs are built fresh
+	 * on every request from whichever admin is viewing.
 	 */
-	const RECENT_DOCS_TRANSIENT = 'billio_dash_recent_docs_v2';
+	const RECENT_DOCS_TRANSIENT = 'billio_dash_recent_documents';
 
 	/**
 	 * @var string Hook suffix for this page, as returned by add_menu_page().
 	 */
 	private $hook_suffix = '';
-
-	/**
-	 * @var DashboardOrderRecord[]|null Per-request memoization — see get_legacy_invoiced_orders().
-	 */
-	private static $invoiced_orders_cache = null;
-
-	/**
-	 * @var DashboardRefundRecord[]|null Per-request memoization — see get_legacy_credit_noted_refunds().
-	 */
-	private static $credit_noted_refunds_cache = null;
 
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
@@ -168,14 +152,9 @@ class Dashboard {
 	 * @return void
 	 */
 	private static function do_bust_stats_cache() {
-		self::$invoiced_orders_cache      = null;
-		self::$credit_noted_refunds_cache = null;
-
 		delete_transient( 'billio_dash_month_stats' );
 		delete_transient( 'billio_dash_last_month_stats' );
 		delete_transient( self::RECENT_DOCS_TRANSIENT );
-		delete_transient( 'billio_dash_legacy_orders' );
-		delete_transient( 'billio_dash_legacy_refunds' );
 		delete_transient( 'billio_dash_missing_order_ids' );
 		foreach ( array( 7, 30, 90 ) as $days ) {
 			delete_transient( 'billio_dash_chart_' . $days );
@@ -278,7 +257,7 @@ class Dashboard {
 			),
 			'nextInvoiceNumber' => NumberManager::peek_next_number( 'invoice' ),
 			'quickSettings'     => array(
-				'emailTriggers' => (array) get_option( 'billio_email_triggers', array( 'customer_completed_order' ) ),
+				'emailTriggers' => Fields::email_triggers(),
 				'template'      => get_option( 'billio_template', 'default' ),
 				'paperSize'     => get_option( 'billio_paper_size', 'A4' ),
 				'enableTaxId'   => (bool) get_option( 'billio_enable_tax_id', false ),
@@ -474,7 +453,7 @@ class Dashboard {
 			array(
 				'key'    => 'email',
 				'label'  => __( 'Email attachment triggers', 'billio' ),
-				'done'   => ! empty( get_option( 'billio_email_triggers', array( 'customer_completed_order' ) ) ),
+				'done'   => ! empty( Fields::email_triggers() ),
 				'anchor' => '#billio-sec-delivery',
 			),
 			array(
@@ -622,17 +601,25 @@ class Dashboard {
 	/**
 	 * Whether an invoiced order's total counts toward the revenue figures.
 	 *
-	 * Cancelled/refunded orders don't represent money kept. Orders in a
-	 * different currency than the store's (multi-currency plugins) are
-	 * left out too: adding e.g. USD and BDT totals into one number would
-	 * be meaningless, and there's no exchange rate to convert with. They
-	 * still count toward invoice *counts*.
+	 * The admin's manual "Generate" button has no status restriction (an
+	 * admin can invoice a pending/failed/on-hold order for record-keeping),
+	 * so having an invoice at all doesn't mean the order represents money
+	 * actually collected — only WooCommerce's own "paid" statuses do.
+	 * Refunded is deliberately excluded even though wc_get_is_paid_statuses()
+	 * includes it by default: money that was given back isn't money kept.
+	 * Orders in a different currency than the store's (multi-currency
+	 * plugins) are left out too: adding e.g. USD and BDT totals into one
+	 * number would be meaningless, and there's no exchange rate to convert
+	 * with. Excluded orders still count toward invoice *counts*, which just
+	 * track how many invoices were generated.
 	 *
 	 * @param DashboardOrderRecord|\WC_Order $order Invoiced order.
 	 * @return bool
 	 */
 	private function counts_toward_revenue( $order ) {
-		if ( in_array( $order->get_status(), self::REVENUE_EXCLUDED_STATUSES, true ) ) {
+		$paid_statuses = array_diff( wc_get_is_paid_statuses(), array( 'refunded' ) );
+
+		if ( ! in_array( $order->get_status(), $paid_statuses, true ) ) {
 			return false;
 		}
 
@@ -689,90 +676,22 @@ class Dashboard {
 	}
 
 	/**
-	 * Batch-convert order IDs to stat records by hydrating each order —
-	 * only for the legacy path (orders invoiced before _billio_invoice_date
-	 * existed), which needs invoice_issue_timestamp()'s paid/completed/
-	 * created fallback chain and is normally empty or tiny.
-	 *
-	 * @param int[] $order_ids Order IDs.
-	 * @return DashboardOrderRecord[]
-	 */
-	private function ids_to_stat_orders_hydrated( array $order_ids ) {
-		if ( empty( $order_ids ) ) {
-			return array();
-		}
-
-		$results = array();
-		$chunks  = array_chunk( $order_ids, 100 );
-
-		foreach ( $chunks as $chunk ) {
-			$orders = wc_get_orders(
-				array(
-					'limit'   => count( $chunk ),
-					'include' => $chunk,
-					'return'  => 'objects',
-				)
-			);
-
-			foreach ( $orders as $order ) {
-				$results[] = new DashboardOrderRecord(
-					$order->get_status(),
-					(float) $order->get_total(),
-					$this->invoice_issue_timestamp( $order ),
-					$order->get_currency()
-				);
-			}
-		}
-
-		return $results;
-	}
-
-	/**
-	 * Batch-convert refund IDs to lightweight stat items in chunks.
-	 *
-	 * @param int[] $refund_ids Refund IDs.
-	 * @return DashboardRefundRecord[]
-	 */
-	private function ids_to_stat_refunds_hydrated( array $refund_ids ) {
-		if ( empty( $refund_ids ) ) {
-			return array();
-		}
-
-		$results = array();
-		$chunks  = array_chunk( $refund_ids, 100 );
-
-		foreach ( $chunks as $chunk ) {
-			$refunds = wc_get_orders(
-				array(
-					'type'    => 'shop_order_refund',
-					'limit'   => count( $chunk ),
-					'include' => $chunk,
-					'return'  => 'objects',
-				)
-			);
-
-			foreach ( $refunds as $refund ) {
-				$results[] = new DashboardRefundRecord(
-					(float) $refund->get_amount(),
-					$this->credit_note_issue_timestamp( $refund )
-				);
-			}
-		}
-
-		return $results;
-	}
-
-	/**
 	 * Every invoiced order whose *resolved issue date* falls within a
-	 * timestamp window.
+	 * timestamp window — a single bulk query; _billio_invoice_date is
+	 * always set at number-assignment time (see
+	 * Generator::assign_number_locked()), so every invoiced order has one.
+	 *
+	 * Public so this can be exercised directly (see tests/integration.php)
+	 * to confirm its query never mixes in a WC_Order_Refund.
 	 *
 	 * @param int $from Window start (unix timestamp).
 	 * @param int $to   Window end (unix timestamp).
 	 * @return DashboardOrderRecord[]
 	 */
-	private function orders_issued_between( $from, $to ) {
-		$common_ids = wc_get_orders(
+	public function orders_issued_between( $from, $to ) {
+		$order_ids = wc_get_orders(
 			array(
+				'type'       => 'shop_order', // Without this, legacy (posts) storage's default type list also includes shop_order_refund.
 				'limit'      => -1,
 				'return'     => 'ids',
 				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
@@ -786,30 +705,19 @@ class Dashboard {
 			)
 		);
 
-		$common = $this->ids_to_stat_orders( $common_ids );
-
-		$legacy_in_window = array_filter(
-			$this->get_legacy_invoiced_orders(),
-			function ( $order ) use ( $from, $to ) {
-				$ts = $this->invoice_issue_timestamp( $order );
-				return $ts >= $from && $ts <= $to;
-			}
-		);
-
-		return array_merge( $common, array_values( $legacy_in_window ) );
+		return $this->ids_to_stat_orders( $order_ids );
 	}
 
 	/**
 	 * Every credit-noted refund whose *resolved issue date* falls within a
-	 * timestamp window — same common-path/legacy-fallback split as
-	 * orders_issued_between().
+	 * timestamp window — same shape as orders_issued_between().
 	 *
 	 * @param int $from Window start (unix timestamp).
 	 * @param int $to   Window end (unix timestamp).
 	 * @return DashboardRefundRecord[]
 	 */
 	private function credit_notes_issued_between( $from, $to ) {
-		$common_ids = wc_get_orders(
+		$refund_ids = wc_get_orders(
 			array(
 				'type'       => 'shop_order_refund',
 				'limit'      => -1,
@@ -825,163 +733,45 @@ class Dashboard {
 			)
 		);
 
-		$common = $this->ids_to_stat_refunds( $common_ids );
-
-		$legacy_in_window = array_filter(
-			$this->get_legacy_credit_noted_refunds(),
-			function ( $refund ) use ( $from, $to ) {
-				$ts = $this->credit_note_issue_timestamp( $refund );
-				return $ts >= $from && $ts <= $to;
-			}
-		);
-
-		return array_merge( $common, array_values( $legacy_in_window ) );
+		return $this->ids_to_stat_refunds( $refund_ids );
 	}
 
 	/**
-	 * Invoiced orders that never got _billio_invoice_date at all (e.g.
-	 * invoiced by a pre-1.1.0 version of this plugin, before the meta
-	 * existed) — normally empty on a real install. Memoized per request:
-	 * called from up to three stats methods in the same page load.
+	 * The date an invoice was actually issued — a plain meta read.
+	 * _billio_invoice_date is set once, at the moment a number is first
+	 * assigned (see Generator::assign_number_locked()), so this is the
+	 * correct source of truth; 0 if it's ever missing or not a valid
+	 * positive integer, never a notice or fatal. Callers that bucket by
+	 * date (e.g. get_chart_data()) simply skip a 0 timestamp.
 	 *
-	 * @return DashboardOrderRecord[]
-	 */
-	private function get_legacy_invoiced_orders() {
-		if ( null === self::$invoiced_orders_cache ) {
-			$cached = get_transient( 'billio_dash_legacy_orders' );
-			if ( false !== $cached && is_array( $cached ) ) {
-				self::$invoiced_orders_cache = $cached;
-				return self::$invoiced_orders_cache;
-			}
-
-			$ids = wc_get_orders(
-				array(
-					'limit'      => -1,
-					'return'     => 'ids',
-					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-						'relation' => 'AND',
-						array(
-							'key'     => '_billio_invoice_number',
-							'compare' => 'EXISTS',
-						),
-						array(
-							'key'     => '_billio_invoice_date',
-							'compare' => 'NOT EXISTS',
-						),
-					),
-				)
-			);
-
-			self::$invoiced_orders_cache = $this->ids_to_stat_orders_hydrated( $ids );
-			set_transient( 'billio_dash_legacy_orders', self::$invoiced_orders_cache, DAY_IN_SECONDS );
-		}
-
-		return self::$invoiced_orders_cache;
-	}
-
-	/**
-	 * Credit-noted refunds that never got _billio_credit_note_date at all —
-	 * same reasoning and memoization as get_legacy_invoiced_orders().
-	 *
-	 * @return DashboardRefundRecord[]
-	 */
-	private function get_legacy_credit_noted_refunds() {
-		if ( null === self::$credit_noted_refunds_cache ) {
-			$cached = get_transient( 'billio_dash_legacy_refunds' );
-			if ( false !== $cached && is_array( $cached ) ) {
-				self::$credit_noted_refunds_cache = $cached;
-				return self::$credit_noted_refunds_cache;
-			}
-
-			$ids = wc_get_orders(
-				array(
-					'type'       => 'shop_order_refund',
-					'limit'      => -1,
-					'return'     => 'ids',
-					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-						'relation' => 'AND',
-						array(
-							'key'     => '_billio_credit_note_number',
-							'compare' => 'EXISTS',
-						),
-						array(
-							'key'     => '_billio_credit_note_date',
-							'compare' => 'NOT EXISTS',
-						),
-					),
-				)
-			);
-
-			self::$credit_noted_refunds_cache = $this->ids_to_stat_refunds_hydrated( $ids );
-			set_transient( 'billio_dash_legacy_refunds', self::$credit_noted_refunds_cache, DAY_IN_SECONDS );
-		}
-
-		return self::$credit_noted_refunds_cache;
-	}
-
-	/**
-	 * The date an invoice was actually issued — never "now", never a file's
-	 * mtime. _billio_invoice_date is set once, at the moment a number is
-	 * first assigned (see Generator::assign_number_locked()), and is the
-	 * correct source of truth; the fallbacks below only matter for an order
-	 * that somehow never got that meta (e.g. invoiced by a pre-1.1.0
-	 * version of this plugin, before the meta existed).
+	 * Public so this can be unit-tested directly (see tests/run.php).
 	 *
 	 * @param \WC_Order|DashboardOrderRecord $order Invoiced order.
 	 * @return int Unix timestamp.
 	 */
-	private function invoice_issue_timestamp( $order ) {
-		if ( method_exists( $order, 'get_meta' ) ) {
-			$meta = (int) $order->get_meta( '_billio_invoice_date' );
-			if ( $meta ) {
-				return $meta;
-			}
+	public static function invoice_issue_timestamp( $order ) {
+		if ( ! method_exists( $order, 'get_meta' ) ) {
+			return 0;
 		}
 
-		if ( method_exists( $order, 'get_date_paid' ) ) {
-			$date_paid = $order->get_date_paid();
-			if ( $date_paid ) {
-				return $date_paid->getTimestamp();
-			}
-		}
-
-		if ( method_exists( $order, 'get_date_completed' ) ) {
-			$date_completed = $order->get_date_completed();
-			if ( $date_completed ) {
-				return $date_completed->getTimestamp();
-			}
-		}
-
-		if ( method_exists( $order, 'get_date_created' ) ) {
-			$date_created = $order->get_date_created();
-			return $date_created ? $date_created->getTimestamp() : 0;
-		}
-
-		return 0;
+		return max( 0, (int) $order->get_meta( '_billio_invoice_date' ) );
 	}
 
 	/**
 	 * The date a credit note was actually issued — same reasoning as
-	 * invoice_issue_timestamp(), falling back to the refund's own creation
-	 * date (a refund has no "paid"/"completed" concept of its own).
+	 * invoice_issue_timestamp().
+	 *
+	 * Public so this can be unit-tested directly (see tests/run.php).
 	 *
 	 * @param \WC_Order_Refund|DashboardRefundRecord $refund Refund with a credit note.
 	 * @return int Unix timestamp.
 	 */
-	private function credit_note_issue_timestamp( $refund ) {
-		if ( method_exists( $refund, 'get_meta' ) ) {
-			$meta = (int) $refund->get_meta( '_billio_credit_note_date' );
-			if ( $meta ) {
-				return $meta;
-			}
+	public static function credit_note_issue_timestamp( $refund ) {
+		if ( ! method_exists( $refund, 'get_meta' ) ) {
+			return 0;
 		}
 
-		if ( method_exists( $refund, 'get_date_created' ) ) {
-			$date_created = $refund->get_date_created();
-			return $date_created ? $date_created->getTimestamp() : 0;
-		}
-
-		return 0;
+		return max( 0, (int) $refund->get_meta( '_billio_credit_note_date' ) );
 	}
 
 	/**
@@ -1024,7 +814,10 @@ class Dashboard {
 		}
 
 		foreach ( $orders as $order ) {
-			$key = wp_date( 'Y-m-d', $this->invoice_issue_timestamp( $order ) );
+			// A 0 timestamp (meta missing/invalid — see invoice_issue_timestamp())
+			// resolves to a date outside this window, so it never matches a
+			// bucket key below; no separate check needed to exclude it.
+			$key = wp_date( 'Y-m-d', self::invoice_issue_timestamp( $order ) );
 			if ( ! isset( $buckets[ $key ] ) ) {
 				continue;
 			}
@@ -1035,7 +828,7 @@ class Dashboard {
 		}
 
 		foreach ( $refunds as $refund ) {
-			$key = wp_date( 'Y-m-d', $this->credit_note_issue_timestamp( $refund ) );
+			$key = wp_date( 'Y-m-d', self::credit_note_issue_timestamp( $refund ) );
 			if ( isset( $buckets[ $key ] ) ) {
 				++$buckets[ $key ]['creditNotes'];
 			}
@@ -1082,12 +875,13 @@ class Dashboard {
 		// are configured to go out at processing (Settings → "Send invoice
 		// when order is") — those orders are expected to have one by now.
 		$statuses = array( 'completed' );
-		if ( in_array( 'customer_processing_order', (array) get_option( 'billio_email_triggers', array( 'customer_completed_order' ) ), true ) ) {
+		if ( in_array( 'customer_processing_order', Fields::email_triggers(), true ) ) {
 			$statuses[] = 'processing';
 		}
 
 		$ids = wc_get_orders(
 			array(
+				'type'         => 'shop_order', // Without this, legacy (posts) storage's default type list also includes shop_order_refund.
 				'status'       => $statuses,
 				'limit'        => $limit,
 				'orderby'      => 'date',
@@ -1113,12 +907,9 @@ class Dashboard {
 	 * by issue date (newest first). Cached — see STATS_CACHE_TTL.
 	 *
 	 * Fetches only `$limit` of each type directly ordered by their own date
-	 * meta in SQL (not "every invoiced order ever, sorted in PHP") — orders
-	 * invoiced so long ago they predate the _billio_invoice_date meta won't
-	 * surface here (an accepted tradeoff for this specific "recent activity"
-	 * list; the stats/chart methods still find them via their own legacy
-	 * fallback). Parent-order lookups only happen for the credit notes that
-	 * actually make the final cut, not every refund in history.
+	 * meta in SQL (not "every invoiced order ever, sorted in PHP"). Parent-
+	 * order lookups only happen for the credit notes that actually make the
+	 * final cut, not every refund in history.
 	 *
 	 * @return array[]
 	 */
@@ -1130,9 +921,12 @@ class Dashboard {
 	 * The cache-safe half of get_recent_documents(): rows without any
 	 * per-admin URL, shared by every admin through one transient.
 	 *
+	 * Public so this can be exercised directly (see tests/integration.php)
+	 * to confirm no row's orderId resolves to a WC_Order_Refund.
+	 *
 	 * @return array[]
 	 */
-	private function get_cached_recent_documents() {
+	public function get_cached_recent_documents() {
 		$cache_key = self::RECENT_DOCS_TRANSIENT;
 		$cached    = get_transient( $cache_key );
 		if ( false !== $cached ) {
@@ -1143,6 +937,7 @@ class Dashboard {
 
 		$invoice_candidates = wc_get_orders(
 			array(
+				'type'       => 'shop_order', // Without this, legacy (posts) storage's default type list also includes shop_order_refund.
 				'limit'      => $limit,
 				'return'     => 'objects',
 				'orderby'    => 'meta_value_num',
@@ -1177,12 +972,21 @@ class Dashboard {
 		$documents = array();
 
 		foreach ( $invoice_candidates as $order ) {
+			// Defensive on top of the explicit 'type' above: format_invoice_document()
+			// is type-hinted \WC_Order, so anything else here would otherwise
+			// be a fatal TypeError, not just a bad row.
+			if ( ! $order instanceof \WC_Order ) {
+				continue;
+			}
 			$documents[] = $this->format_invoice_document( $order );
 		}
 
 		foreach ( $refund_candidates as $refund ) {
+			if ( ! $refund instanceof \WC_Order_Refund ) {
+				continue;
+			}
 			$parent_order = wc_get_order( $refund->get_parent_id() );
-			if ( ! $parent_order ) {
+			if ( ! $parent_order instanceof \WC_Order ) {
 				continue;
 			}
 			$documents[] = $this->format_credit_note_document( $refund, $parent_order );
@@ -1301,15 +1105,16 @@ class Dashboard {
 		$date_key   = $is_invoice ? '_billio_invoice_date' : '_billio_credit_note_date';
 
 		$base = array(
+			// Explicit either way — without this, legacy (posts) storage's
+			// default type list also includes shop_order_refund alongside
+			// shop_order.
+			'type'     => $is_invoice ? 'shop_order' : 'shop_order_refund',
 			'limit'    => self::SEARCH_HARD_LIMIT,
 			'return'   => 'ids',
 			'orderby'  => 'meta_value_num',
 			'meta_key' => $date_key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'order'    => 'DESC',
 		);
-		if ( ! $is_invoice ) {
-			$base['type'] = 'shop_order_refund';
-		}
 
 		$has_number = array(
 			'key'     => $number_key,
@@ -1384,6 +1189,17 @@ class Dashboard {
 	 * WooCommerce's own order search (wc_order_search(), the same lookup
 	 * the Orders screen's search box uses) instead.
 	 *
+	 * wc_order_search() itself takes no limit/offset — its legacy CPT data
+	 * store (WC_Order_Data_Store_CPT::search_orders(), WooCommerce core)
+	 * runs its postmeta/order-items/customer-lookup queries with no SQL
+	 * LIMIT at all before returning. The array_slice() below is a
+	 * best-effort cap on what Billio itself then holds and processes, not
+	 * a fix for the unbounded DB read — that bound lives entirely inside
+	 * WooCommerce core and isn't something Billio can safely override
+	 * without reimplementing WC's own search query (which would drift out
+	 * of sync with it on every WC update). Legacy (non-HPOS) stores are
+	 * already the less-common path going forward.
+	 *
 	 * @param string $q Search text.
 	 * @return int[] At most SEARCH_HARD_LIMIT IDs.
 	 */
@@ -1411,7 +1227,7 @@ class Dashboard {
 	 * @return array
 	 */
 	private function format_invoice_document( \WC_Order $order ) {
-		$timestamp = $this->invoice_issue_timestamp( $order );
+		$timestamp = self::invoice_issue_timestamp( $order );
 		$name      = trim( $order->get_formatted_billing_full_name() );
 		$phone     = trim( (string) $order->get_billing_phone() );
 
@@ -1420,7 +1236,6 @@ class Dashboard {
 			'number'           => $order->get_meta( '_billio_invoice_number' ),
 			'orderId'          => $order->get_id(),
 			'refundId'         => 0,
-			'orderKey'         => $order->get_order_key(),
 			'orderNumber'      => $order->get_order_number(),
 			'orderEditUrl'     => $this->order_edit_url( $order ),
 			'customerName'     => $name,
@@ -1445,7 +1260,7 @@ class Dashboard {
 	 * @return array
 	 */
 	private function format_credit_note_document( \WC_Order_Refund $refund, \WC_Order $parent_order ) {
-		$timestamp = $this->credit_note_issue_timestamp( $refund );
+		$timestamp = self::credit_note_issue_timestamp( $refund );
 		$name      = trim( $parent_order->get_formatted_billing_full_name() );
 		$phone     = trim( (string) $parent_order->get_billing_phone() );
 
@@ -1454,7 +1269,6 @@ class Dashboard {
 			'number'           => $refund->get_meta( '_billio_credit_note_number' ),
 			'orderId'          => $parent_order->get_id(),
 			'refundId'         => $refund->get_id(),
-			'orderKey'         => $parent_order->get_order_key(),
 			'orderNumber'      => $parent_order->get_order_number(),
 			'orderEditUrl'     => $this->order_edit_url( $parent_order ),
 			'customerName'     => $name,
@@ -1480,23 +1294,20 @@ class Dashboard {
 	 * other admins a nonce that fails for them ("link expired").
 	 *
 	 * Share links (Copy link, WhatsApp) use the customer-facing,
-	 * order_key-authorized URL — the admin URL is useless to a customer.
+	 * token-authorized URL — the admin URL is useless to a customer.
 	 *
 	 * @param array $doc Row from format_invoice_document()/format_credit_note_document().
-	 * @return array The row with downloadUrl/previewUrl/shareUrl/whatsappUrl set and orderKey removed.
+	 * @return array The row with downloadUrl/previewUrl/shareUrl/whatsappUrl set.
 	 */
 	private function add_document_urls( array $doc ) {
-		$order_key = isset( $doc['orderKey'] ) ? $doc['orderKey'] : '';
-		unset( $doc['orderKey'] );
-
 		if ( 'cn' === $doc['type'] ) {
 			$download_url = $this->raw_download_url( MetaBox::credit_note_url_for( $doc['orderId'], $doc['refundId'] ) );
-			$share_url    = MyAccount::credit_note_url_for( $doc['orderId'], $doc['refundId'], $order_key );
+			$share_url    = MyAccount::credit_note_url_for( $doc['orderId'], $doc['refundId'] );
 			/* translators: 1: customer name, 2: credit note number, 3: download URL */
 			$wa_format = __( 'Hello %1$s, here is your credit note %2$s: %3$s', 'billio' );
 		} else {
 			$download_url = $this->raw_download_url( OrderActions::build_download_url_for( $doc['orderId'] ) );
-			$share_url    = MyAccount::invoice_url_for( $doc['orderId'], $order_key );
+			$share_url    = MyAccount::invoice_url_for( $doc['orderId'] );
 			/* translators: 1: customer name, 2: invoice number, 3: download URL */
 			$wa_format = __( 'Hello %1$s, here is your invoice %2$s: %3$s', 'billio' );
 		}

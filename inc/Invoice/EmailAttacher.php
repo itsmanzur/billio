@@ -8,6 +8,7 @@
 namespace Billio\Invoice;
 
 use Billio\Logger;
+use Billio\Settings\Fields;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -46,7 +47,7 @@ class EmailAttacher {
 			return $this->attach_credit_note( $attachments, $email_object, $email );
 		}
 
-		$eligible_email_ids = get_option( 'billio_email_triggers', array( 'customer_completed_order' ) );
+		$eligible_email_ids = Fields::email_triggers();
 		$eligible_email_ids = apply_filters( 'billio_invoice_email_ids', $eligible_email_ids );
 
 		if ( ! in_array( $email_id, $eligible_email_ids, true ) ) {
@@ -87,9 +88,25 @@ class EmailAttacher {
 		}
 
 		if ( ! $refund ) {
-			$refunds = $order->get_refunds();
-			if ( ! empty( $refunds ) ) {
-				$refund = $refunds[0];
+			// $email->refund is unset for some trigger paths (e.g. a manual
+			// "Resend" that only has the order id, not a specific refund).
+			// An order can have more than one refund, so blindly grabbing
+			// get_refunds()[0] risked attaching the wrong refund's credit
+			// note to the email. Only pick among refunds that already have
+			// a credit note number — resending is the only case this
+			// fallback is for, and a refund with no number yet was never
+			// the one that triggered this email.
+			$refund = self::latest_credit_noted_refund( $order );
+
+			if ( $refund ) {
+				Logger::info(
+					sprintf(
+						'Credit note attachment: $email->refund was not set for order #%d; fell back to refund #%d (credit note %s).',
+						$order->get_id(),
+						$refund->get_id(),
+						(string) $refund->get_meta( '_billio_credit_note_number' )
+					)
+				);
 			}
 		}
 
@@ -113,5 +130,42 @@ class EmailAttacher {
 		}
 
 		return $attachments;
+	}
+
+	/**
+	 * Among an order's refunds, the most recently created one that already
+	 * has a credit note number assigned — used only as attach_credit_note()'s
+	 * fallback when $email->refund isn't set.
+	 *
+	 * Public so this selection logic can be unit-tested directly (see
+	 * tests/run.php) against plain refund stand-ins, instead of only
+	 * indirectly through attach()/attach_credit_note(), which need a real
+	 * WC_Email object.
+	 *
+	 * @param \WC_Order $order Parent order.
+	 * @return \WC_Order_Refund|null
+	 */
+	public static function latest_credit_noted_refund( \WC_Order $order ) {
+		$latest    = null;
+		$latest_ts = -1;
+
+		foreach ( $order->get_refunds() as $refund ) {
+			if ( ! $refund instanceof \WC_Order_Refund || ! $refund->get_meta( '_billio_credit_note_number' ) ) {
+				continue;
+			}
+
+			$date = $refund->get_date_created();
+			$ts   = $date ? $date->getTimestamp() : 0;
+
+			// Ties (same second, or both missing a date) broken by refund
+			// id, which WooCommerce always assigns in increasing creation
+			// order.
+			if ( ! $latest || $ts > $latest_ts || ( $ts === $latest_ts && $refund->get_id() > $latest->get_id() ) ) {
+				$latest    = $refund;
+				$latest_ts = $ts;
+			}
+		}
+
+		return $latest;
 	}
 }
